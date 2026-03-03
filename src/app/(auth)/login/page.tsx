@@ -53,7 +53,7 @@ export default function LoginPage() {
   const handleGithubLogin = () => {
     // 跳转到GitHub OAuth授权页面
     const clientId = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || "Ov23lisH1zy6aIiT5f9r"
-    const redirectUri = `${window.location.origin}/auth/github/callback`
+    const redirectUri = `http://localhost:8080/api/oauth/github/callback`
     const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=user:email,read:user`
     window.location.href = githubAuthUrl
   }

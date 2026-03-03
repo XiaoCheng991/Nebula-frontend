@@ -9,8 +9,8 @@ import { apiLogger } from '@/lib/utils/logger'
 /**
  * Token 存储键
  */
-const TOKEN_KEY = 'token'
-const REFRESH_TOKEN_KEY = 'refreshToken'
+const TOKEN_KEY = 'auth_access_token'
+const REFRESH_TOKEN_KEY = 'auth_refresh_token'
 
 /**
  * Token 刷新锁，防止并发刷新
@@ -67,7 +67,8 @@ export function setTokens(tokens: { accessToken: string; refreshToken: string })
 
   // 同步到 cookie（用于 SSR 认证）
   const maxAge = 7 * 24 * 60 * 60 // 7 天
-  document.cookie = `${TOKEN_KEY}=${tokens.accessToken}; path=/; max-age=${maxAge}`
+  document.cookie = `${TOKEN_KEY}=${encodeURIComponent(tokens.accessToken)}; path=/; max-age=${maxAge}; SameSite=Lax`
+  document.cookie = `${REFRESH_TOKEN_KEY}=${encodeURIComponent(tokens.refreshToken)}; path=/; max-age=${maxAge}; SameSite=Lax`
 
   apiLogger.auth('login', { accessToken: '***', refreshToken: '***' })
 }
@@ -81,6 +82,7 @@ export function clearTokens(): void {
   localStorage.removeItem(TOKEN_KEY)
   localStorage.removeItem(REFRESH_TOKEN_KEY)
   document.cookie = `${TOKEN_KEY}=; path=/; max-age=0`
+  document.cookie = `${REFRESH_TOKEN_KEY}=; path=/; max-age=0`
 
   apiLogger.auth('logout')
 }

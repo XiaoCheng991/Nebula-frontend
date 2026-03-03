@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { toast } from "@/components/ui/use-toast"
 import { CheckCircle, XCircle } from "lucide-react"
-import { setTokens } from "@/lib/auth/token-manager"
+import { setTokens } from "@/lib/auth/dual-token-manager"
 
 export default function GitHubCallbackPage() {
     const router = useRouter()
@@ -16,12 +16,15 @@ export default function GitHubCallbackPage() {
   useEffect(() => {
     const token = searchParams.get("token")
     const refreshToken = searchParams.get("refreshToken")
+    const expiresInStr = searchParams.get("expiresIn")
 
     if (token) {
-      // 保存 token
+      // 保存 token（使用双 Token 管理器）
+      const expiresIn = expiresInStr ? parseInt(expiresInStr, 10) : 1800 // 默认 30 分钟
       setTokens({
         accessToken: token,
         refreshToken: refreshToken || '',
+        expiresIn,
       })
 
       // 获取用户信息
@@ -29,6 +32,7 @@ export default function GitHubCallbackPage() {
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        credentials: 'include',
       })
         .then((res) => res.json())
         .then((data) => {
