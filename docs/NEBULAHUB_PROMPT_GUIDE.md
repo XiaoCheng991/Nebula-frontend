@@ -24,10 +24,11 @@
 | 前端框架 | Next.js 14 (App Router) |
 | UI组件库 | Radix UI + Tailwind CSS + tailwindcss-animate |
 | 样式方案 | CSS Variables + Tailwind |
-| 认证 | Supabase Authentication (GitHub OAuth + 邮箱) |
-| 数据库 | Supabase PostgreSQL |
-| 存储 | Supabase Storage (桶: avatars, chat-files) |
-| 实时 | Supabase Realtime |
+| 后端服务 | Spring Boot 3.2.2 + Java 21 |
+| 认证 | JWT (Spring Security) |
+| 数据库 | PostgreSQL |
+| 存储 | MinIO (S3-compatible) |
+| 实时 | WebSocket (Spring Boot) |
 | 开发语言 | TypeScript |
 | 包管理器 | npm |
 | 状态管理 | Zustand |
@@ -151,19 +152,18 @@ NebulaHub/
 │   │       ├── toast.tsx
 │   │       └── ...
 │   ├── lib/                    # 工具函数和配置
-│   │   ├── supabase/
-│   │   │   ├── client.ts       # 客户端 (浏览器)
-│   │   │   └── server.ts       # 服务端 (SSR/Cookie)
-│   │   └── supabase-chat.ts    # 聊天相关工具
+│   │   ├── api/                # API 客户端
+│   │   │   └── client.ts       # 后端 API 调用
+│   │   └── utils.ts            # 工具函数
 │   ├── hooks/                  # 自定义 Hooks
 │   └── types/                  # TypeScript 类型定义
-│       └── database.types.ts   # Supabase 类型
+├── db/                         # 数据库配置
+│   └── schema/                 # 数据库 Schema
+│       └── schema_nebulahub.sql
 ├── branding/                   # 品牌资产
 │   └── logo/nebulahub/         # Logo 变体
 ├── public/                     # 静态资源
 │   └── logo_icon.svg           # 主 Logo
-├── supabase/                   # Supabase 配置
-│   └── triggers/               # 数据库触发器
 ├── docs/                       # 文档
 │   ├── IM_requirements.md      # IM 功能需求
 │   └── branding/               # 品牌文档
@@ -179,14 +179,14 @@ NebulaHub/
 
 | 功能 | 状态 | 说明 |
 |------|------|------|
-| 用户认证 (GitHub + 邮箱) | ✅ 已完成 | Supabase Auth |
+| 用户认证 (GitHub + 邮箱) | ✅ 已完成 | JWT Auth (Spring Security) |
 | 主页 | ✅ 已完成 | 基础首页 |
 | 登录/注册页 | ✅ 已完成 | Radix UI Card 样式 |
 | 全局 Header | ✅ 已完成 | Glassmorphism + Logo |
 | 简单聊天 | ✅ 已完成 | 所有人一起聊，无区分 |
 | 群聊/私聊 | ❌ 待开发 | **核心重构目标** |
-| 文件上传 (Supabase Storage) | ❌ 待开发 | 图片、文档存储 |
-| 头像设置 | ❌ 待开发 | OSS 存储 |
+| 文件上传 (MinIO) | ❌ 待开发 | 图片、文档存储 |
+| 头像设置 | ❌ 待开发 | MinIO 存储 |
 | @提及功能 | ❌ 待开发 | 消息通知 |
 | 消息已读状态 | ❌ 待开发 | 未读计数 |
 | 好友关系 | ❌ 待开发 | 用户关注 |
@@ -225,7 +225,7 @@ NebulaHub/
 
 ### 3. 图片和文件上传功能 (高优先级)
 
-**目标**: 实现图片和文件的上传、预览和发送，使用 Supabase OSS 存储
+**目标**: 实现图片和文件的上传、预览和发送，使用 MinIO 对象存储
 
 **验收标准**:
 - [ ] 支持图片 (jpg/png/gif/webp 等) 和常见文档/二进制文件上传
@@ -333,7 +333,7 @@ CREATE TABLE user_relationships (
 1. **使用 Radix UI primitives** 作为基础
 2. **使用 CVA (class-variance-authority)** 处理组件变体
 3. **使用 Zustand** 管理全局状态 (用户、消息、对话列表)
-4. **使用 Supabase Realtime** 实时同步消息
+4. **使用 WebSocket** 实时同步消息
 5. **使用 Zod** 进行表单验证
 
 ### 示例组件结构
@@ -385,8 +385,8 @@ const buttonVariants = cva(
 5. 阴影使用柔和的彩色阴影 (`shadow-purple-500/20`)
 6. 按钮和卡片使用悬停动效 (`transition-all duration-300`)
 7. 页面滚动使用自定义滚动条样式
-8. 图片上传使用 Supabase Storage
-9. 实时消息使用 Supabase Realtime
+8. 图片上传使用 MinIO
+9. 实时消息使用 WebSocket
 
 ### ❌ 禁止做
 
@@ -456,9 +456,6 @@ npm run build
 
 # 代码检查
 npm run lint
-
-# 生成数据库类型
-npm run db:generate
 ```
 
 ---
@@ -466,13 +463,15 @@ npm run db:generate
 ## 环境变量
 
 ```env
-# Supabase (必需)
-NEXT_PUBLIC_SUPABASE_URL=你的Supabase项目URL
-NEXT_PUBLIC_SUPABASE_ANON_KEY=你的Supabase匿名密钥
+# 后端API (必需)
+NEXT_PUBLIC_API_URL=http://localhost:8080/api
 
-# Storage 桶名
-NEXT_PUBLIC_STORAGE_AVATARS=avatars
-NEXT_PUBLIC_STORAGE_CHAT_FILES=chat-files
+# MinIO 存储 (必需)
+NEXT_PUBLIC_MINIO_ENDPOINT=your-minio-endpoint
+NEXT_PUBLIC_MINIO_BUCKET=user-uploads
+
+# AI服务 (可选)
+NEXT_PUBLIC_MINIMAX_API_KEY=你的MiniMax API Key
 ```
 
 ---

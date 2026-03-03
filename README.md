@@ -4,7 +4,7 @@
 
 ## 项目简介
 
- NebulaHub 橙光 是一个帮助编程学习者快速成长的智能平台，提供：
+NebulaHub 橙光 是一个帮助编程学习者快速成长的智能平台，提供：
 
 - 🤖 **AI个性化学习路径**：根据你的水平和目标，AI生成定制化学习计划
 - 💬 **智能编程问答**：随时向AI提问，获得即时解答
@@ -15,8 +15,10 @@
 
 - **前端框架**: Next.js 14 (App Router)
 - **UI组件**: Radix UI + Tailwind CSS
-- **认证服务**: Supabase Authentication
-- **数据库**: Supabase PostgreSQL
+- **后端服务**: Spring Boot 3.2.2 + Java 21
+- **认证服务**: JWT (Spring Security)
+- **数据库**: PostgreSQL
+- **对象存储**: MinIO (S3-compatible)
 - **AI服务**: MiniMax API (可替换为其他LLM)
 - **开发语言**: TypeScript
 
@@ -41,12 +43,13 @@ NebulaHub/
 │   │   ├── ui/               # 基础UI组件
 │   │   └── ...
 │   ├── lib/                   # 工具函数和配置
-│   │   ├── supabase/         # Supabase客户端
+│   │   ├── api/              # API客户端
 │   │   └── ...
 │   ├── hooks/                 # 自定义Hooks
 │   └── types/                 # TypeScript类型定义
-├── supabase/                   # Supabase配置
-│   ├── triggers/              # 数据库触发器
+├── db/                        # 数据库配置
+│   └── schema/                # 数据库Schema
+│       └── schema_nebulahub.sql
 ├── public/                     # 静态资源
 └── .env.local                  # 环境变量（本地）
 ```
@@ -57,7 +60,8 @@ NebulaHub/
 
 - Node.js 18.17+
 - npm / yarn / pnpm
-- Supabase账户
+- PostgreSQL 数据库
+- MinIO 对象存储服务
 
 ### 2. 安装依赖
 
@@ -70,23 +74,18 @@ npm install
 **必需的环境变量**：
 
 ```env
-# Supabase配置
-NEXT_PUBLIC_SUPABASE_URL=你的Supabase项目URL
-NEXT_PUBLIC_SUPABASE_ANON_KEY=你的Supabase匿名密钥
+# 后端API地址
+NEXT_PUBLIC_API_URL=http://localhost:8080/api
+
+# MinIO 存储配置
+NEXT_PUBLIC_MINIO_ENDPOINT=your-minio-endpoint
+NEXT_PUBLIC_MINIO_BUCKET=user-uploads
 
 # AI服务配置（可选：使用MiniMax）
 NEXT_PUBLIC_MINIMAX_API_KEY=你的MiniMax API Key
 ```
 
-### 4. 初始化数据库
-
-在Supabase Dashboard中执行：
-
-1. 进入 **SQL Editor**
-2. 执行 `supabase/schema.sql` 创建表结构
-3. 执行 `supabase/triggers/create_user_on_signup.sql` 创建用户同步触发器
-
-### 5. 启动开发服务器
+### 4. 启动开发服务器
 
 ```bash
 npm run dev
@@ -98,8 +97,8 @@ npm run dev
 
 ### 用户认证
 - 邮箱/密码注册和登录
-- GitHub OAuth登录
-- 自动用户数据同步到public.users表
+- JWT Token 认证
+- 安全的 Cookie 存储
 
 ### 仪表板
 - 欢迎信息和学习统计
@@ -119,8 +118,9 @@ npm run dev
 
 | 变量名 | 必需 | 说明 |
 |--------|------|------|
-| `NEXT_PUBLIC_SUPABASE_URL` | ✅ | Supabase项目URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅ | Supabase匿名密钥 |
+| `NEXT_PUBLIC_API_URL` | ✅ | Spring Boot 后端API地址 |
+| `NEXT_PUBLIC_MINIO_ENDPOINT` | ✅ | MinIO 存储服务地址 |
+| `NEXT_PUBLIC_MINIO_BUCKET` | ❌ | MinIO 存储桶名称 |
 | `NEXT_PUBLIC_MINIMAX_API_KEY` | ❌ | MiniMax API Key |
 | `NEXT_PUBLIC_AI_MODEL` | ❌ | 使用的AI模型（默认：MiniMax） |
 
@@ -152,7 +152,7 @@ docker run -p 3000:3000 NebulaHub
 
 1. 创建对应的页面在 `src/app/` 下
 2. 创建UI组件在 `src/components/` 下
-3. 创建数据库表（如果需要）在 `supabase/schema.sql` 中
+3. 创建数据库表（如果需要）在 `db/schema/` 中
 4. 添加环境变量到 `.env.local.example`
 
 ## 许可证

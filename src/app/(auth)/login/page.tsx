@@ -35,9 +35,14 @@ export default function LoginPage() {
       }, 500)
 
     } catch (error: any) {
+      // 优先显示后端返回的错误消息
+      const errorMessage = error?.message || "登录失败，请检查邮箱和密码"
+
+      console.error('[Login] 登录失败:', errorMessage, error)
+
       toast({
         title: "登录失败",
-        description: error.message || "请检查邮箱和密码",
+        description: errorMessage,
         variant: "destructive",
       })
     } finally {

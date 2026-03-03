@@ -290,14 +290,18 @@ async function request<T>(
 
     // 检查业务状态码
     if (result.code !== 200) {
-      const errorMessage = result.message || '请求失败'
+      // 优先使用后端返回的错误消息
+      const errorMessage = result.message || `请求失败 (code: ${result.code})`
 
       // 关键：检查是否是登录过期的业务错误
       if (isLoginExpiredMessage(errorMessage)) {
         handleAuthExpired()
       }
 
-      throw new ApiError(errorMessage, result.code)
+      // 抛出 ApiError，确保错误消息能被上层捕获
+      const error = new ApiError(errorMessage, result.code)
+      console.error('[API] 业务错误:', errorMessage, 'code:', result.code)
+      throw error
     }
 
     return result
