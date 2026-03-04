@@ -14,6 +14,9 @@ import type { NextRequest } from 'next/server'
 // 受保护的路径列表
 const protectedPaths = ['/dashboard', '/chat', '/drive', '/settings']
 
+// 后台管理路径
+const adminPaths = ['/admin']
+
 // 公开路径（无需登录）
 const publicPaths = ['/', '/login', '/register', '/forgot-password']
 
@@ -44,6 +47,18 @@ export async function middleware(req: NextRequest) {
   )
 
   if (isProtectedPath && !isLoggedIn) {
+    const url = req.nextUrl.clone()
+    url.pathname = '/'
+    url.searchParams.set('auth', 'required')
+    return NextResponse.redirect(url)
+  }
+
+  // 情况4：后台管理路径 - 需要登录（后续会完善角色检查）
+  const isAdminPath = adminPaths.some(path =>
+    pathname === path || pathname.startsWith(path + '/')
+  )
+
+  if (isAdminPath && !isLoggedIn) {
     const url = req.nextUrl.clone()
     url.pathname = '/'
     url.searchParams.set('auth', 'required')
