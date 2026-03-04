@@ -111,7 +111,7 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
       <div className="container mx-auto px-6 py-3 grid grid-cols-3 items-center">
         {/* 左侧 - Logo */}
         <div className="flex items-center justify-start">
-          <Link href="/" className="flex items-center gap-3">
+          <Link href="/home" className="flex items-center gap-3">
             <img src={src} alt="NebulaHub Logo" style={{ height: 40, width: 'auto' }} onError={handleError} className="rounded-xl" />
             <div className="flex flex-col">
               <span className="text-lg font-bold text-slate-800 dark:text-white tracking-tight">

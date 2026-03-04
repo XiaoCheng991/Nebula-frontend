@@ -9,6 +9,7 @@ import { Bell, Search, Home } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { UserAvatar } from '@/components/ui/user-avatar'
+import { LogoutButton } from '@/components/auth/LogoutButton'
 import { useAdminStore } from '@/hooks/useAdminStore'
 
 interface AdminHeaderProps {
@@ -71,7 +72,7 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({ className }) => {
     )}>
       {/* 左侧 - 面包屑 */}
       <div className="flex items-center gap-4">
-        <Link href="/" className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+        <Link href="/home" className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
           <Home className="h-5 w-5" />
         </Link>
         <nav className="flex items-center gap-2 text-sm">
@@ -117,21 +118,24 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({ className }) => {
 
         {/* 用户 */}
         {user && (
-          <Link href="/admin/settings" className="flex items-center gap-2">
-            <UserAvatar
-              avatarUrl={user.avatar}
-              displayName={user.displayName}
-              size="sm"
-            />
-            <div className="hidden text-left md:block">
-              <p className="text-sm font-medium text-gray-900 dark:text-white">
-                {user.displayName}
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                {user.email}
-              </p>
-            </div>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link href="/admin/settings" className="flex items-center gap-2">
+              <UserAvatar
+                avatarUrl={user.avatar}
+                displayName={user.displayName}
+                size="sm"
+              />
+              <div className="hidden text-left md:block">
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  {user.displayName}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {user.email}
+                </p>
+              </div>
+            </Link>
+            <LogoutButton iconOnly />
+          </div>
         )}
       </div>
     </header>
