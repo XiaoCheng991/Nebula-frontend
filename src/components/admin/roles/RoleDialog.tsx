@@ -13,7 +13,6 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Checkbox } from '@/components/ui/checkbox'
 import { AdminRole, AdminPermission, AdminMenu } from '@/lib/admin/types'
 import { mockPermissions, mockMenus } from '@/lib/admin/mock-data'
@@ -101,7 +100,7 @@ export function RoleDialog({ open, onOpenChange, role, onSave }: RoleDialogProps
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="max-h-[60vh] pr-4">
+        <div className="max-h-[60vh] overflow-y-auto pr-4">
           <div className="space-y-4 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -160,7 +159,7 @@ export function RoleDialog({ open, onOpenChange, role, onSave }: RoleDialogProps
               </div>
             </div>
           </div>
-        </ScrollArea>
+        </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
