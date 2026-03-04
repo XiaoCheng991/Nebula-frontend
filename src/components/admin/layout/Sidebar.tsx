@@ -69,7 +69,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ item, level }) => {
         <button
           onClick={() => setIsExpanded(!isExpanded)}
           className={cn(
-            'flex w-full items-center gap-3 px-3 py-2 text-sm font-medium transition-colors hover:bg-gray-100 dark:hover:bg-gray-800',
+            'flex w-full items-center gap-2 px-3 py-2 text-sm font-medium transition-colors hover:bg-gray-100 dark:hover:bg-gray-800',
             level > 0 && 'pl-10'
           )}
         >
@@ -98,7 +98,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ item, level }) => {
     <Link
       href={item.path}
       className={cn(
-        'flex items-center gap-3 px-3 py-2 text-sm font-medium transition-colors',
+        'flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors',
         level > 0 && 'pl-10',
         isActive
           ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
