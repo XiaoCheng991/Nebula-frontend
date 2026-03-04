@@ -188,7 +188,7 @@ export default function SettingsPage() {
       <LayoutWithFullWidth>
         <div className="space-y-4">
         <div>
-          <h1 className="text-3xl font-bold">账号设置</h1>
+          <h1 className="text-3xl font-bold text-foreground">账号设置</h1>
           <p className="text-muted-foreground mt-1">
             管理你的个人信息和偏好设置
           </p>
@@ -241,7 +241,7 @@ export default function SettingsPage() {
                   onChange={handleAvatarUpload}
                   disabled={uploading}
                 />
-                <div className="mt-3 flex items-center gap-4 text-xs text-slate-400">
+                <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                     支持 JPG, PNG, GIF
@@ -268,14 +268,14 @@ export default function SettingsPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* 用户名 */}
               <div className="space-y-2">
-                <Label htmlFor="username" className="text-slate-600">用户名</Label>
+                <Label htmlFor="username" className="text-foreground">用户名</Label>
                 <Input
                   id="username"
                   value={profile.username}
                   disabled
-                  className="bg-slate-50"
+                  className="bg-muted"
                 />
-                <p className="text-xs text-slate-400">用户名唯一且不可修改</p>
+                <p className="text-xs text-muted-foreground">用户名唯一且不可修改</p>
               </div>
 
               {/* 显示名称 */}
@@ -289,7 +289,7 @@ export default function SettingsPage() {
                   maxLength={100}
                 />
                 <div className="flex justify-end">
-                  <span className="text-xs text-slate-400">
+                  <span className="text-xs text-muted-foreground">
                     {profile.displayName?.length || 0}/100
                   </span>
                 </div>
@@ -311,7 +311,7 @@ export default function SettingsPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="bio" className="text-slate-600">简介内容</Label>
+              <Label htmlFor="bio" className="text-foreground">简介内容</Label>
               <Textarea
                 id="bio"
                 value={profile.bio}
@@ -322,7 +322,7 @@ export default function SettingsPage() {
                 className="resize-none"
               />
               <div className="flex justify-end">
-                <span className={`text-xs ${(profile.bio?.length || 0) >= 500 ? 'text-red-500' : 'text-slate-400'}`}>
+                <span className={`text-xs ${(profile.bio?.length || 0) >= 500 ? 'text-red-500' : 'text-muted-foreground'}`}>
                   {profile.bio?.length || 0} / 500
                 </span>
               </div>

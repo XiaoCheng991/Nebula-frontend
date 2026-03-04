@@ -85,7 +85,7 @@ export default function DashboardPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-slate-800 dark:text-white">最近活动</h3>
-                <span className="text-xs px-2 py-1 bg-slate-100 rounded-full text-slate-500 dark:text-gray-300">实时</span>
+                <span className="text-xs px-2 py-1 bg-muted rounded-full text-muted-foreground">实时</span>
               </div>
               <div className="space-y-3">
                 {recentActivity.map((activity) => (
@@ -109,25 +109,25 @@ export default function DashboardPage() {
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold mb-4 text-slate-800 dark:text-white">快捷操作</h3>
               <div className="grid grid-cols-2 gap-3">
-                <Button variant="outline" className="h-20 flex-col items-center justify-center gap-2 hover:bg-blue-50 hover:border-blue-200 transition-all group">
+                <Button variant="outline" className="h-20 flex-col items-center justify-center gap-2 hover:bg-blue-50 dark:hover:bg-blue-950/30 hover:border-blue-200 dark:hover:border-blue-800 transition-all group">
                   <div className="p-2 rounded-lg bg-blue-500/10 group-hover:bg-blue-500 group-hover:text-white transition-colors">
                     <MessageCircle className="h-5 w-5 text-blue-500 group-hover:text-white" />
                   </div>
                   <span className="text-sm font-medium text-slate-600 dark:text-gray-200">消息</span>
                 </Button>
-                <Button variant="outline" className="h-20 flex-col items-center justify-center gap-2 hover:bg-green-50 hover:border-green-200 transition-all group">
+                <Button variant="outline" className="h-20 flex-col items-center justify-center gap-2 hover:bg-green-50 dark:hover:bg-green-950/30 hover:border-green-200 dark:hover:border-green-800 transition-all group">
                   <div className="p-2 rounded-lg bg-green-500/10 group-hover:bg-green-500 group-hover:text-white transition-colors">
                     <FileText className="h-5 w-5 text-green-500 group-hover:text-white" />
                   </div>
                   <span className="text-sm font-medium text-slate-600 dark:text-gray-200">文件</span>
                 </Button>
-                <Button variant="outline" className="h-20 flex-col items-center justify-center gap-2 hover:bg-purple-50 hover:border-purple-200 transition-all group">
+                <Button variant="outline" className="h-20 flex-col items-center justify-center gap-2 hover:bg-purple-50 dark:hover:bg-purple-950/30 hover:border-purple-200 dark:hover:border-purple-800 transition-all group">
                   <div className="p-2 rounded-lg bg-purple-500/10 group-hover:bg-purple-500 group-hover:text-white transition-colors">
                     <Settings className="h-5 w-5 text-purple-500 group-hover:text-white" />
                   </div>
                   <span className="text-sm font-medium text-slate-600 dark:text-gray-200">设置</span>
                 </Button>
-                <Button variant="outline" className="h-20 flex-col items-center justify-center gap-2 hover:bg-amber-50 hover:border-amber-200 transition-all group">
+                <Button variant="outline" className="h-20 flex-col items-center justify-center gap-2 hover:bg-amber-50 dark:hover:bg-amber-950/30 hover:border-amber-200 dark:hover:border-amber-800 transition-all group">
                   <div className="p-2 rounded-lg bg-amber-500/10 group-hover:bg-amber-500 group-hover:text-white transition-colors">
                     <BarChart3 className="h-5 w-5 text-amber-500 group-hover:text-white" />
                   </div>

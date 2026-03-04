@@ -57,8 +57,6 @@ export default function ChatPage() {
     { id: 'conv-3', type: 'user', name: '张三', avatar: '', lastMessage: '收到，谢谢！', time: '16:20', unread: 0, isPinned: false },
     { id: 'conv-4', type: 'group', name: '工作闲聊群', avatar: '', lastMessage: 'Alice: 会议推迟到明天', time: '昨天', unread: 3, isPinned: false },
     { id: 'conv-5', type: 'user', name: '李四', avatar: '', lastMessage: '记得明天的会议', time: '昨天', unread: 0, isPinned: false },
-    // { id: 'conv-6', type: 'user', name: '孙七', avatar: '', lastMessage: '记得明天的会议', time: '昨天', unread: 0, isPinned: false },
-    // { id: 'conv-7', type: 'user', name: '周八', avatar: '', lastMessage: '记得明天的会议', time: '昨天', unread: 0, isPinned: false },
   ]);
 
   const [activeConversation, setActiveConversation] = useState<string | null>('conv-1');
@@ -122,33 +120,33 @@ export default function ChatPage() {
     <ProtectedRoute>
       <ChatLayout>
         {/*手动计算固定距离*/}
-        <div className="flex h-[calc(100vh-85px)] overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100">
+        <div className="flex h-[calc(100vh-85px)] overflow-hidden bg-gradient-to-br from-muted/50 to-background">
         {/* Sidebar - Contact list */}
-        <div className="h-full border-r bg-white flex flex-col shadow-sm pl-2">
+        <div className="h-full border-r bg-background flex flex-col shadow-sm pl-2">
           {/* Header */}
-          <div className="p-4 border-b bg-white">
+          <div className="p-4 border-b bg-background">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-slate-800">聊天</h2>
+              <h2 className="text-xl font-bold text-foreground">聊天</h2>
               <div className="flex gap-2">
-                <Button variant="ghost" size="icon" className="hover:bg-slate-100">
-                  <UserPlus className="h-5 w-5 text-slate-600" />
+                <Button variant="ghost" size="icon" className="hover:bg-muted">
+                  <UserPlus className="h-5 w-5 text-muted-foreground" />
                 </Button>
-                <Button variant="ghost" size="icon" className="hover:bg-slate-100">
-                  <Users className="h-5 w-5 text-slate-600" />
+                <Button variant="ghost" size="icon" className="hover:bg-muted">
+                  <Users className="h-5 w-5 text-muted-foreground" />
                 </Button>
                 <Link href="/dashboard">
-                  <Button variant="ghost" size="icon" className="hover:bg-slate-100">
-                    <MoreVertical className="h-5 w-5 text-slate-600" />
+                  <Button variant="ghost" size="icon" className="hover:bg-muted">
+                    <MoreVertical className="h-5 w-5 text-muted-foreground" />
                   </Button>
                 </Link>
               </div>
             </div>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="text"
                 placeholder="搜索对话..."
-                className="pl-10 bg-slate-50 border-slate-200 focus:border-blue-400 focus:ring-blue-400/20"
+                className="pl-10 bg-muted border-border focus:border-blue-400 focus:ring-blue-400/20"
               />
             </div>
           </div>
@@ -161,15 +159,15 @@ export default function ChatPage() {
                 <div
                   key={conversation.id}
                   className={cn(
-                    "flex items-center gap-3 p-3 hover:bg-slate-50 cursor-pointer transition-all duration-200 border-l-4",
+                    "flex items-center gap-3 p-3 hover:bg-muted cursor-pointer transition-all duration-200 border-l-4",
                     activeConversation === conversation.id
-                      ? "bg-blue-50 border-l-blue-500"
+                      ? "bg-blue-50 border-l-blue-500 dark:bg-blue-950/30"
                       : "border-l-transparent"
                   )}
                   onClick={() => setActiveConversation(conversation.id)}
                 >
                   <div className="relative">
-                    <Avatar className="w-12 h-12 ring-2 ring-slate-100">
+                    <Avatar className="w-12 h-12 ring-2 ring-muted">
                       <AvatarImage src={conversation.avatar} />
                       <AvatarFallback className={cn(
                         "text-lg",
@@ -181,23 +179,23 @@ export default function ChatPage() {
                       </AvatarFallback>
                     </Avatar>
                     {conversation.type === 'user' && (
-                      <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+                      <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-background rounded-full"></span>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <h3 className={cn(
                         "font-semibold truncate",
-                        conversation.unread > 0 ? "text-slate-800" : "text-slate-600"
+                        conversation.unread > 0 ? "text-foreground" : "text-muted-foreground"
                       )}>
                         {conversation.name}
                       </h3>
-                      <span className="text-xs text-slate-400">{conversation.time}</span>
+                      <span className="text-xs text-muted-foreground">{conversation.time}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <p className={cn(
                         "text-sm truncate",
-                        conversation.unread > 0 ? "text-slate-700 font-medium" : "text-slate-400"
+                        conversation.unread > 0 ? "text-foreground font-medium" : "text-muted-foreground"
                       )}>
                         {conversation.lastMessage}
                       </p>
@@ -217,14 +215,14 @@ export default function ChatPage() {
         </div>
 
         {/* Chat Area */}
-        <div className="h-full flex-1 flex flex-col bg-white/50 backdrop-blur-sm">
+        <div className="h-full flex-1 flex flex-col bg-background/50 backdrop-blur-sm">
           {activeConv ? (
             <div className="flex flex-col h-full">
               {/* Chat Header */}
-              <div className="border-b p-4 flex items-center justify-between bg-white shadow-sm z-10">
+              <div className="border-b p-4 flex items-center justify-between bg-background shadow-sm z-10">
                 <div className="flex items-center gap-3">
                   <div className="relative">
-                    <Avatar className="w-10 h-10 ring-2 ring-slate-100">
+                    <Avatar className="w-10 h-10 ring-2 ring-muted">
                       <AvatarImage src={activeConv.avatar} />
                       <AvatarFallback className={cn(
                         "font-medium",
@@ -235,24 +233,24 @@ export default function ChatPage() {
                         {activeConv.type === 'group' ? '👥' : activeConv.name.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-background rounded-full"></span>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-slate-800">{activeConv.name}</h3>
-                    <p className="text-xs text-slate-500">
+                    <h3 className="font-semibold text-foreground">{activeConv.name}</h3>
+                    <p className="text-xs text-muted-foreground">
                       {activeConv.type === 'user' ? '在线' : '2 位成员在线'}
                     </p>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="ghost" size="icon" className="hover:bg-slate-100">
-                    <Phone className="h-5 w-5 text-slate-600" />
+                  <Button variant="ghost" size="icon" className="hover:bg-muted">
+                    <Phone className="h-5 w-5 text-muted-foreground" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="hover:bg-slate-100">
-                    <Video className="h-5 w-5 text-slate-600" />
+                  <Button variant="ghost" size="icon" className="hover:bg-muted">
+                    <Video className="h-5 w-5 text-muted-foreground" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="hover:bg-slate-100">
-                    <MoreVertical className="h-5 w-5 text-slate-600" />
+                  <Button variant="ghost" size="icon" className="hover:bg-muted">
+                    <MoreVertical className="h-5 w-5 text-muted-foreground" />
                   </Button>
                 </div>
               </div>
@@ -260,12 +258,12 @@ export default function ChatPage() {
               {/* Messages & Input Container - Use flex to ensure input stays at bottom */}
               <div className="flex-1 flex flex-col">
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-gradient-to-b from-slate-50 to-white">
+                <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-gradient-to-b from-muted/50 to-background">
                   {messages.map((message, index) => (
                     <div key={message.id} className="flex flex-col items-start w-full">
                       {/* 时间标签 - 仅在间隔超过5分钟时显示 */}
                       {shouldShowTime(index, messages) && (
-                        <div className="self-center my-2 px-3 py-1 bg-slate-200 text-slate-600 text-xs rounded-full">
+                        <div className="self-center my-2 px-3 py-1 bg-muted text-muted-foreground text-xs rounded-full">
                           {formatTime(message.timestamp instanceof Date ? message.timestamp : new Date(message.timestamp))}
                         </div>
                       )}
@@ -275,7 +273,7 @@ export default function ChatPage() {
                             "max-w-xs lg:max-w-md px-4 py-2 rounded-2xl shadow-sm transition-all duration-200 hover:shadow-md",
                             message.senderId === 'me'
                               ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-br-sm ml-auto'
-                              : 'bg-white text-slate-800 rounded-tl-sm border border-slate-100 mr-auto'
+                              : 'bg-background text-foreground rounded-tl-sm border border-border mr-auto'
                           )}
                         >
                           <p className="leading-relaxed">{message.content}</p>
@@ -287,15 +285,15 @@ export default function ChatPage() {
                 </div>
 
                 {/* Message Input - Fixed at bottom */}
-                <div className="border-t p-2 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] flex-shrink-0">
+                <div className="border-t p-2 bg-background shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] flex-shrink-0">
                   <div className="flex items-end gap-2">
-                    <div className="flex-1 bg-slate-50 rounded-2xl p-2 border border-slate-200 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-400/20 transition-all">
+                    <div className="flex-1 bg-muted rounded-2xl p-2 border border-border focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-400/20 transition-all">
                       <textarea
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         onKeyDown={handleKeyPress}
                         placeholder="输入消息..."
-                        className="w-full bg-transparent border-none resize-none focus:outline-none h-10 max-h-20 text-slate-700 placeholder:text-slate-400"
+                        className="w-full bg-transparent border-none resize-none focus:outline-none h-10 max-h-20 text-foreground placeholder:text-muted-foreground"
                         style={{ maxHeight: '6rem', resize: 'none' }}
                       />
                     </div>
@@ -306,7 +304,7 @@ export default function ChatPage() {
                         "h-10 w-10 p-0 rounded-xl transition-all duration-200",
                         newMessage.trim()
                           ? "bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg shadow-blue-500/30"
-                          : "bg-slate-200"
+                          : "bg-muted"
                       )}
                     >
                       <Send className="h-4 w-4" />
@@ -316,9 +314,9 @@ export default function ChatPage() {
               </div>
             </div>
           ) : (
-            <div className="flex-1 flex items-center justify-center text-slate-400 bg-gradient-to-br from-slate-50 to-slate-100">
+            <div className="flex-1 flex items-center justify-center text-muted-foreground bg-gradient-to-br from-muted/50 to-background">
               <div className="text-center">
-                <div className="w-20 h-20 mx-auto mb-4 bg-slate-200 rounded-full flex items-center justify-center">
+                <div className="w-20 h-20 mx-auto mb-4 bg-muted rounded-full flex items-center justify-center">
                   <MessageCircle className="h-10 w-10" />
                 </div>
                 <p className="text-lg font-medium">选择一个聊天开始对话</p>
