@@ -3,17 +3,10 @@ import React from 'react';
 import Link from 'next/link';
 import { UserAvatar } from '@/components/ui/user-avatar';
 import { LogoutButton } from '@/components/auth/LogoutButton';
+import { ThemeSwitcher } from '@/components/ui/theme-switcher';
 import { useUser } from '@/lib/user-context';
-import { MessageCircle, Settings, Sparkles, FolderUp, LogOut, Loader2, Moon, Sun, Monitor, ChevronDown, Shield } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useThemeStore } from '@/hooks/useTheme';
+import { MessageCircle, Settings, Sparkles, FolderUp, LogOut, Loader2, Shield } from 'lucide-react';
 import { useAdminStore } from '@/hooks/useAdminStore';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 
 type GlobalHeaderProps = {
   className?: string;
@@ -52,59 +45,6 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
     );
   };
 
-  const ThemeSwitcher: React.FC = () => {
-    const { theme, setTheme } = useThemeStore();
-
-    const getThemeIcon = () => {
-      switch (theme) {
-        case 'light':
-          return <Sun className="h-5 w-5" />;
-        case 'dark':
-          return <Moon className="h-5 w-5" />;
-        case 'system':
-          return <Monitor className="h-5 w-5" />;
-      }
-    };
-
-    const getThemeLabel = () => {
-      switch (theme) {
-        case 'light':
-          return '浅色';
-        case 'dark':
-          return '深色';
-        case 'system':
-          return '系统';
-      }
-    };
-
-    return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="flex items-center gap-1 w-auto px-2">
-            {getThemeIcon()}
-            <ChevronDown className="h-4 w-4 opacity-50" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="rounded-[25px]">
-          <DropdownMenuItem onClick={() => setTheme('light')} className="flex items-center gap-2 cursor-pointer">
-            <Sun className="h-4 w-4" />
-            <span>浅色</span>
-            {theme === 'light' && <span className="ml-auto text-xs text-muted-foreground">✓</span>}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setTheme('dark')} className="flex items-center gap-2 cursor-pointer">
-            <Moon className="h-4 w-4" />
-            <span>深色</span>
-            {theme === 'dark' && <span className="ml-auto text-xs text-muted-foreground">✓</span>}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setTheme('system')} className="flex items-center gap-2 cursor-pointer">
-            <Monitor className="h-4 w-4" />
-            <span>跟随系统</span>
-            {theme === 'system' && <span className="ml-auto text-xs text-muted-foreground">✓</span>}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    );
-  };
 
   return (
     <header className={`w-full sticky top-0 z-50 bg-transparent backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 ${className}`} aria-label="站点头部">

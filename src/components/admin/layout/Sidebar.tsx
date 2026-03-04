@@ -69,7 +69,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ item, level }) => {
         <button
           onClick={() => setIsExpanded(!isExpanded)}
           className={cn(
-            'flex w-full items-center gap-2 px-3 py-2 text-sm font-medium transition-colors hover:bg-gray-100 dark:hover:bg-gray-800',
+            'flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors hover:bg-gray-100 dark:hover:bg-gray-800',
             level > 0 && 'pl-10'
           )}
         >

@@ -5,19 +5,13 @@
 import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Bell, Search, Home, Moon, Sun, Monitor, ChevronDown } from 'lucide-react'
+import { Bell, Search, Home } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { UserAvatar } from '@/components/ui/user-avatar'
 import { LogoutButton } from '@/components/auth/LogoutButton'
+import { ThemeSwitcher } from '@/components/ui/theme-switcher'
 import { useAdminStore } from '@/hooks/useAdminStore'
-import { useThemeStore } from '@/hooks/useTheme'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 
 interface AdminHeaderProps {
   className?: string
@@ -26,48 +20,6 @@ interface AdminHeaderProps {
 export const AdminHeader: React.FC<AdminHeaderProps> = ({ className }) => {
   const pathname = usePathname()
   const { user } = useAdminStore()
-  const { theme, setTheme } = useThemeStore()
-
-  const ThemeSwitcher = () => {
-    const getThemeIcon = () => {
-      switch (theme) {
-        case 'light':
-          return <Sun className="h-5 w-5" />;
-        case 'dark':
-          return <Moon className="h-5 w-5" />;
-        case 'system':
-          return <Monitor className="h-5 w-5" />;
-      }
-    };
-
-    return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="flex items-center gap-1 w-auto px-2">
-            {getThemeIcon()}
-            <ChevronDown className="h-4 w-4 opacity-50" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => setTheme('light')} className="flex items-center gap-2 cursor-pointer">
-            <Sun className="h-4 w-4" />
-            <span>浅色</span>
-            {theme === 'light' && <span className="ml-auto text-xs text-muted-foreground">✓</span>}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setTheme('dark')} className="flex items-center gap-2 cursor-pointer">
-            <Moon className="h-4 w-4" />
-            <span>深色</span>
-            {theme === 'dark' && <span className="ml-auto text-xs text-muted-foreground">✓</span>}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setTheme('system')} className="flex items-center gap-2 cursor-pointer">
-            <Monitor className="h-4 w-4" />
-            <span>跟随系统</span>
-            {theme === 'system' && <span className="ml-auto text-xs text-muted-foreground">✓</span>}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    );
-  };
 
   // 生成面包屑
   const getBreadcrumbs = () => {
