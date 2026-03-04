@@ -36,7 +36,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
   const getDisplayContent = () => {
     if (message.is_deleted) {
       return (
-        <span className="italic text-gray-400 flex items-center gap-1">
+        <span className="italic text-gray-400 flex items-center gap-1 dark:text-gray-300">
           <Clock size={14} />
           此消息已撤回
         </span>
@@ -86,7 +86,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
         
         {/* 发送者名字 */}
         {!isOwn && (
-          <span className="text-xs text-gray-500 mb-1 ml-1">
+          <span className="text-xs text-gray-500 mb-1 ml-1 dark:text-gray-300">
             {message.sender_name}
           </span>
         )}
@@ -96,7 +96,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
           <div className={`mb-1 px-3 py-2 rounded-lg text-sm ${
             isOwn 
               ? 'bg-green-100/80 text-green-800' 
-              : 'bg-gray-100/80 text-gray-700'
+              : 'bg-gray-100/80 text-gray-700 dark:text-gray-200'
           }`}>
             <div className="flex items-center gap-1 mb-1">
               <CornerUpLeft size={12} className="opacity-60" />
@@ -115,7 +115,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
           <div className={`px-4 py-2.5 rounded-2xl shadow-sm ${
             isOwn
               ? 'bg-gradient-to-br from-green-400 to-green-500 text-white rounded-tr-sm'
-              : 'bg-white text-gray-800 rounded-tl-sm border border-gray-100'
+              : 'bg-white text-gray-800 rounded-tl-sm border border-gray-100 dark:bg-gray-900 dark:text-gray-200'
           }`}>
             {getDisplayContent()}
           </div>
@@ -133,7 +133,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
               {/* 回复按钮 */}
               <button
                 onClick={() => onReply(message)}
-                className="p-1.5 hover:bg-gray-100 rounded-md transition-colors text-gray-500 hover:text-blue-500"
+                className="p-1.5 hover:bg-gray-100 rounded-md transition-colors text-gray-500 hover:text-blue-500 dark:text-gray-300"
                 title="引用回复"
               >
                 <CornerUpLeft size={14} />
@@ -142,7 +142,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
               {/* 复制按钮 */}
               <button
                 onClick={handleCopy}
-                className="p-1.5 hover:bg-gray-100 rounded-md transition-colors text-gray-500 hover:text-blue-500"
+                className="p-1.5 hover:bg-gray-100 rounded-md transition-colors text-gray-500 hover:text-blue-500 dark:text-gray-300"
                 title={copied ? '已复制' : '复制'}
               >
                 {copied ? <CheckCheck size={14} className="text-green-500" /> : <Copy size={14} />}
@@ -152,7 +152,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
               {isOwn && (
                 <button
                   onClick={() => onDelete(message.id)}
-                  className="p-1.5 hover:bg-red-50 rounded-md transition-colors text-gray-500 hover:text-red-500"
+                  className="p-1.5 hover:bg-red-50 rounded-md transition-colors text-gray-500 hover:text-red-500 dark:text-red-400"
                   title="撤回"
                 >
                   <Trash2 size={14} />
@@ -164,7 +164,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
 
         {/* 时间 */}
         {showTime && (
-          <span className="text-xs text-gray-400 mt-1 mx-1">
+          <span className="text-xs text-gray-400 mt-1 mx-1 dark:text-gray-300">
             {formatMessageTime(message.created_at)}
           </span>
         )}

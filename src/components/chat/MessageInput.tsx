@@ -89,14 +89,14 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 <div className="text-xs font-medium text-blue-600">
                   回复 {replyingTo.sender_name}
                 </div>
-                <div className="text-sm text-gray-600 truncate">
+                <div className="text-sm text-gray-600 dark:text-gray-200 truncate">
                   {replyingTo.content}
                 </div>
               </div>
             </div>
             <button
               onClick={onCancelReply}
-              className="p-1 hover:bg-blue-100 rounded-full transition-colors text-gray-400 hover:text-gray-600"
+              className="p-1 hover:bg-blue-100 rounded-full transition-colors text-gray-400 hover:text-gray-600 dark:text-gray-300"
             >
               <X size={14} />
             </button>
@@ -109,19 +109,19 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         {/* 附加按钮 */}
         <div className="flex gap-1">
           <button 
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors dark:text-gray-300"
             title="发送图片"
           >
             <Image size={20} />
           </button>
           <button 
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors dark:text-gray-300"
             title="添加附件"
           >
             <Paperclip size={20} />
           </button>
           <button 
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors dark:text-gray-300"
             title="表情"
           >
             <Smile size={20} />
@@ -152,7 +152,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             className={`absolute right-2 bottom-1.5 p-1.5 rounded-xl transition-all duration-200 ${
               message.trim() && !disabled
                 ? 'bg-blue-500 text-white hover:bg-blue-600 shadow-lg shadow-blue-500/30'
-                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed dark:text-gray-500'
             } ${isSending ? 'opacity-70' : ''}`}
           >
             {isSending ? (
@@ -180,8 +180,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       </div>
 
       {/* 提示文字 */}
-      <div className="mt-1 text-xs text-gray-400 text-center">
-        按 <kbd className="px-1.5 py-0.5 bg-gray-100 rounded text-gray-500 font-medium">Enter</kbd> 发送，<kbd className="px-1.5 py-0.5 bg-gray-100 rounded text-gray-500 font-medium">Shift+Enter</kbd> 换行
+      <div className="mt-1 text-xs text-gray-400 text-center dark:text-gray-300">
+        按 <kbd className="px-1.5 py-0.5 bg-gray-100 rounded text-gray-500 font-medium dark:text-gray-300">Enter</kbd> 发送，<kbd className="px-1.5 py-0.5 bg-gray-100 rounded text-gray-500 font-medium dark:text-gray-300">Shift+Enter</kbd> 换行
       </div>
     </div>
   );
