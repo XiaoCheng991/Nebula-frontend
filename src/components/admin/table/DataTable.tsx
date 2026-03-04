@@ -81,7 +81,7 @@ export function DataTable<TData, TValue>({
       )}
 
       {/* 表格 */}
-      <div className="rounded-md border">
+      <div className="rounded-sm border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
