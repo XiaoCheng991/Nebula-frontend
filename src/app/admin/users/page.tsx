@@ -1,14 +1,118 @@
-// src/app/admin/users/page.tsx
-
 'use client'
 
 import React from 'react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Plus, Edit, Trash2, UserPlus } from 'lucide-react'
+import { DataTable } from '@/components/admin/table/DataTable'
+import { ColumnDef } from '@tanstack/react-table'
+import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
+import { UserAvatar } from '@/components/ui/user-avatar'
+import { mockUsers } from '@/lib/admin/mock-data'
+import { AdminUser } from '@/lib/admin/types'
 
 export default function UsersPage() {
+  const columns: ColumnDef<AdminUser>[] = [
+    {
+      id: 'select',
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && 'indeterminate')
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="全选"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="选择"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      accessorKey: 'username',
+      header: '用户名',
+      cell: ({ row }) => (
+        <div className="flex items-center gap-3">
+          <UserAvatar
+            avatarUrl={row.original.avatar}
+            displayName={row.original.displayName}
+            size="sm"
+          />
+          <span className="font-medium">{row.original.username}</span>
+        </div>
+      ),
+    },
+    {
+      accessorKey: 'displayName',
+      header: '显示名称',
+      cell: ({ row }) => row.original.displayName,
+    },
+    {
+      accessorKey: 'email',
+      header: '邮箱',
+      cell: ({ row }) => row.original.email,
+    },
+    {
+      accessorKey: 'status',
+      header: '状态',
+      cell: ({ row }) => (
+        <Badge variant={row.original.status === 'active' ? 'default' : 'destructive'}>
+          {row.original.status === 'active' ? '正常' : '禁用'}
+        </Badge>
+      ),
+    },
+    {
+      id: 'actions',
+      header: '操作',
+      cell: () => (
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon">
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon">
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
+    },
+  ]
+
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">用户管理</h1>
-      <p className="text-gray-500 dark:text-gray-400">功能开发中...</p>
+      {/* 页面头部 */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">用户管理</h1>
+          <p className="text-muted-foreground mt-1">管理系统用户</p>
+        </div>
+        <Button className="gap-2">
+          <UserPlus className="h-4 w-4" />
+          新增用户
+        </Button>
+      </div>
+
+      {/* 用户列表 */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle>用户列表</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <DataTable
+            columns={columns}
+            data={mockUsers}
+            searchKey="username"
+            searchPlaceholder="搜索用户名..."
+          />
+        </CardContent>
+      </Card>
     </div>
   )
 }
