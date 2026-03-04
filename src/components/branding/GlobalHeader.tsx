@@ -4,9 +4,10 @@ import Link from 'next/link';
 import { UserAvatar } from '@/components/ui/user-avatar';
 import { LogoutButton } from '@/components/auth/LogoutButton';
 import { useUser } from '@/lib/user-context';
-import { MessageCircle, Settings, Sparkles, FolderUp, LogOut, Loader2, Moon, Sun, Monitor, ChevronDown } from 'lucide-react';
+import { MessageCircle, Settings, Sparkles, FolderUp, LogOut, Loader2, Moon, Sun, Monitor, ChevronDown, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useThemeStore } from '@/hooks/useTheme';
+import { useAdminStore } from '@/hooks/useAdminStore';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,6 +23,7 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
   className = '',
 }) => {
   const { user, loading } = useUser()
+  const { hasAdminAccess } = useAdminStore()
   const [src, setSrc] = React.useState<string>('/logo_icon.svg');
 
   const handleError = (e: React.SyntheticEvent<HTMLImageElement>) => {
@@ -30,6 +32,24 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
       img.src = '/public/logo_icon.svg';
       setSrc('/public/logo_icon.svg');
     }
+  };
+
+  const AdminEntrance: React.FC = () => {
+    const { hasAdminAccess } = useAdminStore();
+
+    if (!hasAdminAccess) {
+      return null;
+    }
+
+    return (
+      <Link
+        href="/admin"
+        className="flex items-center gap-2 p-2 rounded-lg transition-colors duration-200 hover:bg-gray-100/50 dark:hover:bg-gray-800/50"
+      >
+        <Shield className="h-5 w-5" />
+        <span className="text-sm font-medium hidden sm:block">管理后台</span>
+      </Link>
+    );
   };
 
   const ThemeSwitcher: React.FC = () => {
@@ -142,6 +162,7 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
 
         {/* 右侧 - 用户操作 */}
         <div className="flex items-center justify-end gap-2">
+          <AdminEntrance />
           <ThemeSwitcher />
           {loading ? (
             <div className="flex items-center gap-2 px-3">
