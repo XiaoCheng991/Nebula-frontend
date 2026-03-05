@@ -50,12 +50,37 @@ export default function LoginPage() {
     }
   }
 
-  const handleGithubLogin = () => {
-    // 跳转到GitHub OAuth授权页面
-    const clientId = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || "Ov23lisH1zy6aIiT5f9r"
-    const redirectUri = `http://localhost:8080/api/oauth/github/callback`
-    const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=user:email,read:user`
-    window.location.href = githubAuthUrl
+  const handleGithubLogin = async () => {
+    setLoading(true)
+    try {
+      // 获取GitHub授权URL
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/api/oauth/github/authorize`,
+        {
+          credentials: 'include',
+        }
+      )
+      const data = await res.json()
+
+      if (data.code === 200 && data.data?.authorizeUrl) {
+        window.location.href = data.data.authorizeUrl
+      } else {
+        toast({
+          title: "获取授权链接失败",
+          description: data.message || "请稍后重试",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      console.error("获取GitHub授权链接失败", error)
+      toast({
+        title: "获取授权链接失败",
+        description: "网络错误，请稍后重试",
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

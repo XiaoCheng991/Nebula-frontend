@@ -92,16 +92,18 @@ export function RoleDialog({ open, onOpenChange, role, onSave }: RoleDialogProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh]">
-        <DialogHeader>
-          <DialogTitle>{isEdit ? '编辑角色' : '新增角色'}</DialogTitle>
-          <DialogDescription>
-            {isEdit ? '修改角色信息' : '创建新的系统角色'}
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col p-0 gap-0 overflow-hidden">
+        <div className="p-6 pb-2">
+          <DialogHeader>
+            <DialogTitle>{isEdit ? '编辑角色' : '新增角色'}</DialogTitle>
+            <DialogDescription>
+              {isEdit ? '修改角色信息' : '创建新的系统角色'}
+            </DialogDescription>
+          </DialogHeader>
+        </div>
 
-        <div className="max-h-[60vh] overflow-y-auto pr-4">
-          <div className="space-y-4 py-4">
+        <div className="flex-1 overflow-y-auto px-6 py-2">
+          <div className="space-y-4 py-2">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="name">角色名称 *</Label>
@@ -134,7 +136,7 @@ export function RoleDialog({ open, onOpenChange, role, onSave }: RoleDialogProps
 
             <div className="space-y-2">
               <Label>权限配置</Label>
-              <div className="border rounded-lg p-4 max-h-48 overflow-y-auto">
+              <div className="border rounded-sm p-4 max-h-48 overflow-y-auto">
                 <div className="grid grid-cols-2 gap-2">
                   {mockPermissions.map(perm => (
                     <div key={perm.id} className="flex items-center gap-2">
@@ -154,21 +156,23 @@ export function RoleDialog({ open, onOpenChange, role, onSave }: RoleDialogProps
 
             <div className="space-y-2">
               <Label>菜单配置</Label>
-              <div className="border rounded-lg p-4 max-h-48 overflow-y-auto">
+              <div className="border rounded-sm p-4 max-h-48 overflow-y-auto">
                 {renderMenuTree(mockMenus)}
               </div>
             </div>
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            取消
-          </Button>
-          <Button onClick={handleSave}>
-            {isEdit ? '保存修改' : '创建角色'}
-          </Button>
-        </DialogFooter>
+        <div className="p-6 pt-2">
+          <DialogFooter>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              取消
+            </Button>
+            <Button onClick={handleSave}>
+              {isEdit ? '保存修改' : '创建角色'}
+            </Button>
+          </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   )

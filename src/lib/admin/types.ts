@@ -1,14 +1,19 @@
 // src/lib/admin/types.ts
 
+import type { SysUser as BackendSysUser, SysRole as BackendSysRole } from '@/lib/api/modules/admin'
+
 // ======== 核心类型 ========
 
 export interface AdminUser {
   id: number
   username: string
   displayName: string
+  nickname?: string
   email: string
   avatar?: string
+  avatarUrl?: string
   status: 'active' | 'disabled'
+  accountStatus?: number // 0-禁用, 1-启用
   roleIds: number[]
   createdAt?: string
   updatedAt?: string
@@ -116,4 +121,42 @@ export interface AdminState {
   setHasAdminAccess: (hasAccess: boolean) => void
   loadAdminData: () => Promise<void>
   clearAdminData: () => void
+}
+
+// ======== 后端数据转换函数 ========
+
+/**
+ * 将后端 SysUser 转换为前端 AdminUser
+ */
+export function transformSysUserToAdminUser(backendUser: BackendSysUser): AdminUser {
+  return {
+    id: backendUser.id,
+    username: backendUser.username,
+    displayName: backendUser.displayName || backendUser.nickname || backendUser.username,
+    nickname: backendUser.nickname,
+    email: backendUser.email || '',
+    avatar: backendUser.avatarUrl,
+    avatarUrl: backendUser.avatarUrl,
+    status: backendUser.accountStatus === 1 ? 'active' : 'disabled',
+    accountStatus: backendUser.accountStatus,
+    roleIds: [], // 需要单独接口获取
+    createdAt: backendUser.createTime,
+    updatedAt: backendUser.updateTime,
+  }
+}
+
+/**
+ * 将后端 SysRole 转换为前端 AdminRole
+ */
+export function transformSysRoleToAdminRole(backendRole: BackendSysRole): AdminRole {
+  return {
+    id: backendRole.id,
+    name: backendRole.roleName,
+    code: backendRole.roleCode,
+    description: backendRole.description,
+    permissionCodes: [], // 需要单独接口获取
+    menuIds: [], // 需要单独接口获取
+    createdAt: backendRole.createTime,
+    updatedAt: backendRole.updateTime,
+  }
 }

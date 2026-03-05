@@ -1,22 +1,71 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Edit, Trash2, UserPlus } from 'lucide-react'
+import { Edit, Trash2, UserPlus, RefreshCw } from 'lucide-react'
 import { DataTable } from '@/components/admin/table/DataTable'
 import { ColumnDef } from '@tanstack/react-table'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { UserAvatar } from '@/components/ui/user-avatar'
 import { UserDialog } from '@/components/admin/users/UserDialog'
-import { mockUsers } from '@/lib/admin/mock-data'
-import { AdminUser } from '@/lib/admin/types'
+import { AdminUser, transformSysUserToAdminUser } from '@/lib/admin/types'
+import { getUserList } from '@/lib/api/modules/admin'
+import { toast } from '@/components/ui/use-toast'
 
 export default function UsersPage() {
-  const [dialogOpen, setDialogOpen] = React.useState(false)
-  const [editingUser, setEditingUser] = React.useState<AdminUser | null>(null)
-  const [users, setUsers] = React.useState(mockUsers)
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [editingUser, setEditingUser] = useState<AdminUser | null>(null)
+  const [users, setUsers] = useState<AdminUser[]>([])
+  const [loading, setLoading] = useState(false)
+  const [pagination, setPagination] = useState({ page: 1, pageSize: 10, total: 0 })
+  const [searchKeyword, setSearchKeyword] = useState('')
+
+  // 加载用户列表
+  const loadUsers = async (page: number = 1, pageSize: number = 10, keyword?: string) => {
+    setLoading(true)
+    try {
+      const response = await getUserList(page, pageSize, keyword)
+      if (response.code === 200 && response.data) {
+        const transformedUsers = response.data.records.map(transformSysUserToAdminUser)
+        setUsers(transformedUsers)
+        setPagination({
+          page: response.data.current,
+          pageSize: response.data.size,
+          total: response.data.total,
+        })
+      } else {
+        toast({
+          title: '加载失败',
+          description: response.message || '加载用户列表失败',
+          variant: 'destructive',
+        })
+      }
+    } catch (error) {
+      console.error('Failed to load users:', error)
+      toast({
+        title: '加载失败',
+        description: '加载用户列表失败',
+        variant: 'destructive',
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // 初始加载
+  useEffect(() => {
+    loadUsers(1, 10)
+  }, [])
+
+  // 搜索防抖
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadUsers(1, pagination.pageSize, searchKeyword || undefined)
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [searchKeyword, pagination.pageSize])
 
   const handleAddUser = () => {
     setEditingUser(null)
@@ -29,13 +78,12 @@ export default function UsersPage() {
   }
 
   const handleSaveUser = (userData: Partial<AdminUser>) => {
+    // TODO: 对接保存用户 API
     if (editingUser) {
-      // 编辑用户
       setUsers(users.map(u => u.id === editingUser.id ? { ...u, ...userData } as AdminUser : u))
     } else {
-      // 新增用户
       const newUser: AdminUser = {
-        id: Math.max(...users.map(u => u.id)) + 1,
+        id: Math.max(...users.map(u => u.id), 0) + 1,
         username: userData.username || '',
         displayName: userData.displayName || '',
         email: userData.email || '',
@@ -46,6 +94,10 @@ export default function UsersPage() {
       }
       setUsers([...users, newUser])
     }
+  }
+
+  const handleRefresh = () => {
+    loadUsers(pagination.page, pagination.pageSize, searchKeyword || undefined)
   }
 
   const columns: ColumnDef<AdminUser>[] = [
@@ -77,7 +129,7 @@ export default function UsersPage() {
       cell: ({ row }) => (
         <div className="flex items-center gap-3">
           <UserAvatar
-            avatarUrl={row.original.avatar}
+            avatarUrl={row.original.avatarUrl}
             displayName={row.original.displayName}
             size="sm"
           />
@@ -93,7 +145,7 @@ export default function UsersPage() {
     {
       accessorKey: 'email',
       header: '邮箱',
-      cell: ({ row }) => row.original.email,
+      cell: ({ row }) => row.original.email || '-',
     },
     {
       accessorKey: 'status',
@@ -128,10 +180,26 @@ export default function UsersPage() {
           <h1 className="text-2xl font-bold text-foreground">用户管理</h1>
           <p className="text-muted-foreground mt-1">管理系统用户</p>
         </div>
-        <Button className="gap-2" onClick={handleAddUser}>
-          <UserPlus className="h-4 w-4" />
-          新增用户
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="icon" onClick={handleRefresh} disabled={loading}>
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          </Button>
+          <Button className="gap-2" onClick={handleAddUser}>
+            <UserPlus className="h-4 w-4" />
+            新增用户
+          </Button>
+        </div>
+      </div>
+
+      {/* 搜索框 */}
+      <div className="flex items-center gap-2">
+        <input
+          type="text"
+          placeholder="搜索用户名、邮箱或昵称..."
+          value={searchKeyword}
+          onChange={(e) => setSearchKeyword(e.target.value)}
+          className="max-w-sm px-3 py-2 border rounded-md bg-background"
+        />
       </div>
 
       {/* 用户列表 */}
@@ -140,12 +208,17 @@ export default function UsersPage() {
           <CardTitle>用户列表</CardTitle>
         </CardHeader>
         <CardContent>
-          <DataTable
-            columns={columns}
-            data={users}
-            searchKey="username"
-            searchPlaceholder="搜索用户名..."
-          />
+          {loading && users.length === 0 ? (
+            <div className="flex items-center justify-center py-8">
+              <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
+              <span className="ml-2 text-muted-foreground">加载中...</span>
+            </div>
+          ) : (
+            <DataTable
+              columns={columns}
+              data={users}
+            />
+          )}
         </CardContent>
       </Card>
 

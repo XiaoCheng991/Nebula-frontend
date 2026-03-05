@@ -10,3 +10,6 @@ export * from './user'
 
 // 文件相关
 export * from './file'
+
+// 后台管理相关
+export * from './admin'

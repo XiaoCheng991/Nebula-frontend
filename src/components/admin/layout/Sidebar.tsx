@@ -120,7 +120,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
 
   return (
     <aside className={cn(
-      'flex h-full w-64 flex-col border-r border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900',
+      'flex h-full w-45 flex-col border-r border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900',
       className
     )}>
       {/* Logo 区域 */}
