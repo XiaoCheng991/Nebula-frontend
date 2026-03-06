@@ -17,7 +17,7 @@ import {
  * 登录请求
  */
 export interface LoginRequest {
-  email: string
+  account: string
   password: string
 }
 

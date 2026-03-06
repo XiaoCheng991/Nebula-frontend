@@ -13,7 +13,7 @@ import { Github, Mail, Lock, ArrowRight } from "lucide-react"
 import { PublicRoute } from "@/components/auth/AuthGuard"
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
+  const [account, setAccount] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const router = useRouter()
@@ -23,7 +23,7 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      await login({ email, password })
+      await login({ account, password })
 
       toast({
         title: "登录成功",
@@ -116,16 +116,16 @@ export default function LoginPage() {
 
           <form onSubmit={handleEmailLogin} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">邮箱</Label>
+              <Label htmlFor="account">用户名/邮箱</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="your@email.com"
+                  id="account"
+                  type="text"
+                  placeholder="用户名或邮箱"
                   className="pl-10"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={account}
+                  onChange={(e) => setAccount(e.target.value)}
                   required
                 />
               </div>
