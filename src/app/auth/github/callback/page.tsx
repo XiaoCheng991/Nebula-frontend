@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { toast } from "@/components/ui/use-toast"
 import { CheckCircle, XCircle, Github, Mail, User } from "lucide-react"
 import { setTokens } from "@/lib/auth/dual-token-manager"
@@ -39,7 +38,6 @@ export default function GitHubCallbackPage() {
 
   useEffect(() => {
     const tempToken = searchParams.get("tempToken")
-    const githubId = searchParams.get("githubId")
     const errorParam = searchParams.get("error")
 
     if (errorParam) {
@@ -55,13 +53,49 @@ export default function GitHubCallbackPage() {
     }
   }, [searchParams])
 
+  const completeLogin = async (data: any) => {
+    const { token, refreshToken, expiresIn, userInfo: loginUserInfo } = data
+
+    setTokens({
+      accessToken: token,
+      refreshToken,
+      expiresIn,
+    })
+
+    localStorage.setItem("userInfo", JSON.stringify(loginUserInfo))
+    window.dispatchEvent(new Event('auth-change'))
+
+    setStatus("success")
+    toast({
+      title: "登录成功",
+      description: "欢迎回来，正在跳转...",
+    })
+
+    setTimeout(() => {
+      router.push("/dashboard")
+    }, 1500)
+  }
+
+  const confirmGitHubLogin = async (request: GitHubConfirmRequest) => {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/api/oauth/github/confirm`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(request),
+      }
+    )
+    return res.json()
+  }
+
   const fetchGitHubUserInfo = async (tempToken: string) => {
     try {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/api/oauth/github/info?tempToken=${encodeURIComponent(tempToken)}`,
-        {
-          credentials: 'include',
-        }
+        { credentials: 'include' }
       )
       const data = await res.json()
 
@@ -70,9 +104,18 @@ export default function GitHubCallbackPage() {
         setNickname(data.data.nickname || data.data.githubLogin || "")
         setEmail(data.data.email || "")
 
-        // 老用户直接登录，不需要确认
         if (data.data.isNewUser === false) {
-          handleAutoConfirm(data.data)
+          const result = await confirmGitHubLogin({
+            tempToken: data.data.tempToken,
+            nickname: data.data.nickname || data.data.githubLogin,
+            email: data.data.email,
+          })
+          if (result.code === 200 && result.data) {
+            await completeLogin(result.data)
+          } else {
+            toast({ title: "登录失败", description: result.message, variant: "destructive" })
+            setStatus("error")
+          }
         } else {
           setStatus("confirm")
         }
@@ -80,130 +123,28 @@ export default function GitHubCallbackPage() {
         setError(data.message || "获取用户信息失败")
         setStatus("error")
       }
-    } catch (err) {
-      console.error("获取GitHub用户信息失败", err)
+    } catch {
       setError("网络错误，请稍后重试")
-      setStatus("error")
-    }
-  }
-
-  // 老用户自动确认登录
-  const handleAutoConfirm = async (userInfo: GitHubUserInfo) => {
-    try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/api/oauth/github/confirm`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            tempToken: userInfo.tempToken,
-            nickname: userInfo.nickname || userInfo.githubLogin,
-            email: userInfo.email,
-          } satisfies GitHubConfirmRequest),
-        }
-      )
-      const data = await res.json()
-
-      if (data.code === 200 && data.data) {
-        const { token, refreshToken, expiresIn, userInfo: loginUserInfo } = data.data
-
-        setTokens({
-          accessToken: token,
-          refreshToken,
-          expiresIn,
-        })
-
-        localStorage.setItem("userInfo", JSON.stringify(loginUserInfo))
-        window.dispatchEvent(new Event('auth-change'))
-
-        setStatus("success")
-        toast({
-          title: "登录成功",
-          description: "欢迎回来，正在跳转...",
-        })
-
-        setTimeout(() => {
-          router.push("/dashboard")
-        }, 1500)
-      } else {
-        toast({
-          title: "登录失败",
-          description: data.message || "请稍后重试",
-          variant: "destructive",
-        })
-        setStatus("error")
-      }
-    } catch (err) {
-      console.error("自动登录失败", err)
-      toast({
-        title: "登录失败",
-        description: "网络错误，请稍后重试",
-        variant: "destructive",
-      })
       setStatus("error")
     }
   }
 
   const handleConfirm = async () => {
     if (!userInfo) return
-
     setConfirmLoading(true)
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/api/oauth/github/confirm`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            tempToken: userInfo.tempToken,
-            nickname,
-            email: email || undefined,
-          } satisfies GitHubConfirmRequest),
-        }
-      )
-      const data = await res.json()
-
-      if (data.code === 200 && data.data) {
-        const { token, refreshToken, expiresIn, userInfo: loginUserInfo } = data.data
-
-        setTokens({
-          accessToken: token,
-          refreshToken,
-          expiresIn,
-        })
-
-        localStorage.setItem("userInfo", JSON.stringify(loginUserInfo))
-        window.dispatchEvent(new Event('auth-change'))
-
-        setStatus("success")
-        toast({
-          title: "登录成功",
-          description: "欢迎回来，正在跳转...",
-        })
-
-        setTimeout(() => {
-          router.push("/dashboard")
-        }, 1500)
-      } else {
-        toast({
-          title: "登录失败",
-          description: data.message || "请稍后重试",
-          variant: "destructive",
-        })
-      }
-    } catch (err) {
-      console.error("确认登录失败", err)
-      toast({
-        title: "登录失败",
-        description: "网络错误，请稍后重试",
-        variant: "destructive",
+      const result = await confirmGitHubLogin({
+        tempToken: userInfo.tempToken,
+        nickname,
+        email: email || undefined,
       })
+      if (result.code === 200 && result.data) {
+        await completeLogin(result.data)
+      } else {
+        toast({ title: "登录失败", description: result.message, variant: "destructive" })
+      }
+    } catch {
+      toast({ title: "登录失败", description: "网络错误，请稍后重试", variant: "destructive" })
     } finally {
       setConfirmLoading(false)
     }
@@ -233,7 +174,6 @@ export default function GitHubCallbackPage() {
               </div>
               <div>
                 <CardTitle className="text-xl mb-1">确认GitHub登录</CardTitle>
-                <CardDescription>请确认你的账户信息</CardDescription>
               </div>
 
               <div className="space-y-4 text-left">
@@ -241,11 +181,7 @@ export default function GitHubCallbackPage() {
                   <Label>GitHub 用户名</Label>
                   <div className="relative">
                     <Github className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      value={userInfo.githubLogin}
-                      disabled
-                      className="pl-10"
-                    />
+                    <Input value={userInfo.githubLogin} disabled className="pl-10" />
                   </div>
                 </div>
 
@@ -278,11 +214,7 @@ export default function GitHubCallbackPage() {
               </div>
 
               <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => router.push("/login")}
-                >
+                <Button variant="outline" className="flex-1" onClick={() => router.push("/login")}>
                   取消
                 </Button>
                 <Button
