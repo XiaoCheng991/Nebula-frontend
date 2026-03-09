@@ -3,15 +3,43 @@ import { create } from 'zustand'
 
 export type Theme = 'light' | 'dark' | 'system'
 
+const THEME_STORAGE_KEY = 'theme'
+
 interface ThemeState {
   theme: Theme
   setTheme: (theme: Theme) => void
 }
 
-export const useThemeStore = create<ThemeState>((set) => ({
-  theme: 'system',
-  setTheme: (theme) => set({ theme }),
-}))
+// 从 localStorage 读取主题
+const getStoredTheme = (): Theme => {
+  if (typeof window === 'undefined') return 'system'
+  try {
+    const stored = localStorage.getItem(THEME_STORAGE_KEY)
+    if (stored === 'light' || stored === 'dark' || stored === 'system') {
+      return stored
+    }
+  } catch {
+    // ignore
+  }
+  return 'system'
+}
+
+export const useThemeStore = create<ThemeState>((set) => {
+  // 初始化时从 localStorage 读取
+  const initialTheme = typeof window !== 'undefined' ? getStoredTheme() : 'system'
+
+  return {
+    theme: initialTheme,
+    setTheme: (theme) => {
+      set({ theme })
+      try {
+        localStorage.setItem(THEME_STORAGE_KEY, theme)
+      } catch {
+        // ignore
+      }
+    },
+  }
+})
 
 export function useThemeEffect() {
   const { theme } = useThemeStore()

@@ -107,10 +107,14 @@ export const useAdminStore = create<AdminState>()(
     }),
     {
       name: 'admin-storage',
-      partialize: (state) => ({
-        // 不持久化敏感数据，每次都从后端重新加载
-        hasAdminAccess: state.hasAdminAccess,
-      }),
+      // 不持久化任何数据，每次都从后端重新加载
+      partialize: () => ({}),
+      // 初始化时清除旧数据
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state.hasAdminAccess = false
+        }
+      },
     }
   )
 )

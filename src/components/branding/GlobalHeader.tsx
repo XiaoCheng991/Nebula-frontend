@@ -1,5 +1,5 @@
 "use client";
-import React from 'react';
+import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { UserAvatar } from '@/components/ui/user-avatar';
 import { LogoutButton } from '@/components/auth/LogoutButton';
@@ -22,9 +22,18 @@ type GlobalHeaderProps = {
 const GlobalHeader: React.FC<GlobalHeaderProps> = ({
   className = '',
 }) => {
-  const { user, loading } = useUser()
-  const { hasAdminAccess } = useAdminStore()
+  const { user, loading: userLoading } = useUser()
+  const { hasAdminAccess, loadAdminData } = useAdminStore()
   const [src, setSrc] = React.useState<string>('/logo_icon.svg');
+
+  // 当用户登录后，加载管理员权限信息
+  useEffect(() => {
+    if (user && !userLoading) {
+      loadAdminData().catch(() => {
+        // 忽略错误，非管理员用户会正常失败
+      })
+    }
+  }, [user?.username, userLoading, loadAdminData])
 
   const handleError = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const img = e.currentTarget;
@@ -164,7 +173,7 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
         <div className="flex items-center justify-end gap-2">
           <AdminEntrance />
           <ThemeSwitcher />
-          {loading ? (
+          {userLoading ? (
             <div className="flex items-center gap-2 px-3">
               <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
             </div>

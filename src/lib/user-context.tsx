@@ -23,52 +23,78 @@ interface UserContextType {
 
 const UserContext = createContext<UserContextType | undefined>(undefined)
 
+// 最大 loading 时间（毫秒），超时后自动结束 loading
+const MAX_LOADING_TIME = 3000
+
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
-  // 用于跟踪是否有本地数据，避免不必要地显示 loading
   const hasLocalDataRef = useRef(false)
+  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // 清除 loading 超时定时器
+  const clearLoadingTimeout = useCallback(() => {
+    if (loadingTimeoutRef.current) {
+      clearTimeout(loadingTimeoutRef.current)
+      loadingTimeoutRef.current = null
+    }
+  }, [])
+
+  // 设置 loading 超时保护
+  const setLoadingWithTimeout = useCallback((isLoading: boolean) => {
+    if (isLoading) {
+      setLoading(true)
+      // 设置超时保护，防止一直 loading
+      loadingTimeoutRef.current = setTimeout(() => {
+        setLoading(false)
+      }, MAX_LOADING_TIME)
+    } else {
+      clearLoadingTimeout()
+      setLoading(false)
+    }
+  }, [clearLoadingTimeout])
 
   // 初始化 Token Manager 和 Token 刷新函数
   useEffect(() => {
-    console.log('[UserProvider] 初始化 Token Manager...')
-
-    // 1. 初始化 Token Manager（从 localStorage 恢复）
     initTokenManager()
 
-    // 2. 设置 Token 刷新函数
     setupTokenRefresh(async (refreshToken: string) => {
-      console.log('[UserProvider] 调用 Token 刷新函数...')
       return refreshTokenApi(refreshToken)
     })
 
-    // 3. 启动 Token 刷新定时器（主动刷新）
-    const cleanupTimer = startTokenRefreshTimer(30 * 1000) // 每 30 秒检查一次
+    const cleanupTimer = startTokenRefreshTimer(30 * 1000)
 
-    console.log('[UserProvider] Token Manager 已初始化')
-
-    // 组件卸载时清理定时器
     return () => {
       cleanupTimer()
-      console.log('[UserProvider] Token 刷新定时器已停止')
+      clearLoadingTimeout()
     }
-  }, [])
+  }, [clearLoadingTimeout])
+
+  // 处理未认证跳转
+  const handleUnauthenticated = useCallback(() => {
+    setUser(null)
+    setLoading(false)
+    hasLocalDataRef.current = false
+    // 如果在受保护页面，跳转到登录页
+    const protectedPaths = ['/dashboard', '/chat', '/drive', '/settings', '/admin']
+    const currentPath = window.location.pathname
+    if (protectedPaths.some(path => currentPath.startsWith(path))) {
+      router.push('/login')
+    }
+  }, [router])
 
   // 从服务器获取最新的用户信息
   const refreshUser = useCallback(async (silent: boolean = false) => {
     try {
-      // 只在没有本地数据且不是静默刷新时显示 loading
       if (!hasLocalDataRef.current && !silent) {
-        setLoading(true)
+        setLoadingWithTimeout(true)
       }
       setError(null)
 
       if (!isAuthenticated()) {
-        setUser(null)
-        setLoading(false)
-        hasLocalDataRef.current = false
+        handleUnauthenticated()
         return
       }
 
@@ -80,7 +106,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         bio: data.bio || '',
       })
 
-      // 同步更新 localStorage
       const localUser = getLocalUserInfo()
       if (localUser) {
         const updatedUser = {
@@ -91,17 +116,16 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem('userInfo', JSON.stringify(updatedUser))
       }
     } catch (err: any) {
-      console.error('[UserProvider] 获取用户信息失败:', err)
       setError(err.message)
 
-      // 如果是认证错误，跳转到登录页
-      if (err.message.includes('401') || err.message.includes('登录')) {
-        router.push('/login')
+      // 如果是认证错误，处理未认证情况
+      if (err.message?.includes('401') || err.message?.includes('未登录') || err.message?.includes('认证')) {
+        handleUnauthenticated()
       }
     } finally {
       setLoading(false)
     }
-  }, [router])
+  }, [router, setLoadingWithTimeout, handleUnauthenticated])
 
   // 更新用户信息（本地更新，不调用接口）
   const updateUser = useCallback((updates: Partial<UserProfile>) => {
@@ -109,7 +133,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       if (!prev) return null
       const updated = { ...prev, ...updates }
 
-      // 同步更新 localStorage
       const localUser = getLocalUserInfo()
       if (localUser) {
         const updatedLocalUser = {
@@ -135,9 +158,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const localUser = getLocalUserInfo()
     if (localUser) {
-      // 标记有本地数据
       hasLocalDataRef.current = true
-      // 先使用本地数据快速显示
       setUser({
         username: localUser.username,
         displayName: localUser.nickname || '',
@@ -146,16 +167,17 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       })
       // 有本地数据时立即结束 loading 状态
       setLoading(false)
+    } else {
+      // 没有本地数据时，设置超时保护
+      setLoadingWithTimeout(true)
     }
 
-    // 然后从服务器获取最新数据（静默更新）
     refreshUser(true)
-  }, [refreshUser])
+  }, [refreshUser, setLoadingWithTimeout])
 
   // 监听认证变化事件（登录/退出）
   useEffect(() => {
     const handleAuthChange = () => {
-      console.log('[UserProvider] 检测到认证状态变化')
       const localUser = getLocalUserInfo()
       if (localUser) {
         hasLocalDataRef.current = true

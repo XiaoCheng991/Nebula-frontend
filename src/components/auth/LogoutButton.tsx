@@ -5,14 +5,18 @@ import { LogOut } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { logout } from "@/lib/api/modules/auth"
+import { useAdminStore } from "@/hooks/useAdminStore"
 
 export function LogoutButton({ className, iconOnly }: { className?: string, iconOnly?: boolean }) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const { clearAdminData } = useAdminStore()
 
   const handleLogout = async () => {
     setIsLoading(true)
     try {
+      // 清除管理员数据
+      clearAdminData()
       // 调用 logout 函数清除本地存储和cookie
       await logout()
 
