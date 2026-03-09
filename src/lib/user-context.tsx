@@ -72,8 +72,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }
   }, [clearLoadingTimeout])
 
-  // 处理未认证跳转
-  const handleUnauthenticated = useCallback(() => {
+  // 处理未认证跳转 - 直接使用 router，不形成循环依赖
+  const handleUnauthenticated = () => {
     setUser(null)
     setLoading(false)
     hasLocalDataRef.current = false
@@ -83,7 +83,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     if (protectedPaths.some(path => currentPath.startsWith(path))) {
       router.push('/login')
     }
-  }, [router])
+  }
 
   // 从服务器获取最新的用户信息
   const refreshUser = useCallback(async (silent: boolean = false) => {
@@ -94,7 +94,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       setError(null)
 
       if (!isAuthenticated()) {
-        handleUnauthenticated()
+        setUser(null)
+        setLoading(false)
+        hasLocalDataRef.current = false
         return
       }
 
@@ -118,14 +120,16 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     } catch (err: any) {
       setError(err.message)
 
-      // 如果是认证错误，处理未认证情况
+      // 如果是认证错误，清除状态
       if (err.message?.includes('401') || err.message?.includes('未登录') || err.message?.includes('认证')) {
-        handleUnauthenticated()
+        setUser(null)
+        setLoading(false)
+        hasLocalDataRef.current = false
       }
     } finally {
       setLoading(false)
     }
-  }, [router, setLoadingWithTimeout, handleUnauthenticated])
+  }, [setLoadingWithTimeout])
 
   // 更新用户信息（本地更新，不调用接口）
   const updateUser = useCallback((updates: Partial<UserProfile>) => {
@@ -156,8 +160,16 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   // 初始化：从 localStorage 读取，然后从服务器获取最新数据
   useEffect(() => {
-    const localUser = getLocalUserInfo()
-    if (localUser) {
+    const initUser = async () => {
+      const localUser = getLocalUserInfo()
+
+      // 如果没有本地用户数据，直接结束 loading
+      if (!localUser) {
+        setLoading(false)
+        return
+      }
+
+      // 有本地数据，先显示本地数据
       hasLocalDataRef.current = true
       setUser({
         username: localUser.username,
@@ -165,15 +177,24 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         avatarUrl: localUser.avatar || null,
         bio: '',
       })
-      // 有本地数据时立即结束 loading 状态
       setLoading(false)
-    } else {
-      // 没有本地数据时，设置超时保护
-      setLoadingWithTimeout(true)
+
+      // 然后静默验证 token 是否有效
+      try {
+        if (!isAuthenticated()) {
+          handleUnauthenticated()
+          return
+        }
+        // 验证 token 有效性
+        await getUserProfile()
+      } catch (err: any) {
+        // token 失效，清除状态并跳转
+        handleUnauthenticated()
+      }
     }
 
-    refreshUser(true)
-  }, [refreshUser, setLoadingWithTimeout])
+    initUser()
+  }, [])
 
   // 监听认证变化事件（登录/退出）
   useEffect(() => {

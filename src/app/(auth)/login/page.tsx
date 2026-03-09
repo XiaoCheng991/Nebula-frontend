@@ -3,19 +3,16 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from "@/components/ui/use-toast"
 import { login } from "@/lib/api/modules/auth"
-import { Github, Mail, Lock, ArrowRight } from "lucide-react"
+import { Github, ArrowRight } from "lucide-react"
 import { PublicRoute } from "@/components/auth/AuthGuard"
 
 export default function LoginPage() {
   const [account, setAccount] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
+  const [focusedField, setFocusedField] = useState<string | null>(null)
   const router = useRouter()
 
   const handleEmailLogin = async (e: React.FormEvent) => {
@@ -35,10 +32,7 @@ export default function LoginPage() {
       }, 500)
 
     } catch (error: any) {
-      // 优先显示后端返回的错误消息
-      const errorMessage = error?.message || "登录失败，请检查邮箱和密码"
-
-      console.error('[Login] 登录失败:', errorMessage, error)
+      const errorMessage = error?.message || "登录失败，请检查账号和密码"
 
       toast({
         title: "登录失败",
@@ -53,12 +47,9 @@ export default function LoginPage() {
   const handleGithubLogin = async () => {
     setLoading(true)
     try {
-      // 获取GitHub授权URL
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/api/oauth/github/authorize`,
-        {
-          credentials: 'include',
-        }
+        { credentials: 'include' }
       )
       const data = await res.json()
 
@@ -72,7 +63,6 @@ export default function LoginPage() {
         })
       }
     } catch (error) {
-      console.error("获取GitHub授权链接失败", error)
       toast({
         title: "获取授权链接失败",
         description: "网络错误，请稍后重试",
@@ -85,88 +75,131 @@ export default function LoginPage() {
 
   return (
     <PublicRoute>
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-white dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-4 -mt-16">
-      <div className="w-full max-w-md">
-        <Card>
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">欢迎回来</CardTitle>
-          <CardDescription>登录你的账户，继续使用 NebulaHub</CardDescription>
-        </CardHeader>
+      {/* 页面容器 - 减少顶部间距，让内容更靠上 */}
+      <div className="min-h-screen w-full flex flex-col items-center justify-start pt-20 sm:pt-24 pb-8 px-4 sm:px-6">
+        {/* 背景色 - 使用纯色避免 hydration 问题 */}
+        <div className="fixed inset-0 -z-10 bg-[#fafafa] dark:bg-[#0d0d0d]" />
 
-        <CardContent className="space-y-4">
-          {/* GitHub登录按钮 */}
-          <Button
-            variant="outline"
-            className="w-full gap-2"
-            onClick={handleGithubLogin}
-            disabled={loading}
-          >
-            <Github className="h-4 w-4" />
-            GitHub 账号登录
-          </Button>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
+        {/* 内容区域 */}
+        <div className="w-full max-w-[360px]">
+          {/* Logo */}
+          <div className="text-center mb-6">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-[22px] bg-white dark:bg-[#1a1a1a] shadow-sm border border-gray-200/50 dark:border-white/5 mb-4">
+              <img
+                src="/logo_icon.svg"
+                alt="NebulaHub"
+                className="w-20 h-20"
+              />
             </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">或者使用邮箱</span>
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-white tracking-tight">
+              登录 NebulaHub
+            </h1>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              输入你的账号继续
+            </p>
+          </div>
+
+          {/* 登录卡片 */}
+          <div className="bg-white dark:bg-[#141414] rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-none border border-gray-100 dark:border-white/[0.06] overflow-hidden">
+            <div className="p-5 space-y-4">
+              {/* GitHub 登录 */}
+              <button
+                onClick={handleGithubLogin}
+                disabled={loading}
+                className="w-full h-11 flex items-center justify-center gap-2.5 rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-sm font-medium transition-all duration-200 hover:bg-gray-800 dark:hover:bg-gray-100 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Github className="h-[18px] w-[18px]" />
+                <span>使用 GitHub 登录</span>
+              </button>
+
+              {/* 分隔线 */}
+              <div className="relative flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-100 dark:border-white/[0.04]" />
+                </div>
+                <span className="relative bg-white dark:bg-[#141414] px-2.5 text-[11px] text-gray-400 dark:text-gray-500 font-medium">
+                  或使用账号登录
+                </span>
+              </div>
+
+              {/* 表单 */}
+              <form onSubmit={handleEmailLogin} className="space-y-3">
+                {/* 账号 */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400 ml-0.5">
+                    用户名或邮箱
+                  </label>
+                  <input
+                    type="text"
+                    value={account}
+                    onChange={(e) => setAccount(e.target.value)}
+                    onFocus={() => setFocusedField('account')}
+                    onBlur={() => setFocusedField(null)}
+                    className="w-full h-10 px-3 rounded-lg bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/[0.06] text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-blue-500/50 focus:ring-[3px] focus:ring-blue-500/10 transition-all duration-200"
+                    placeholder="name@example.com"
+                    required
+                  />
+                </div>
+
+                {/* 密码 */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400 ml-0.5">
+                      密码
+                    </label>
+                    <Link
+                      href="#"
+                      className="text-[11px] text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                    >
+                      忘记密码？
+                    </Link>
+                  </div>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onFocus={() => setFocusedField('password')}
+                    onBlur={() => setFocusedField(null)}
+                    className="w-full h-10 px-3 rounded-lg bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/[0.06] text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-blue-500/50 focus:ring-[3px] focus:ring-blue-500/10 transition-all duration-200"
+                    placeholder="••••••••"
+                    required
+                  />
+                </div>
+
+                {/* 登录按钮 */}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full h-10 mt-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/25 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {loading ? (
+                    <>
+                      <div className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>登录中...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>登录</span>
+                      <ArrowRight className="h-4 w-4" />
+                    </>
+                  )}
+                </button>
+              </form>
             </div>
           </div>
 
-          <form onSubmit={handleEmailLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="account">用户名/邮箱</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="account"
-                  type="text"
-                  placeholder="用户名或邮箱"
-                  className="pl-10"
-                  value={account}
-                  onChange={(e) => setAccount(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">密码</Label>
-              </div>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="输入你的密码"
-                  className="pl-10"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-
-            <Button type="submit" className="w-full gap-2" disabled={loading}>
-              {loading ? "登录中..." : "登录"}
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </form>
-        </CardContent>
-
-        <CardFooter className="justify-center">
-          <p className="text-sm text-muted-foreground">
+          {/* 注册链接 */}
+          <p className="text-center mt-5 text-[13px] text-gray-500 dark:text-gray-400">
             还没有账户？{" "}
-            <Link href="/register" className="text-primary hover:underline font-medium">
-              立即注册
+            <Link
+              href="/register"
+              className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+            >
+              注册
             </Link>
           </p>
-        </CardFooter>
-      </Card>
+        </div>
       </div>
-    </div>
     </PublicRoute>
   )
 }
