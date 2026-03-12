@@ -45,8 +45,14 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
 
   const AdminEntrance: React.FC = () => {
     const { hasAdminAccess } = useAdminStore();
+    const [mounted, setMounted] = React.useState(false);
 
-    if (!hasAdminAccess) {
+    React.useEffect(() => {
+      setMounted(true);
+    }, []);
+
+    // 避免 hydration 不匹配，客户端挂载后才渲染
+    if (!mounted || !hasAdminAccess) {
       return null;
     }
 

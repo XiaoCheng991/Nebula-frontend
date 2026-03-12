@@ -10,13 +10,15 @@ import {
   AdminMenu,
   Dictionary,
   transformSysUserToAdminUser,
+  transformSysRoleToAdminRole,
+  transformSysMenuToAdminMenu,
 } from '@/lib/admin/types'
 import {
   getCurrentAdminUser,
   getRolesByUserId,
   getAllRoles,
+  getCurrentUserMenus,
 } from '@/lib/api/modules/admin'
-import { transformSysRoleToAdminRole } from '@/lib/admin/types'
 
 export const useAdminStore = create<AdminState>()(
   persist(
@@ -75,9 +77,23 @@ export const useAdminStore = create<AdminState>()(
             console.warn('Failed to load user roles:', error)
           }
 
+          // 3. 获取当前用户的菜单列表（仅当用户有管理员权限时）
+          let userMenus: AdminMenu[] = []
+          if (hasAdminAccess) {
+            try {
+              const menusResponse = await getCurrentUserMenus()
+              if (menusResponse.code === 200 && menusResponse.data) {
+                userMenus = menusResponse.data.map(transformSysMenuToAdminMenu)
+              }
+            } catch (error) {
+              console.warn('Failed to load user menus:', error)
+            }
+          }
+
           set({
             user: adminUser,
             roles: userRoles,
+            menus: userMenus,
             hasAdminAccess,
             isLoading: false,
           })
@@ -107,12 +123,17 @@ export const useAdminStore = create<AdminState>()(
     }),
     {
       name: 'admin-storage',
-      // 不持久化任何数据，每次都从后端重新加载
-      partialize: () => ({}),
-      // 初始化时清除旧数据
+      // 持久化用户、权限状态、菜单和管理员权限标志
+      partialize: (state) => ({
+        user: state.user,
+        roles: state.roles,
+        menus: state.menus,
+        hasAdminAccess: state.hasAdminAccess,
+      }),
+      // 初始化时清除加载状态
       onRehydrateStorage: () => (state) => {
         if (state) {
-          state.hasAdminAccess = false
+          state.isLoading = false
         }
       },
     }

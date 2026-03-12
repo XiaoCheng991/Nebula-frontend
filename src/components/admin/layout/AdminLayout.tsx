@@ -2,7 +2,7 @@
 
 'use client'
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Sidebar } from './Sidebar'
 import { AdminHeader } from './AdminHeader'
@@ -15,18 +15,33 @@ interface AdminLayoutProps {
 export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const router = useRouter()
   const { hasAdminAccess, isLoading, loadAdminData } = useAdminStore()
+  const [isClient, setIsClient] = useState(false)
 
+  // 标记客户端挂载
   useEffect(() => {
-    loadAdminData()
-  }, [loadAdminData])
+    setIsClient(true)
+  }, [])
 
+  // 加载管理员数据
   useEffect(() => {
-    if (!isLoading && !hasAdminAccess) {
+    if (isClient) {
+      loadAdminData()
+    }
+  }, [isClient, loadAdminData])
+
+  // 权限检查与跳转
+  useEffect(() => {
+    // 等待客户端挂载和数据加载完成
+    if (!isClient || isLoading) return
+
+    // 如果没有管理员权限，跳转到首页
+    if (!hasAdminAccess) {
       router.push('/')
     }
-  }, [hasAdminAccess, isLoading, router])
+  }, [hasAdminAccess, isLoading, router, isClient])
 
-  if (isLoading) {
+  // 服务端渲染或客户端初始化时显示加载状态
+  if (!isClient || isLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center">
@@ -37,8 +52,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     )
   }
 
+  // 客户端挂载且加载完成后，如果没有权限则不渲染（等待跳转）
   if (!hasAdminAccess) {
-    return null // 会通过 useEffect 跳转到首页
+    return null
   }
 
   return (

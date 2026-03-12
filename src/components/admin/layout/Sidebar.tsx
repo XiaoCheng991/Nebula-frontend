@@ -73,7 +73,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ item, level }) => {
             level > 0 && 'pl-10'
           )}
         >
-          {Icon && <Icon className="h-4 w-4" />}
+          {Icon ? <Icon className="h-4 w-4" /> : <div className="h-4 w-4" />}
           <span className="flex-1">{item.name}</span>
           {isExpanded ? (
             <ChevronDown className="h-4 w-4 text-gray-400" />
@@ -105,7 +105,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ item, level }) => {
           : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
       )}
     >
-      {Icon && <Icon className="h-4 w-4" />}
+      {Icon ? <Icon className="h-4 w-4" /> : <div className="h-4 w-4" />}
       <span>{item.name}</span>
     </Link>
   )

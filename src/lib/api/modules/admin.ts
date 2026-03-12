@@ -56,6 +56,26 @@ export interface SysRole {
   updateTime?: string
 }
 
+/**
+ * 后端系统菜单
+ */
+export interface SysMenu {
+  id: number
+  parentId?: number
+  menuType: string // directory-目录, menu-菜单, button-按钮
+  menuName: string
+  path?: string
+  component?: string
+  permission?: string
+  icon?: string
+  sortOrder?: number
+  isVisible?: boolean
+  isSystem?: boolean
+  children?: SysMenu[]
+  createTime?: string
+  updateTime?: string
+}
+
 // ======== 用户管理 API ========
 
 /**
@@ -122,6 +142,29 @@ export async function assignRolesToUser(userId: number, roleIds: number[]): Prom
  */
 export async function deleteUser(userId: number): Promise<ApiResponse<void>> {
   return del<ApiResponse<void>>(`/api/admin/system/user/${userId}`)
+}
+
+// ======== 菜单管理 API ========
+
+/**
+ * 获取当前用户的菜单树
+ */
+export async function getCurrentUserMenus(): Promise<ApiResponse<SysMenu[]>> {
+  return get<ApiResponse<SysMenu[]>>('/api/admin/system/menu/user')
+}
+
+/**
+ * 获取菜单列表
+ */
+export async function getMenuList(): Promise<ApiResponse<SysMenu[]>> {
+  return get<ApiResponse<SysMenu[]>>('/api/admin/system/menu/list')
+}
+
+/**
+ * 获取菜单树结构
+ */
+export async function getMenuTree(): Promise<ApiResponse<SysMenu[]>> {
+  return get<ApiResponse<SysMenu[]>>('/api/admin/system/menu/tree')
 }
 
 // ======== 角色管理 API ========

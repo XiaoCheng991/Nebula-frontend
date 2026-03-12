@@ -1,6 +1,6 @@
 // src/lib/admin/types.ts
 
-import type { SysUser as BackendSysUser, SysRole as BackendSysRole } from '@/lib/api/modules/admin'
+import type { SysUser as BackendSysUser, SysRole as BackendSysRole, SysMenu as BackendSysMenu } from '@/lib/api/modules/admin'
 
 // ======== 核心类型 ========
 
@@ -158,5 +158,23 @@ export function transformSysRoleToAdminRole(backendRole: BackendSysRole): AdminR
     menuIds: [], // 需要单独接口获取
     createdAt: backendRole.createTime,
     updatedAt: backendRole.updateTime,
+  }
+}
+
+/**
+ * 将后端 SysMenu 转换为前端 AdminMenu
+ */
+export function transformSysMenuToAdminMenu(backendMenu: BackendSysMenu): AdminMenu {
+  return {
+    id: backendMenu.id,
+    parentId: backendMenu.parentId,
+    name: backendMenu.menuName,
+    path: backendMenu.path,
+    icon: backendMenu.icon,
+    sortOrder: backendMenu.sortOrder || 0,
+    type: (backendMenu.menuType as 'directory' | 'menu' | 'button') || 'menu',
+    permissionCode: backendMenu.permission,
+    children: backendMenu.children?.map(transformSysMenuToAdminMenu),
+    createdAt: backendMenu.createTime,
   }
 }
