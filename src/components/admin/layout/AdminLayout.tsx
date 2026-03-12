@@ -60,7 +60,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       {/* 侧边栏 */}
-      <Sidebar />
+      <div className="w-64 flex-shrink-0">
+        <Sidebar />
+      </div>
 
       {/* 主内容区 */}
       <div className="flex flex-1 flex-col overflow-hidden">

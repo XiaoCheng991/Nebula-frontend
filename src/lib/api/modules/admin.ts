@@ -199,3 +199,80 @@ export async function getRoleList(
 export async function getRolesByUserId(userId: number): Promise<ApiResponse<SysRole[]>> {
   return get<ApiResponse<SysRole[]>>(`/api/admin/system/role/user/${userId}`)
 }
+
+// ======== 字典管理 API ========
+
+/**
+ * 后端字典类型
+ */
+export interface SysDictType {
+  id: number
+  dictName: string
+  dictCode: string
+  status: string // ACTIVE-启用, DISABLED-禁用
+  isSystem?: boolean
+  remark?: string
+  createTime?: string
+  updateTime?: string
+}
+
+/**
+ * 后端字典数据
+ */
+export interface SysDictData {
+  id: number
+  dictTypeId: number
+  dictLabel: string
+  dictValue: string
+  sortOrder: number
+  status: string // ACTIVE-启用, DISABLED-禁用
+  createTime?: string
+  updateTime?: string
+}
+
+/**
+ * 获取字典类型列表
+ */
+export async function getDictTypeList(
+  pageNum: number = 1,
+  pageSize: number = 10,
+  keyword?: string
+): Promise<ApiResponse<PageResponse<SysDictType>>> {
+  const params = new URLSearchParams()
+  params.append('pageNum', pageNum.toString())
+  params.append('pageSize', pageSize.toString())
+  if (keyword) {
+    params.append('keyword', keyword)
+  }
+  return get<ApiResponse<PageResponse<SysDictType>>>(`/api/admin/system/dict-type/list?${params.toString()}`)
+}
+
+/**
+ * 获取所有启用的字典类型
+ */
+export async function getAllDictTypes(): Promise<ApiResponse<SysDictType[]>> {
+  return get<ApiResponse<SysDictType[]>>('/api/admin/system/dict-type/all')
+}
+
+/**
+ * 获取字典类型详情
+ */
+export async function getDictTypeById(dictId: number): Promise<ApiResponse<SysDictType>> {
+  return get<ApiResponse<SysDictType>>(`/api/admin/system/dict-type/${dictId}`)
+}
+
+/**
+ * 删除字典类型
+ */
+export async function deleteDictType(dictId: number): Promise<ApiResponse<void>> {
+  return del<ApiResponse<void>>(`/api/admin/system/dict-type/${dictId}`)
+}
+
+/**
+ * 获取字典数据列表
+ */
+export async function getDictDataList(
+  dictTypeId: number
+): Promise<ApiResponse<SysDictData[]>> {
+  return get<ApiResponse<SysDictData[]>>(`/api/admin/system/dict-data/${dictTypeId}/list`)
+}

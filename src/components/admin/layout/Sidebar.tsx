@@ -26,6 +26,7 @@ import {
   ChevronRight,
   ChevronDown,
 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useAdminStore } from '@/hooks/useAdminStore'
 import { AdminMenu as AdminMenuType } from '@/lib/admin/types'
@@ -94,16 +95,25 @@ const MenuItem: React.FC<MenuItemProps> = ({ item, level }) => {
 
   if (!item.path) return null
 
+  // 确保路径以 / 开头
+  const normalizedPath = item.path.startsWith('/') ? item.path : `/${item.path}`
+
+  const handleLinkClick = (e: React.MouseEvent) => {
+    console.log(`[Sidebar] 点击菜单: ${item.name}, 路径: ${normalizedPath}`)
+  }
+
   return (
     <Link
-      href={item.path}
+      href={normalizedPath}
       className={cn(
-        'flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors',
+        'flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors cursor-pointer',
         level > 0 && 'pl-10',
         isActive
           ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
           : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
       )}
+      prefetch={false}
+      onClick={handleLinkClick}
     >
       {Icon ? <Icon className="h-4 w-4" /> : <div className="h-4 w-4" />}
       <span>{item.name}</span>
@@ -117,10 +127,26 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
   const { menus } = useAdminStore()
+  const [isMounted, setIsMounted] = React.useState(false)
+
+  React.useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  if (!isMounted) {
+    return (
+      <aside className={cn(
+        'flex h-full w-64 flex-col border-r border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900',
+        className
+      )}>
+        <div className="h-16 border-b border-gray-200 dark:border-gray-700" />
+      </aside>
+    )
+  }
 
   return (
     <aside className={cn(
-      'flex h-full w-45 flex-col border-r border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900',
+      'flex h-full w-64 flex-col border-r border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900',
       className
     )}>
       {/* Logo 区域 */}
@@ -130,16 +156,32 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
             <span className="text-sm font-bold text-white">N</span>
           </div>
           <span className="text-lg font-bold text-gray-900 dark:text-white">
-            NebulaAdmin
+            NebulaHub
           </span>
         </Link>
       </div>
 
       {/* 菜单区域 */}
       <nav className="flex-1 overflow-y-auto py-4">
-        {menus.map((menu) => (
-          <MenuItem key={menu.id} item={menu} level={0} />
-        ))}
+        {menus.length === 0 ? (
+          <div className="px-4 py-8 text-center">
+            <p className="text-sm text-muted-foreground mb-4">暂无菜单数据</p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                localStorage.removeItem('admin-storage')
+                window.location.reload()
+              }}
+            >
+              清除缓存重试
+            </Button>
+          </div>
+        ) : (
+          menus.map((menu) => (
+            <MenuItem key={menu.id} item={menu} level={0} />
+          ))
+        )}
       </nav>
 
       {/* 底部区域 */}

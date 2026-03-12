@@ -81,12 +81,20 @@ export const useAdminStore = create<AdminState>()(
           let userMenus: AdminMenu[] = []
           if (hasAdminAccess) {
             try {
+              console.log('[AdminStore] 开始获取用户菜单...')
               const menusResponse = await getCurrentUserMenus()
+              console.log('[AdminStore] 菜单API响应:', menusResponse)
+
               if (menusResponse.code === 200 && menusResponse.data) {
                 userMenus = menusResponse.data.map(transformSysMenuToAdminMenu)
+                console.log('[AdminStore] 转换后的菜单数据:', userMenus)
+              } else {
+                console.error('[AdminStore] 获取菜单失败:', menusResponse.message)
               }
             } catch (error) {
-              console.warn('Failed to load user menus:', error)
+              console.error('[AdminStore] 获取菜单异常:', error)
+              // 获取失败时清除持久化的菜单数据
+              set({ menus: [] })
             }
           }
 

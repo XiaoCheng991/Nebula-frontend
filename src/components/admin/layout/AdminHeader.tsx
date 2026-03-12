@@ -12,6 +12,7 @@ import { UserAvatar } from '@/components/ui/user-avatar'
 import { LogoutButton } from '@/components/auth/LogoutButton'
 import { ThemeSwitcher } from '@/components/ui/theme-switcher'
 import { useAdminStore } from '@/hooks/useAdminStore'
+import { cn } from '@/lib/utils'
 
 interface AdminHeaderProps {
   className?: string
@@ -144,8 +145,4 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({ className }) => {
       </div>
     </header>
   )
-}
-
-function cn(...classes: (string | undefined | null | false)[]) {
-  return classes.filter(Boolean).join(' ')
 }

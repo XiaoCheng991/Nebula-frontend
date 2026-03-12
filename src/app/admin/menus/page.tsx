@@ -1,38 +1,40 @@
-'use client'
+'use client';
 
-import React from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Edit, Trash2, Menu, Plus, ChevronRight, ChevronDown, Folder, FileText } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
-import { MenuDialog } from '@/components/admin/menus/MenuDialog'
-import { mockMenus } from '@/lib/admin/mock-data'
-import { AdminMenu } from '@/lib/admin/types'
+import React, { useState, useEffect, useCallback } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Edit, Trash2, Menu, Plus, ChevronRight, ChevronDown, Folder, FileText, RefreshCw } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/components/ui/use-toast';
+import { MenuDialog } from '@/components/admin/menus/MenuDialog';
+import { getMenuTree } from '@/lib/api/modules/admin';
+import { AdminMenu } from '@/lib/admin/types';
+import { transformSysMenuToAdminMenu } from '@/lib/admin/types';
 
 interface MenuTreeItemProps {
-  menu: AdminMenu
-  level: number
-  onEdit: (menu: AdminMenu) => void
-  onAddChild: (parentId: number) => void
+  menu: AdminMenu;
+  level: number;
+  onEdit: (menu: AdminMenu) => void;
+  onAddChild: (parentId: number) => void;
 }
 
 function MenuTreeItem({ menu, level, onEdit, onAddChild }: MenuTreeItemProps) {
-  const [expanded, setExpanded] = React.useState(true)
-  const hasChildren = menu.children && menu.children.length > 0
+  const [expanded, setExpanded] = useState(true);
+  const hasChildren = menu.children && menu.children.length > 0;
 
   const getIcon = () => {
-    if (menu.type === 'directory') return Folder
-    if (menu.type === 'menu') return FileText
-    return Menu
-  }
+    if (menu.type === 'directory') return Folder;
+    if (menu.type === 'menu') return FileText;
+    return Menu;
+  };
 
-  const getVariant = () => {
-    if (menu.type === 'directory') return 'default' as const
-    if (menu.type === 'menu') return 'secondary' as const
-    return 'outline' as const
-  }
+  const getVariant = (): "default" | "secondary" | "outline" => {
+    if (menu.type === 'directory') return 'default';
+    if (menu.type === 'menu') return 'secondary';
+    return 'outline';
+  };
 
-  const Icon = getIcon()
+  const Icon = getIcon();
 
   return (
     <div className="select-none">
@@ -43,6 +45,7 @@ function MenuTreeItem({ menu, level, onEdit, onAddChild }: MenuTreeItemProps) {
         <button
           onClick={() => setExpanded(!expanded)}
           className="w-4 h-4 flex items-center justify-center"
+          type="button"
         >
           {hasChildren ? (
             expanded ? (
@@ -74,6 +77,7 @@ function MenuTreeItem({ menu, level, onEdit, onAddChild }: MenuTreeItemProps) {
               size="icon"
               className="h-8 w-8"
               onClick={() => onAddChild(menu.id)}
+              type="button"
             >
               <Plus className="h-4 w-4" />
             </Button>
@@ -83,10 +87,11 @@ function MenuTreeItem({ menu, level, onEdit, onAddChild }: MenuTreeItemProps) {
             size="icon"
             className="h-8 w-8"
             onClick={() => onEdit(menu)}
+            type="button"
           >
             <Edit className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
+          <Button variant="ghost" size="icon" className="h-8 w-8" type="button">
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
@@ -106,43 +111,72 @@ function MenuTreeItem({ menu, level, onEdit, onAddChild }: MenuTreeItemProps) {
         </div>
       )}
     </div>
-  )
+  );
 }
 
 export default function MenusPage() {
-  const [dialogOpen, setDialogOpen] = React.useState(false)
-  const [editingMenu, setEditingMenu] = React.useState<AdminMenu | null>(null)
-  const [parentMenuId, setParentMenuId] = React.useState<number | null>(null)
-  const [menus, setMenus] = React.useState(mockMenus)
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingMenu, setEditingMenu] = useState<AdminMenu | null>(null);
+  const [parentMenuId, setParentMenuId] = useState<number | null>(null);
+  const [menus, setMenus] = useState<AdminMenu[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  const fetchMenus = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await getMenuTree();
+      if (response.code === 200 && response.data) {
+        const adminMenus = response.data.map(transformSysMenuToAdminMenu);
+        setMenus(adminMenus);
+      } else {
+        toast({
+          title: '获取菜单列表失败',
+          description: response.message || '未知错误',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      console.error('Failed to fetch menus:', error);
+      toast({
+        title: '获取菜单列表失败',
+        description: '网络错误，请稍后重试',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
+
+  useEffect(() => {
+    fetchMenus();
+  }, [fetchMenus]);
 
   const handleAddMenu = () => {
-    setEditingMenu(null)
-    setParentMenuId(null)
-    setDialogOpen(true)
-  }
+    setEditingMenu(null);
+    setParentMenuId(null);
+    setDialogOpen(true);
+  };
 
   const handleAddChildMenu = (parentId: number) => {
-    setEditingMenu(null)
-    setParentMenuId(parentId)
-    setDialogOpen(true)
-  }
+    setEditingMenu(null);
+    setParentMenuId(parentId);
+    setDialogOpen(true);
+  };
 
   const handleEditMenu = (menu: AdminMenu) => {
-    setEditingMenu(menu)
-    setParentMenuId(null)
-    setDialogOpen(true)
-  }
+    setEditingMenu(menu);
+    setParentMenuId(null);
+    setDialogOpen(true);
+  };
 
   const handleSaveMenu = (menuData: Partial<AdminMenu>) => {
-    // 简化处理，实际应该更新树形结构
     if (editingMenu) {
-      // 编辑菜单 - 这里简化处理
-      console.log('Edit menu:', editingMenu.id, menuData)
+      console.log('Edit menu:', editingMenu.id, menuData);
     } else {
-      // 新增菜单 - 这里简化处理
-      console.log('Add menu:', menuData)
+      console.log('Add menu:', menuData);
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -151,10 +185,16 @@ export default function MenusPage() {
           <h1 className="text-2xl font-bold text-foreground">菜单管理</h1>
           <p className="text-muted-foreground mt-1">管理系统菜单结构</p>
         </div>
-        <Button className="gap-2" onClick={handleAddMenu}>
-          <Plus className="h-4 w-4" />
-          新增菜单
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" className="gap-2" onClick={fetchMenus}>
+            <RefreshCw className="h-4 w-4" />
+            刷新
+          </Button>
+          <Button className="gap-2" onClick={handleAddMenu}>
+            <Plus className="h-4 w-4" />
+            新增菜单
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -165,17 +205,28 @@ export default function MenusPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="border rounded-lg divide-y">
-            {menus.map(menu => (
-              <MenuTreeItem
-                key={menu.id}
-                menu={menu}
-                level={0}
-                onEdit={handleEditMenu}
-                onAddChild={handleAddChildMenu}
-              />
-            ))}
-          </div>
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              <span className="ml-2">加载中...</span>
+            </div>
+          ) : menus.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              暂无菜单数据
+            </div>
+          ) : (
+            <div className="border rounded-lg divide-y">
+              {menus.map(menu => (
+                <MenuTreeItem
+                  key={menu.id}
+                  menu={menu}
+                  level={0}
+                  onEdit={handleEditMenu}
+                  onAddChild={handleAddChildMenu}
+                />
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -187,5 +238,5 @@ export default function MenusPage() {
         onSave={handleSaveMenu}
       />
     </div>
-  )
+  );
 }

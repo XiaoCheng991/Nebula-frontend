@@ -25,6 +25,12 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
   const { user, loading: userLoading } = useUser()
   const { hasAdminAccess, loadAdminData } = useAdminStore()
   const [src, setSrc] = React.useState<string>('/logo_icon.svg');
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  // 所有Hooks必须放在组件最顶部，不能放在条件返回之后
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // 当用户登录后，加载管理员权限信息
   useEffect(() => {
@@ -34,6 +40,21 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
       })
     }
   }, [user?.username, userLoading, loadAdminData])
+
+  // 服务端渲染和客户端挂载前只渲染简单骨架，避免hydration错误
+  if (!isMounted) {
+    return (
+      <header className={`w-full sticky top-0 z-50 bg-transparent backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 ${className}`}>
+        <div className="container mx-auto px-6 py-3 grid grid-cols-3 items-center h-16">
+          <div className="flex items-center justify-start">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600" />
+          </div>
+          <div className="flex items-center justify-center" />
+          <div className="flex items-center justify-end gap-2" />
+        </div>
+      </header>
+    );
+  }
 
   const handleError = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const img = e.currentTarget;
