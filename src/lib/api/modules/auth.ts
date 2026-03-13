@@ -1,17 +1,14 @@
 /**
- * 认证相关 API（使用双 Token 无感刷新）
+ * 认证相关 API（Sa-Token Cookie Session 模式）
  */
 
 import { get, post } from '../client'
 import type { ApiResponse } from '../types'
 import {
-  setTokens,
+  markAuthenticated,
   clearTokens,
   isAuthenticated,
-  getTokenRemainingTime,
-  startTokenRefreshTimer,
-  type TokenPair,
-} from '@/lib/auth/dual-token-manager'
+} from '@/lib/auth/token-manager'
 
 /**
  * 登录请求
@@ -47,51 +44,26 @@ export interface LoginResponse {
   }
 }
 
-/**
- * 刷新 Token 响应
- */
-export interface RefreshTokenResponse {
-  token: string
-  refreshToken: string
-  expiresIn: number
-  userInfo: {
-    id: number
-    username: string
-    email: string
-    nickname: string
-    avatar: string | null
-  }
-}
-
-/**
- * Token 刷新函数（供 Token Manager 调用）
- */
-export async function refreshTokenApi(refreshToken: string): Promise<TokenPair> {
-  const response = await post<ApiResponse<RefreshTokenResponse>>('/api/auth/refresh-token', {
-    refreshToken,
-  })
-
-  if (response.code === 200 && response.data) {
-    const { token, refreshToken: newRefreshToken, expiresIn, userInfo } = response.data
-
-    // 更新用户信息
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('userInfo', JSON.stringify(userInfo))
-    }
-
-    // 触发自定义事件
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new Event('auth-change'))
-    }
-
-    return {
-      accessToken: token,
-      refreshToken: newRefreshToken,
-      expiresIn,
-    }
+function normalizeLoginResponsePayload(rawData: any): LoginResponse | null {
+  if (!rawData || typeof rawData !== 'object') {
+    return null
   }
 
-  throw new Error(response.message || '刷新 token 失败')
+  // 兼容两种后端结构：
+  // 1) Result<LoginResponse>
+  // 2) Result<SaResult>，真实数据在 data.data
+  const candidate = rawData.userInfo ? rawData : rawData.data
+
+  if (!candidate || typeof candidate !== 'object' || !candidate.userInfo) {
+    return null
+  }
+
+  return {
+    token: candidate.token || '',
+    refreshToken: candidate.refreshToken || '',
+    expiresIn: Number(candidate.expiresIn || 0),
+    userInfo: candidate.userInfo,
+  }
 }
 
 /**
@@ -99,16 +71,13 @@ export async function refreshTokenApi(refreshToken: string): Promise<TokenPair> 
  */
 export async function login(data: LoginRequest): Promise<LoginResponse> {
   const response = await post<ApiResponse<LoginResponse>>('/api/auth/login', data)
+  const normalizedData = normalizeLoginResponsePayload(response.data)
 
-  if (response.code === 200 && response.data) {
-    const { token, refreshToken, expiresIn, userInfo } = response.data
+  if (response.code === 200 && normalizedData) {
+    const { userInfo } = normalizedData
 
-    // 保存 token
-    setTokens({
-      accessToken: token,
-      refreshToken: refreshToken,
-      expiresIn: expiresIn,
-    })
+    // 标记本地会话状态；真实 token 由后端 Cookie 管理
+    markAuthenticated()
 
     // 保存用户信息
     if (typeof window !== 'undefined') {
@@ -120,7 +89,7 @@ export async function login(data: LoginRequest): Promise<LoginResponse> {
       window.dispatchEvent(new Event('auth-change'))
     }
 
-    return response.data
+    return normalizedData
   }
 
   throw new Error(response.message || '登录失败')
@@ -131,16 +100,13 @@ export async function login(data: LoginRequest): Promise<LoginResponse> {
  */
 export async function register(data: RegisterRequest): Promise<LoginResponse> {
   const response = await post<ApiResponse<LoginResponse>>('/api/auth/register', data)
+  const normalizedData = normalizeLoginResponsePayload(response.data)
 
-  if (response.code === 200 && response.data) {
-    const { token, refreshToken, expiresIn, userInfo } = response.data
+  if (response.code === 200 && normalizedData) {
+    const { userInfo } = normalizedData
 
-    // 保存 token
-    setTokens({
-      accessToken: token,
-      refreshToken: refreshToken,
-      expiresIn: expiresIn,
-    })
+    // 标记本地会话状态；真实 token 由后端 Cookie 管理
+    markAuthenticated()
 
     // 保存用户信息
     if (typeof window !== 'undefined') {
@@ -152,7 +118,7 @@ export async function register(data: RegisterRequest): Promise<LoginResponse> {
       window.dispatchEvent(new Event('auth-change'))
     }
 
-    return response.data
+    return normalizedData
   }
 
   throw new Error(response.message || '注册失败')
@@ -218,13 +184,3 @@ export function getLocalUserInfo(): LoginResponse['userInfo'] | null {
  * 检查是否已登录
  */
 export { isAuthenticated }
-
-/**
- * 获取 Token 剩余有效时间（秒）
- */
-export { getTokenRemainingTime }
-
-/**
- * 启动 Token 刷新定时器
- */
-export { startTokenRefreshTimer }

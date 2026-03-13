@@ -17,7 +17,7 @@ export interface ServerUserInfo {
  */
 export function getServerToken(): string | null {
   const cookieStore = cookies()
-  return cookieStore.get('token')?.value || null
+  return cookieStore.get('satoken')?.value || null
 }
 
 /**
@@ -39,10 +39,13 @@ export async function getServerUserInfo(): Promise<ServerUserInfo | null> {
 
   try {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
+    const cookieHeader = `satoken=${encodeURIComponent(token)}`
+
     const response = await fetch(`${baseUrl}/api/auth/user-info`, {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Cookie: cookieHeader,
       },
+      credentials: 'include',
     })
 
     if (response.ok) {

@@ -11,9 +11,6 @@ export {
   logout,
   getUserInfo,
   getLocalUserInfo,
-  refreshTokenApi as refreshAccessToken,
-  getTokenRemainingTime,
-  startTokenRefreshTimer,
   type LoginRequest,
   type RegisterRequest,
   type LoginResponse,
@@ -22,10 +19,9 @@ export {
 // 从 Token Manager 导出
 export {
   getAccessToken as getToken,
-  getRefreshToken,
   isAuthenticated,
   initTokenManager,
-} from './auth/dual-token-manager'
+} from './auth/token-manager'
 
 // 重新导出 ApiResponse 类型（兼容旧代码）
 export type { ApiResponse } from './api/types'

@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "@/components/ui/use-toast"
 import { CheckCircle, XCircle, Github, Mail, User } from "lucide-react"
-import { setTokens } from "@/lib/auth/dual-token-manager"
+import { setTokens } from "@/lib/auth/token-manager"
 
 interface GitHubUserInfo {
   tempToken: string
@@ -54,11 +54,11 @@ export default function GitHubCallbackPage() {
   }, [searchParams])
 
   const completeLogin = async (data: any) => {
-    const { token, refreshToken, expiresIn, userInfo: loginUserInfo } = data
+    const { token, expiresIn, userInfo: loginUserInfo } = data
 
     setTokens({
       accessToken: token,
-      refreshToken,
+      refreshToken: '',
       expiresIn,
     })
 

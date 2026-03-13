@@ -3,13 +3,9 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from "@/components/ui/use-toast"
 import { register } from "@/lib/api/modules/auth"
-import { Mail, Lock, User, ArrowRight, Check, Github } from "lucide-react"
+import { Github, ArrowRight, Check } from "lucide-react"
 import { PublicRoute } from "@/components/auth/AuthGuard"
 
 export default function RegisterPage() {
@@ -18,6 +14,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [loading, setLoading] = useState(false)
+  const [focusedField, setFocusedField] = useState<string | null>(null)
   const router = useRouter()
 
   const handleEmailRegister = async (e: React.FormEvent) => {
@@ -80,12 +77,33 @@ export default function RegisterPage() {
     }
   }
 
-  const handleGithubLogin = () => {
-    // 跳转到GitHub OAuth授权页面
-    const clientId = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || "Ov23lisH1zy6aIiT5f9r"
-    const redirectUri = `${window.location.origin}/auth/github/callback`
-    const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=user:email`
-    window.location.href = githubAuthUrl
+  const handleGithubLogin = async () => {
+    setLoading(true)
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/api/oauth/github/authorize`,
+        { credentials: 'include' }
+      )
+      const data = await res.json()
+
+      if (data.code === 200 && data.data?.authorizeUrl) {
+        window.location.href = data.data.authorizeUrl
+      } else {
+        toast({
+          title: "获取授权链接失败",
+          description: data.message || "请稍后重试",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "获取授权链接失败",
+        description: "网络错误，请稍后重试",
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   const passwordRequirements = [
@@ -96,138 +114,171 @@ export default function RegisterPage() {
 
   return (
     <PublicRoute>
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 p-4 -mt-16">
-      <div className="w-full max-w-md">
-        <Card>
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">创建账户</CardTitle>
-          <CardDescription>开始使用 NebulaHub</CardDescription>
-        </CardHeader>
+      {/* 页面容器 - 和登录页保持一致 */}
+      <div className="min-h-screen w-full flex flex-col items-center justify-start pt-20 sm:pt-24 pb-8 px-4 sm:px-6">
+        {/* 背景色 - 和登录页完全一致 */}
+        <div className="fixed inset-0 -z-10 bg-[#fafafa] dark:bg-[#0d0d0d]" />
 
-        <CardContent className="space-y-4">
-          {/* GitHub登录按钮 */}
-          <Button
-            variant="outline"
-            className="w-full gap-2"
-            onClick={handleGithubLogin}
-            disabled={loading}
-          >
-            <Github className="h-4 w-4" />
-            GitHub 账号注册
-          </Button>
+        {/* 内容区域 */}
+        <div className="w-full max-w-[360px]">
+          {/* 标题 */}
+          <div className="text-center mb-6">
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-white tracking-tight">
+              创建账户
+            </h1>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              欢迎加入 NebulaHub
+            </p>
+          </div>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">或者使用邮箱</span>
+          {/* 注册卡片 - 和登录页样式统一 */}
+          <div className="bg-white dark:bg-[#141414] rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-none border border-gray-100 dark:border-white/[0.06] overflow-hidden">
+            <div className="p-5 space-y-4">
+              {/* GitHub 登录按钮 */}
+              <button
+                onClick={handleGithubLogin}
+                disabled={loading}
+                className="w-full h-11 flex items-center justify-center gap-2.5 rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-sm font-medium transition-all duration-200 hover:bg-gray-800 dark:hover:bg-gray-100 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Github className="h-[18px] w-[18px]" />
+                <span>使用 GitHub 注册</span>
+              </button>
+
+              {/* 分隔线 */}
+              <div className="relative flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-100 dark:border-white/[0.04]" />
+                </div>
+                <span className="relative bg-white dark:bg-[#141414] px-2.5 text-[11px] text-gray-400 dark:text-gray-500 font-medium">
+                  或使用邮箱注册
+                </span>
+              </div>
+
+              {/* 表单 */}
+              <form onSubmit={handleEmailRegister} className="space-y-3">
+                {/* 用户名 */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400 ml-0.5">
+                    用户名
+                  </label>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    onFocus={() => setFocusedField('username')}
+                    onBlur={() => setFocusedField(null)}
+                    className="w-full h-10 px-3 rounded-lg bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/[0.06] text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-blue-500/50 focus:ring-[3px] focus:ring-blue-500/10 transition-all duration-200"
+                    placeholder="用户名（至少3个字符）"
+                    required
+                    minLength={3}
+                    maxLength={50}
+                  />
+                </div>
+
+                {/* 邮箱 */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400 ml-0.5">
+                    邮箱
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onFocus={() => setFocusedField('email')}
+                    onBlur={() => setFocusedField(null)}
+                    className="w-full h-10 px-3 rounded-lg bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/[0.06] text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-blue-500/50 focus:ring-[3px] focus:ring-blue-500/10 transition-all duration-200"
+                    placeholder="your@email.com"
+                    required
+                  />
+                </div>
+
+                {/* 密码 */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400 ml-0.5">
+                    密码
+                  </label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onFocus={() => setFocusedField('password')}
+                    onBlur={() => setFocusedField(null)}
+                    className="w-full h-10 px-3 rounded-lg bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/[0.06] text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-blue-500/50 focus:ring-[3px] focus:ring-blue-500/10 transition-all duration-200"
+                    placeholder="设置密码（至少6个字符）"
+                    required
+                    minLength={6}
+                  />
+                </div>
+
+                {/* 确认密码 */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400 ml-0.5">
+                    确认密码
+                  </label>
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onFocus={() => setFocusedField('confirmPassword')}
+                    onBlur={() => setFocusedField(null)}
+                    className="w-full h-10 px-3 rounded-lg bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/[0.06] text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-blue-500/50 focus:ring-[3px] focus:ring-blue-500/10 transition-all duration-200"
+                    placeholder="再次输入密码"
+                    required
+                  />
+                </div>
+
+                {/* 密码强度提示 */}
+                {password.length > 0 && (
+                  <div className="space-y-1.5 px-1">
+                    {passwordRequirements.map((req, index) => (
+                      <div key={index} className="flex items-center gap-2 text-[11px]">
+                        <Check
+                          className={`h-3.5 w-3.5 ${
+                            req.met ? "text-green-500" : "text-gray-400"
+                          }`}
+                        />
+                        <span className={req.met ? "text-green-600 dark:text-green-400" : "text-gray-500 dark:text-gray-400"}>
+                          {req.text}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* 注册按钮 */}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full h-10 mt-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/25 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {loading ? (
+                    <>
+                      <div className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>注册中...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>创建账户</span>
+                      <ArrowRight className="h-4 w-4" />
+                    </>
+                  )}
+                </button>
+              </form>
             </div>
           </div>
 
-          <form onSubmit={handleEmailRegister} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="username">用户名</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="用户名（3-50个字符）"
-                  className="pl-10"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                  minLength={3}
-                  maxLength={50}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email">邮箱</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="your@email.com"
-                  className="pl-10"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">密码</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="设置密码（至少6个字符）"
-                  className="pl-10"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">确认密码</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="再次输入密码"
-                  className="pl-10"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-
-            {password.length > 0 && (
-              <div className="space-y-2">
-                {passwordRequirements.map((req, index) => (
-                  <div key={index} className="flex items-center gap-2 text-sm">
-                    <Check
-                      className={`h-4 w-4 ${
-                        req.met ? "text-green-500" : "text-muted-foreground"
-                      }`}
-                    />
-                    <span className={req.met ? "text-green-500" : "text-muted-foreground"}>
-                      {req.text}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <Button type="submit" className="w-full gap-2" disabled={loading}>
-              {loading ? "注册中..." : "创建账户"}
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </form>
-        </CardContent>
-
-        <CardFooter className="flex flex-col space-y-4">
-          <p className="text-sm text-muted-foreground text-center">
-            已有账号？{" "}
-            <Link href="/login" className="text-primary hover:underline font-medium">
+          {/* 登录链接 */}
+          <p className="text-center mt-5 text-[13px] text-gray-500 dark:text-gray-400">
+            已有账户？{" "}
+            <Link
+              href="/login"
+              className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+            >
               立即登录
             </Link>
           </p>
-        </CardFooter>
-      </Card>
+        </div>
       </div>
-    </div>
     </PublicRoute>
   )
 }

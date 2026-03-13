@@ -21,8 +21,8 @@ const adminPaths = ['/admin']
 const publicPaths = ['/', '/login', '/register', '/forgot-password']
 
 export async function middleware(req: NextRequest) {
-  // 从 cookie 获取 token（使用新的 auth_access_token key）
-  const token = req.cookies.get('auth_access_token')?.value
+  // Sa-Token 默认 cookie key 为 satoken
+  const token = req.cookies.get('satoken')?.value
 
   const { pathname } = req.nextUrl
   const isLoggedIn = !!token

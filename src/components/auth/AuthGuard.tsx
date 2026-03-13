@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { isAuthenticated, initTokenManager } from '@/lib/auth/dual-token-manager'
+import { isAuthenticated, initTokenManager } from '@/lib/auth/token-manager'
 import { Loader2 } from 'lucide-react'
 import { useAuthPrompt } from '@/hooks/useAuthPrompt'
 

@@ -8,7 +8,7 @@ import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from '@/components/ui/use-toast'
 import { ToastAction } from '@/components/ui/toast'
-import { initTokenManager, isAuthenticated } from '@/lib/auth/dual-token-manager'
+import { isAuthenticated } from '@/lib/auth/token-manager'
 import React from 'react'
 
 interface LoginPromptOptions {
@@ -48,9 +48,6 @@ export function useAuthPrompt() {
       autoRedirect = false,
       redirectDelay = 3000
     } = options
-
-    // 初始化 Token Manager
-    initTokenManager()
 
     // 如果已登录，不显示提示
     if (isAuthenticated()) {
@@ -96,8 +93,6 @@ export function useAuthPrompt() {
    * @returns 是否已登录
    */
   const requireAuth = useCallback((currentPath?: string) => {
-    // 初始化 Token Manager
-    initTokenManager()
 
     if (isAuthenticated()) {
       return true
@@ -117,8 +112,6 @@ export function useAuthPrompt() {
    * 检查未登录状态（用于登录/注册页）
    */
   const requireGuest = useCallback(() => {
-    // 初始化 Token Manager
-    initTokenManager()
 
     if (isAuthenticated()) {
       toast({

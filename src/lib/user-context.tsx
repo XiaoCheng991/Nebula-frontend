@@ -1,8 +1,8 @@
 "use client"
 
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react'
-import { getUserProfile, getLocalUserInfo, setupTokenRefresh, refreshTokenApi, startTokenRefreshTimer } from '@/lib/api'
-import { initTokenManager, isAuthenticated } from '@/lib/auth/dual-token-manager'
+import { getUserProfile, getLocalUserInfo } from '@/lib/api'
+import { isAuthenticated } from '@/lib/auth/token-manager'
 import { useRouter } from 'next/navigation'
 
 interface UserProfile {
@@ -56,18 +56,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }
   }, [clearLoadingTimeout])
 
-  // 初始化 Token Manager 和 Token 刷新函数
+  // 仅做卸载清理
   useEffect(() => {
-    initTokenManager()
-
-    setupTokenRefresh(async (refreshToken: string) => {
-      return refreshTokenApi(refreshToken)
-    })
-
-    const cleanupTimer = startTokenRefreshTimer(30 * 1000)
-
     return () => {
-      cleanupTimer()
       clearLoadingTimeout()
     }
   }, [clearLoadingTimeout])
@@ -108,15 +99,13 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         bio: data.bio || '',
       })
 
-      const localUser = getLocalUserInfo()
-      if (localUser) {
-        const updatedUser = {
-          ...localUser,
-          nickname: data.displayName,
-          avatar: data.avatar,
-        }
-        localStorage.setItem('userInfo', JSON.stringify(updatedUser))
-      }
+      localStorage.setItem('userInfo', JSON.stringify({
+        id: data.id,
+        username: data.username,
+        email: data.email,
+        nickname: data.displayName,
+        avatar: data.avatar,
+      }))
     } catch (err: any) {
       setError(err.message)
 
@@ -163,9 +152,13 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     const initUser = async () => {
       const localUser = getLocalUserInfo()
 
-      // 如果没有本地用户数据，直接结束 loading
+      // 如果没有本地用户数据，但会话仍有效，则从服务端拉取
       if (!localUser) {
-        setLoading(false)
+        if (isAuthenticated()) {
+          await refreshUser(true)
+        } else {
+          setLoading(false)
+        }
         return
       }
 
@@ -211,8 +204,12 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         setLoading(false)
         refreshUser(true)
       } else {
-        clearUser()
-        setLoading(false)
+        if (isAuthenticated()) {
+          refreshUser(true)
+        } else {
+          clearUser()
+          setLoading(false)
+        }
       }
     }
 

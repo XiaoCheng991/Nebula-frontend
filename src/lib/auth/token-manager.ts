@@ -1,76 +1,68 @@
 /**
- * Token 统一管理模块
- * 负责 Token 的获取、存储、删除和自动刷新
- * 支持 SSR/CSR 环境适配
+ * 认证状态管理模块（Sa-Token Cookie Session 模式）
+ *
+ * 说明：
+ * - Sa-Token token 由后端通过 Cookie 下发与校验
+ * - 前端不再保存 access/refresh token，也不再负责刷新
+ * - 这里仅维护一个“会话存在”的本地提示位，配合 user-info 接口做最终校验
  */
 
 import { apiLogger } from '@/lib/utils/logger'
 
-/**
- * Token 存储键
- */
-const TOKEN_KEY = 'auth_access_token'
-const REFRESH_TOKEN_KEY = 'auth_refresh_token'
+const TOKEN_KEY = 'satoken'
+const AUTH_STATE_KEY = 'auth_session_active'
 
-/**
- * Token 刷新锁，防止并发刷新
- */
-let isRefreshing = false
-let refreshSubscribers: Array<(token: string) => void> = []
-
-/**
- * 添加刷新订阅者
- */
-function subscribeTokenRefresh(cb: (token: string) => void) {
-  refreshSubscribers.push(cb)
-}
-
-/**
- * 通知所有订阅者 token 已刷新
- */
-function onTokenRefreshed(token: string) {
-  refreshSubscribers.forEach(cb => cb(token))
-  refreshSubscribers = []
-}
-
-/**
- * 检查是否为浏览器环境
- */
 function isBrowser(): boolean {
   return typeof window !== 'undefined' && typeof window.localStorage !== 'undefined'
 }
 
-/**
- * 获取 Access Token
- */
-export function getAccessToken(): string | null {
-  if (!isBrowser()) return null
-  return localStorage.getItem(TOKEN_KEY)
-}
-
-/**
- * 获取 Refresh Token
- */
-export function getRefreshToken(): string | null {
-  if (!isBrowser()) return null
-  return localStorage.getItem(REFRESH_TOKEN_KEY)
-}
-
-/**
- * 保存 Token 对
- */
-export function setTokens(tokens: { accessToken: string; refreshToken: string }): void {
+function setSessionState(isActive: boolean): void {
   if (!isBrowser()) return
 
-  localStorage.setItem(TOKEN_KEY, tokens.accessToken)
-  localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken)
+  if (isActive) {
+    localStorage.setItem(AUTH_STATE_KEY, '1')
+  } else {
+    localStorage.removeItem(AUTH_STATE_KEY)
+  }
+}
 
-  // 同步到 cookie（用于 SSR 认证）
-  const maxAge = 7 * 24 * 60 * 60 // 7 天
-  document.cookie = `${TOKEN_KEY}=${encodeURIComponent(tokens.accessToken)}; path=/; max-age=${maxAge}; SameSite=Lax`
-  document.cookie = `${REFRESH_TOKEN_KEY}=${encodeURIComponent(tokens.refreshToken)}; path=/; max-age=${maxAge}; SameSite=Lax`
+/**
+ * 初始化认证管理器（兼容旧调用）
+ */
+export function initTokenManager(): void {
+  // Cookie Session 模式无需额外初始化
+}
 
-  apiLogger.auth('login', { accessToken: '***', refreshToken: '***' })
+/**
+ * 获取 Access Token（兼容旧调用）
+ *
+ * 注意：若后端设置 HttpOnly，该值在浏览器端不可读，会返回 null。
+ */
+export function getAccessToken(): string | null {
+  if (!isBrowser() || typeof document === 'undefined') return null
+
+  const cookies = document.cookie.split(';').map(c => c.trim())
+  const tokenCookie = cookies.find(c => c.startsWith(`${TOKEN_KEY}=`))
+
+  if (!tokenCookie) return null
+
+  return decodeURIComponent(tokenCookie.substring(TOKEN_KEY.length + 1))
+}
+
+/**
+ * 保存 Token 对（兼容旧调用）
+ *
+ * Sa-Token 场景下，token 应由后端 Set-Cookie 管理。
+ * 这里仅更新本地会话提示状态。
+ */
+export function setTokens(_tokens: { accessToken: string; refreshToken: string; expiresIn?: number }): void {
+  setSessionState(true)
+
+  apiLogger.auth('login', { session: 'cookie' })
+}
+
+export function markAuthenticated(): void {
+  setSessionState(true)
 }
 
 /**
@@ -80,9 +72,8 @@ export function clearTokens(): void {
   if (!isBrowser()) return
 
   localStorage.removeItem(TOKEN_KEY)
-  localStorage.removeItem(REFRESH_TOKEN_KEY)
+  localStorage.removeItem(AUTH_STATE_KEY)
   document.cookie = `${TOKEN_KEY}=; path=/; max-age=0`
-  document.cookie = `${REFRESH_TOKEN_KEY}=; path=/; max-age=0`
 
   apiLogger.auth('logout')
 }
@@ -91,67 +82,8 @@ export function clearTokens(): void {
  * 检查是否已登录
  */
 export function isAuthenticated(): boolean {
-  return !!getAccessToken()
-}
-
-/**
- * Token 刷新函数类型
- */
-export type TokenRefreshFn = () => Promise<string>
-
-/**
- * 设置 Token 刷新函数
- */
-let refreshAccessTokenFn: TokenRefreshFn | null = null
-
-export function setTokenRefreshFn(fn: TokenRefreshFn) {
-  refreshAccessTokenFn = fn
-}
-
-/**
- * 刷新 Access Token
- * @returns 新的 Access Token
- */
-export async function refreshAccessToken(): Promise<string> {
-  const refreshToken = getRefreshToken()
-
-  if (!refreshToken) {
-    throw new Error('No refresh token available')
-  }
-
-  // 如果正在刷新，加入等待队列
-  if (isRefreshing) {
-    return new Promise<string>((resolve, reject) => {
-      subscribeTokenRefresh((token: string) => {
-        resolve(token)
-      })
-    })
-  }
-
-  // 开始刷新
-  isRefreshing = true
-
-  try {
-    if (!refreshAccessTokenFn) {
-      throw new Error('Token refresh function not set')
-    }
-
-    const newToken = await refreshAccessTokenFn()
-    isRefreshing = false
-    onTokenRefreshed(newToken)
-
-    apiLogger.tokenRefresh(true)
-    return newToken
-  } catch (error) {
-    isRefreshing = false
-
-    // 刷新失败，清除本地存储
-    clearTokens()
-
-    apiLogger.tokenRefresh(false, error as Error)
-
-    throw new Error('Token refresh failed')
-  }
+  if (!isBrowser()) return false
+  return localStorage.getItem(AUTH_STATE_KEY) === '1'
 }
 
 /**

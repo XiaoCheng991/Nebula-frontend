@@ -1,11 +1,10 @@
 /**
- * 核心 HTTP 客户端（支持双 Token 无感刷新）
+ * 核心 HTTP 客户端（Sa-Token Cookie Session 模式）
  *
  * 特性：
- * - 自动注入 Access Token
- * - 401 错误自动刷新 Token
- * - 并发请求控制
- * - 统一的鉴权拦截
+ * - 所有请求默认携带 Cookie（credentials: include）
+ * - 不再在前端注入/刷新 Bearer Token
+ * - 统一登录过期处理
  */
 
 import {
@@ -15,11 +14,8 @@ import {
   RequestMetadata,
 } from './types'
 import {
-  getAccessToken,
-  setTokenRefreshFn,
   clearTokens,
-  ensureValidAccessToken,
-} from '@/lib/auth/dual-token-manager'
+} from '@/lib/auth/token-manager'
 import { apiLogger } from '@/lib/utils/logger'
 import { handleApiError } from '@/lib/utils/error-handler'
 
@@ -71,10 +67,10 @@ function handleAuthExpired(): void {
 }
 
 /**
- * 设置 Token 刷新函数
+ * 兼容旧调用：Cookie Session 模式无需前端刷新 Token
  */
-export function setupTokenRefresh(refreshFn: (refreshToken: string) => Promise<{ accessToken: string; refreshToken: string; expiresIn: number }>) {
-  setTokenRefreshFn(refreshFn)
+export function setupTokenRefresh(_refreshFn: (refreshToken: string) => Promise<{ accessToken: string; refreshToken: string; expiresIn: number }>) {
+  // no-op
 }
 
 /**
@@ -157,28 +153,11 @@ async function request<T>(
   // 准备请求配置
   let config: RequestConfig = {
     ...options,
+    credentials: options.credentials || 'include',
     headers: {
       'Content-Type': 'application/json',
       ...options.headers,
     },
-  }
-
-  // 自动注入 Token（除非 skipAuth 为 true）
-  if (!config.skipAuth) {
-    try {
-      // 使用 ensureValidAccessToken 确保获取有效的 token
-      // 如果 token 已过期，会自动刷新
-      const token = await ensureValidAccessToken()
-      if (token) {
-        config.headers = {
-          ...config.headers,
-          Authorization: `Bearer ${token}`,
-        }
-      }
-    } catch (error) {
-      // 无法获取有效 token，继续请求（可能返回 401）
-      console.warn('[API] 无法获取有效的 Access Token:', error)
-    }
   }
 
   // 应用请求拦截器
@@ -197,53 +176,10 @@ async function request<T>(
     // 应用响应拦截器
     response = await applyResponseInterceptors(response)
 
-    // 处理 401 未授权错误 - 尝试刷新 token
+    // 处理 401 未授权错误
     if (response.status === 401 && !config.skipAuth) {
-      console.log('[API] 收到 401 响应，尝试刷新 Token...')
-
-      try {
-        // 尝试刷新 token
-        const newToken = await ensureValidAccessToken()
-
-        // 使用新 token 重试请求
-        const retryConfig: RequestConfig = {
-          ...config,
-          headers: {
-            ...config.headers,
-            Authorization: `Bearer ${newToken}`,
-          },
-        }
-
-        response = await fetchWithTimeout(
-          url,
-          retryConfig,
-          config.timeout || 30000
-        )
-
-        response = await applyResponseInterceptors(response)
-
-        console.log('[API] Token 刷新成功，重试请求')
-      } catch (refreshError) {
-        // Token 刷新失败
-        console.error('[API] Token 刷新失败:', refreshError)
-
-        const metadata: RequestMetadata = {
-          url,
-          method: config.method || 'GET',
-          timestamp: startTime,
-          duration: Date.now() - startTime,
-          success: false,
-          statusCode: 401,
-          errorMessage: 'Token refresh failed',
-        }
-
-        apiLogger.requestError(metadata)
-
-        // 清除 token 并跳转登录
-        handleAuthExpired()
-
-        throw new ApiError('登录已过期，请重新登录', 401, refreshError as Error)
-      }
+      handleAuthExpired()
+      throw new ApiError('登录已过期，请重新登录', 401)
     }
 
     // 检查 HTTP 状态码
@@ -409,39 +345,22 @@ export async function uploadFile(
   const startTime = Date.now()
   const url = `${API_BASE_URL}${endpoint}`
 
-  const uploadWithToken = async (token: string): Promise<Response> => {
+  const uploadWithSession = async (): Promise<Response> => {
     const formData = new FormData()
     formData.append('file', file)
 
     return fetch(url, {
       method: 'POST',
-      headers: {
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
+      credentials: 'include',
       body: formData,
     })
   }
 
-  let token = getAccessToken()
-  if (!token) {
-    throw new ApiError('未登录', 401)
+  if (typeof onProgress === 'function') {
+    onProgress(0)
   }
 
-  let response = await uploadWithToken(token)
-
-  // 处理 401 未授权错误 - 尝试刷新 token
-  if (response.status === 401) {
-    try {
-      token = await ensureValidAccessToken()
-      response = await uploadWithToken(token)
-    } catch (refreshError) {
-      // Token 刷新失败
-      if (typeof window !== 'undefined') {
-        handleAuthExpired()
-      }
-      throw new ApiError('登录已过期，请重新登录', 401, refreshError as Error)
-    }
-  }
+  const response = await uploadWithSession()
 
   // 检查 HTTP 状态码
   if (!response.ok) {
@@ -469,6 +388,10 @@ export async function uploadFile(
     }
 
     throw new ApiError(errorMessage, response.status)
+  }
+
+  if (typeof onProgress === 'function') {
+    onProgress(100)
   }
 
   const result = await response.json()

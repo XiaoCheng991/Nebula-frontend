@@ -82,15 +82,8 @@ export default function LoginPage() {
 
         {/* 内容区域 */}
         <div className="w-full max-w-[360px]">
-          {/* Logo */}
+          {/* 标题 */}
           <div className="text-center mb-6">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-[22px] bg-white dark:bg-[#1a1a1a] shadow-sm border border-gray-200/50 dark:border-white/5 mb-4">
-              <img
-                src="/logo_icon.svg"
-                alt="NebulaHub"
-                className="w-20 h-20"
-              />
-            </div>
             <h1 className="text-xl font-semibold text-gray-900 dark:text-white tracking-tight">
               登录 NebulaHub
             </h1>
@@ -148,7 +141,7 @@ export default function LoginPage() {
                       密码
                     </label>
                     <Link
-                      href="#"
+                      href="/forgot-password"
                       className="text-[11px] text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                     >
                       忘记密码？
