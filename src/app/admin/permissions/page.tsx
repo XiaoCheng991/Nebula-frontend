@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Edit, Trash2, Key, Plus } from 'lucide-react'
@@ -9,13 +9,12 @@ import { ColumnDef } from '@tanstack/react-table'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { PermissionDialog } from '@/components/admin/permissions/PermissionDialog'
-import { mockPermissions } from '@/lib/admin/mock-data'
 import { AdminPermission } from '@/lib/admin/types'
 
 export default function PermissionsPage() {
-  const [dialogOpen, setDialogOpen] = React.useState(false)
-  const [editingPermission, setEditingPermission] = React.useState<AdminPermission | null>(null)
-  const [permissions, setPermissions] = React.useState(mockPermissions)
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [editingPermission, setEditingPermission] = useState<AdminPermission | null>(null)
+  const [permissions, setPermissions] = useState<AdminPermission[]>([])
 
   const handleAddPermission = () => {
     setEditingPermission(null)
@@ -32,7 +31,7 @@ export default function PermissionsPage() {
       setPermissions(permissions.map(p => p.id === editingPermission.id ? { ...p, ...permissionData } as AdminPermission : p))
     } else {
       const newPermission: AdminPermission = {
-        id: Math.max(...permissions.map(p => p.id)) + 1,
+        id: permissions.length > 0 ? Math.max(...permissions.map(p => p.id)) + 1 : 1,
         name: permissionData.name || '',
         code: permissionData.code || '',
         type: permissionData.type || 'button',

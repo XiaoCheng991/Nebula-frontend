@@ -74,7 +74,7 @@ export const useAdminStore = create<AdminState>()(
               )
             }
           } catch (error) {
-            console.warn('Failed to load user roles:', error)
+            // 角色获取失败
           }
 
           // 3. 获取当前用户的菜单列表（仅当用户有管理员权限时）
@@ -86,11 +86,10 @@ export const useAdminStore = create<AdminState>()(
               if (menusResponse.code === 200 && menusResponse.data) {
                 userMenus = menusResponse.data.map(transformSysMenuToAdminMenu)
               } else {
-                console.error('[AdminStore] 获取菜单失败:', menusResponse.message)
+                // 菜单获取失败
               }
             } catch (error) {
-              console.error('[AdminStore] 获取菜单异常:', error)
-              // 获取失败时清除持久化的菜单数据
+              // 菜单获取失败时清除持久化的菜单数据
               set({ menus: [] })
             }
           }

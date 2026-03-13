@@ -15,16 +15,17 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { AdminRole, AdminPermission, AdminMenu } from '@/lib/admin/types'
-import { mockPermissions, mockMenus } from '@/lib/admin/mock-data'
 
 interface RoleDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   role?: AdminRole | null
   onSave?: (role: Partial<AdminRole>) => void
+  permissions?: AdminPermission[]
+  menus?: AdminMenu[]
 }
 
-export function RoleDialog({ open, onOpenChange, role, onSave }: RoleDialogProps) {
+export function RoleDialog({ open, onOpenChange, role, onSave, permissions = [], menus = [] }: RoleDialogProps) {
   const [formData, setFormData] = React.useState<Partial<AdminRole>>({
     name: '',
     code: '',
@@ -137,27 +138,35 @@ export function RoleDialog({ open, onOpenChange, role, onSave }: RoleDialogProps
             <div className="space-y-2">
               <Label>权限配置</Label>
               <div className="border rounded-sm p-4 max-h-48 overflow-y-auto">
-                <div className="grid grid-cols-2 gap-2">
-                  {mockPermissions.map(perm => (
-                    <div key={perm.id} className="flex items-center gap-2">
-                      <Checkbox
-                        checked={formData.permissionCodes?.includes(perm.code)}
-                        onCheckedChange={() => togglePermission(perm.code)}
-                        id={`perm-${perm.id}`}
-                      />
-                      <Label htmlFor={`perm-${perm.id}`} className="cursor-pointer text-sm">
-                        {perm.name}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
+                {permissions.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">暂无权限数据，请先在权限管理中添加权限</p>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
+                    {permissions.map(perm => (
+                      <div key={perm.id} className="flex items-center gap-2">
+                        <Checkbox
+                          checked={formData.permissionCodes?.includes(perm.code)}
+                          onCheckedChange={() => togglePermission(perm.code)}
+                          id={`perm-${perm.id}`}
+                        />
+                        <Label htmlFor={`perm-${perm.id}`} className="cursor-pointer text-sm">
+                          {perm.name}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
             <div className="space-y-2">
               <Label>菜单配置</Label>
               <div className="border rounded-sm p-4 max-h-48 overflow-y-auto">
-                {renderMenuTree(mockMenus)}
+                {menus.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">暂无菜单数据</p>
+                ) : (
+                  renderMenuTree(menus)
+                )}
               </div>
             </div>
           </div>

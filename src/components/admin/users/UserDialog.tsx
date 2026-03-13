@@ -21,16 +21,16 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { AdminUser, AdminRole } from '@/lib/admin/types'
-import { mockRoles } from '@/lib/admin/mock-data'
 
 interface UserDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   user?: AdminUser | null
   onSave?: (user: Partial<AdminUser>) => void
+  roles?: AdminRole[]
 }
 
-export function UserDialog({ open, onOpenChange, user, onSave }: UserDialogProps) {
+export function UserDialog({ open, onOpenChange, user, onSave, roles = [] }: UserDialogProps) {
   const [formData, setFormData] = React.useState<Partial<AdminUser>>({
     username: '',
     nickname: '',
@@ -133,21 +133,25 @@ export function UserDialog({ open, onOpenChange, user, onSave }: UserDialogProps
             <div className="space-y-2">
               <Label>角色</Label>
               <div className="flex flex-wrap gap-2">
-                {mockRoles.map((role) => (
-                  <Button
-                    key={role.id}
-                    variant={formData.roleIds?.includes(role.id) ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => {
-                      const newRoleIds = formData.roleIds?.includes(role.id)
-                        ? formData.roleIds.filter((id) => id !== role.id)
-                        : [...(formData.roleIds || []), role.id]
-                      setFormData({ ...formData, roleIds: newRoleIds })
-                    }}
-                  >
-                    {role.name}
-                  </Button>
-                ))}
+                {roles.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">暂无角色数据</p>
+                ) : (
+                  roles.map((role) => (
+                    <Button
+                      key={role.id}
+                      variant={formData.roleIds?.includes(role.id) ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => {
+                        const newRoleIds = formData.roleIds?.includes(role.id)
+                          ? formData.roleIds.filter((id) => id !== role.id)
+                          : [...(formData.roleIds || []), role.id]
+                        setFormData({ ...formData, roleIds: newRoleIds })
+                      }}
+                    >
+                      {role.name}
+                    </Button>
+                  ))
+                )}
               </div>
             </div>
           </div>

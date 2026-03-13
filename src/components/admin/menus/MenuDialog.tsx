@@ -21,7 +21,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { AdminMenu } from '@/lib/admin/types'
-import { mockMenus } from '@/lib/admin/mock-data'
 
 interface MenuDialogProps {
   open: boolean
@@ -29,9 +28,10 @@ interface MenuDialogProps {
   menu?: AdminMenu | null
   parentMenuId?: number | null
   onSave?: (menu: Partial<AdminMenu>) => void
+  menus?: AdminMenu[]
 }
 
-export function MenuDialog({ open, onOpenChange, menu, parentMenuId, onSave }: MenuDialogProps) {
+export function MenuDialog({ open, onOpenChange, menu, parentMenuId, onSave, menus = [] }: MenuDialogProps) {
   const [formData, setFormData] = React.useState<Partial<AdminMenu>>({
     name: '',
     path: '',
@@ -79,7 +79,7 @@ export function MenuDialog({ open, onOpenChange, menu, parentMenuId, onSave }: M
     return options.filter(m => m.type !== 'button')
   }
 
-  const parentMenuOptions = getParentMenuOptions(mockMenus, menu?.id)
+  const parentMenuOptions = getParentMenuOptions(menus, menu?.id)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
