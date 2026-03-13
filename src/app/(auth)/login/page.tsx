@@ -136,17 +136,9 @@ export default function LoginPage() {
 
                 {/* 密码 */}
                 <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400 ml-0.5">
-                      密码
-                    </label>
-                    <Link
-                      href="/forgot-password"
-                      className="text-[11px] text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                    >
-                      忘记密码？
-                    </Link>
-                  </div>
+                  <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400 ml-0.5">
+                    密码
+                  </label>
                   <input
                     type="password"
                     value={password}
@@ -157,6 +149,14 @@ export default function LoginPage() {
                     placeholder="••••••••"
                     required
                   />
+
+                  <Link
+                    href="/forgot-password"
+                    tabIndex={0}
+                    className="mt-1 block text-[11px] text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                  >
+                    忘记密码？
+                  </Link>
                 </div>
 
                 {/* 登录按钮 */}
