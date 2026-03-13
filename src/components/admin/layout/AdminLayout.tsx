@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { Sidebar } from './Sidebar'
 import { AdminHeader } from './AdminHeader'
 import { useAdminStore } from '@/hooks/useAdminStore'
+import { useThemeEffect } from '@/hooks/useTheme'
 import '@/app/admin/layout.css'
 
 interface AdminLayoutProps {
@@ -17,6 +18,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const router = useRouter()
   const { hasAdminAccess, isLoading, loadAdminData } = useAdminStore()
   const [isClient, setIsClient] = useState(false)
+
+  // 激活主题切换功能
+  useThemeEffect()
 
   // 标记客户端挂载
   useEffect(() => {
@@ -61,7 +65,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   return (
     <div className="flex h-screen admin-layout">
       {/* 侧边栏 */}
-      <div className="w-64 flex-shrink-0">
+      <div className="w-56 flex-shrink-0">
         <Sidebar />
       </div>
 

@@ -287,14 +287,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
 
   if (!isMounted) {
     return (
-      <aside className={cn('flex h-full w-64 flex-col admin-sidebar', className)}>
+      <aside className={cn('flex h-full w-56 flex-col admin-sidebar', className)}>
         <div className="h-16" />
       </aside>
     )
   }
 
   return (
-    <aside className={cn('flex h-full w-64 flex-col admin-sidebar', className)}>
+    <aside className={cn('flex h-full w-56 flex-col admin-sidebar', className)}>
       {/* Logo 区域 - 使用图片，类似前台 */}
       <div className="flex h-16 items-center px-6 relative z-10">
         <Link href="/admin" className="flex items-center gap-3 group">

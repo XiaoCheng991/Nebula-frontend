@@ -26,7 +26,8 @@
 }
 
 /* ===== 亮色主题 ===== */
-[data-theme="light"] {
+[data-theme="light"],
+html[data-theme="light"] {
   --bg-base: #f5f5f7;
   --glass-bg: rgba(255, 255, 255, 0.72);
   --glass-bg-hover: rgba(255, 255, 255, 0.88);
@@ -38,12 +39,12 @@
   --text-tertiary: rgba(0, 0, 0, 0.35);
   --text-muted: rgba(0, 0, 0, 0.2);
 
-  --accent: #e8890c;
-  --accent-soft: rgba(232, 137, 12, 0.08);
-  --accent-border: rgba(232, 137, 12, 0.2);
+  --accent: #2563eb;
+  --accent-soft: rgba(37, 99, 235, 0.08);
+  --accent-border: rgba(37, 99, 235, 0.2);
 
   --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.06);
-  --shadow-glow: 0 0 24px rgba(232, 137, 12, 0.1);
+  --shadow-glow: 0 0 24px rgba(37, 99, 235, 0.1);
 }
 
 /* ===== 全局变量 ===== */
@@ -114,7 +115,7 @@
   margin: 3px var(--space-2);
   border-radius: var(--radius);
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 500;
   cursor: pointer;
   transition: all var(--duration) var(--ease);
@@ -206,7 +207,7 @@
 
 .submenu .menu-item {
   margin-left: var(--space-4);
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--text-tertiary);
 }
 
@@ -310,6 +311,11 @@
   color: var(--text-primary);
   font-size: 13px;
   transition: all var(--duration) var(--ease);
+}
+
+/* 搜索框特殊样式 - 增加左边距 */
+.admin-input[type="search"] {
+  padding-left: 3rem;
 }
 
 .admin-input::placeholder {

@@ -51,6 +51,11 @@ export function useThemeEffect() {
     if (theme === 'system') {
       applied = systemDark ? 'dark' : 'light'
     }
+
+    // 设置 data-theme 属性，用于CSS选择器
+    root.setAttribute('data-theme', applied)
+
+    // 同时保留 dark 类，用于Tailwind dark: 前缀
     if (applied === 'dark') {
       root.classList.add('dark')
     } else {
