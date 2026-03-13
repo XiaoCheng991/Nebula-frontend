@@ -4,137 +4,136 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { Bell, Search, Home } from 'lucide-react'
+import { Bell, Search, Settings, LogOut, Moon, Sun, Monitor, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { UserAvatar } from '@/components/ui/user-avatar'
 import { LogoutButton } from '@/components/auth/LogoutButton'
-import { ThemeSwitcher } from '@/components/ui/theme-switcher'
 import { useAdminStore } from '@/hooks/useAdminStore'
+import { useThemeStore } from '@/hooks/useTheme'
 import { cn } from '@/lib/utils'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 interface AdminHeaderProps {
   className?: string
 }
 
+// 主题切换组件 - 参考前台 GlobalHeader
+const ThemeSwitcherDropdown: React.FC = () => {
+  const { theme, setTheme } = useThemeStore()
+
+  const getThemeIcon = () => {
+    switch (theme) {
+      case 'light':
+        return <Sun className="h-5 w-5" />
+      case 'dark':
+        return <Moon className="h-5 w-5" />
+      case 'system':
+        return <Monitor className="h-5 w-5" />
+      default:
+        return <Moon className="h-5 w-5" />
+    }
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="btn-ghost flex items-center gap-1.5 p-2">
+          {getThemeIcon()}
+          <ChevronDown className="h-4 w-4 opacity-50" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="rounded-[var(--radius)] min-w-[120px]">
+        <DropdownMenuItem
+          onClick={() => setTheme('light')}
+          className="flex items-center gap-2 cursor-pointer"
+        >
+          <Sun className="h-4 w-4" />
+          <span>浅色</span>
+          {theme === 'light' && <span className="ml-auto text-xs">✓</span>}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => setTheme('dark')}
+          className="flex items-center gap-2 cursor-pointer"
+        >
+          <Moon className="h-4 w-4" />
+          <span>深色</span>
+          {theme === 'dark' && <span className="ml-auto text-xs">✓</span>}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => setTheme('system')}
+          className="flex items-center gap-2 cursor-pointer"
+        >
+          <Monitor className="h-4 w-4" />
+          <span>跟随系统</span>
+          {theme === 'system' && <span className="ml-auto text-xs">✓</span>}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
 export const AdminHeader: React.FC<AdminHeaderProps> = ({ className }) => {
-  const pathname = usePathname()
   const { user } = useAdminStore()
-
-  // 生成面包屑
-  const getBreadcrumbs = () => {
-    const paths = pathname.split('/').filter(Boolean)
-    const breadcrumbs = []
-
-    let currentPath = ''
-    for (let i = 0; i < paths.length; i++) {
-      currentPath += '/' + paths[i]
-      const name = getPathName(paths[i])
-      breadcrumbs.push({
-        name,
-        path: currentPath,
-        isLast: i === paths.length - 1,
-      })
-    }
-
-    return breadcrumbs
-  }
-
-  const getPathName = (path: string) => {
-    const names: Record<string, string> = {
-      admin: '后台',
-      users: '用户管理',
-      roles: '角色管理',
-      permissions: '权限管理',
-      menus: '菜单管理',
-      dictionaries: '字典配置',
-      logs: '操作日志',
-      settings: '系统设置',
-      blog: '博客',
-      posts: '文章管理',
-      categories: '分类管理',
-      tags: '标签管理',
-      comments: '评论管理',
-      im: 'IM',
-      messages: '消息管理',
-      rooms: '聊天室管理',
-      'sensitive-words': '敏感词管理',
-      bans: '禁言管理',
-    }
-    return names[path] || path
-  }
-
-  const breadcrumbs = getBreadcrumbs()
 
   return (
     <header className={cn(
-      'flex h-16 items-center justify-between border-b border-gray-200 bg-white px-6 dark:border-gray-700 dark:bg-gray-900',
+      'flex h-16 items-center justify-between admin-header px-6',
       className
     )}>
-      {/* 左侧 - 面包屑 */}
-      <div className="flex items-center gap-4">
-        <Link href="/home" className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-          <Home className="h-5 w-5" />
-        </Link>
-        <nav className="flex items-center gap-2 text-sm">
-          {breadcrumbs.map((crumb, index) => (
-            <React.Fragment key={crumb.path}>
-              {index > 0 && <span className="text-gray-400">/</span>}
-              {crumb.isLast ? (
-                <span className="font-medium text-gray-900 dark:text-white">
-                  {crumb.name}
-                </span>
-              ) : (
-                <Link
-                  href={crumb.path}
-                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                >
-                  {crumb.name}
-                </Link>
-              )}
-            </React.Fragment>
-          ))}
-        </nav>
+      {/* 左侧 - 简洁标题 */}
+      <div className="flex items-center gap-3">
+        <h1 className="text-lg font-semibold text-[var(--text-primary)]">
+          管理后台
+        </h1>
       </div>
 
       {/* 右侧 - 操作区 */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2">
         {/* 搜索 */}
         <div className="hidden md:block">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-            <Input
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
+            <input
               type="search"
               placeholder="搜索..."
-              className="w-64 pl-10"
+              className="admin-input w-64 pl-10"
             />
           </div>
         </div>
 
-        {/* 主题切换 */}
-        <ThemeSwitcher />
+        {/* 主题切换 - 下拉菜单形式 */}
+        <ThemeSwitcherDropdown />
 
         {/* 通知 */}
-        <Button variant="ghost" size="icon" className="relative">
+        <button className="btn-ghost relative p-2">
           <Bell className="h-5 w-5" />
-          <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500" />
-        </Button>
+          <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-[var(--accent)]" />
+        </button>
 
-        {/* 用户 */}
+        {/* 设置 */}
+        <Link href="/admin/settings" className="btn-ghost p-2">
+          <Settings className="h-5 w-5" />
+        </Link>
+
+        {/* 用户信息 */}
         {user && (
-          <div className="flex items-center gap-2">
-            <Link href="/admin/settings" className="flex items-center gap-2">
+          <div className="flex items-center gap-3 ml-2 pl-3 border-l border-[var(--glass-border)]">
+            <Link href="/admin/settings" className="flex items-center gap-2.5 group">
               <UserAvatar
                 avatarUrl={user.avatar}
                 nickname={user.nickname}
                 size="sm"
               />
               <div className="hidden text-left md:block">
-                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                <p className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">
                   {user.nickname}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-[var(--text-tertiary)]">
                   {user.email}
                 </p>
               </div>

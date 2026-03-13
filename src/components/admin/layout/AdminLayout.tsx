@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { Sidebar } from './Sidebar'
 import { AdminHeader } from './AdminHeader'
 import { useAdminStore } from '@/hooks/useAdminStore'
+import '@/app/admin/layout.css'
 
 interface AdminLayoutProps {
   children: React.ReactNode
@@ -43,10 +44,10 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   // 服务端渲染或客户端初始化时显示加载状态
   if (!isClient || isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
+      <div className="flex h-screen items-center justify-center admin-layout">
         <div className="text-center">
-          <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent mx-auto"></div>
-          <p className="text-gray-500 dark:text-gray-400">加载中...</p>
+          <div className="spinner mx-auto mb-4"></div>
+          <p className="text-[var(--text-secondary)]">加载中...</p>
         </div>
       </div>
     )
@@ -58,7 +59,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="flex h-screen admin-layout">
       {/* 侧边栏 */}
       <div className="w-64 flex-shrink-0">
         <Sidebar />
