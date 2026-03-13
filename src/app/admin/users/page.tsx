@@ -208,7 +208,7 @@ export default function UserManagementPage() {
                   <TableRow key={user.id}>
                     <TableCell className="font-medium">{user.id}</TableCell>
                     <TableCell>{user.username}</TableCell>
-                    <TableCell>{user.nickname || user.displayName || '-'}</TableCell>
+                    <TableCell>{user.nickname || '-'}</TableCell>
                     <TableCell>{user.email || '-'}</TableCell>
                     <TableCell>{user.phone || '-'}</TableCell>
                     <TableCell>

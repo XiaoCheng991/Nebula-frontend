@@ -7,8 +7,7 @@ import type { SysUser as BackendSysUser, SysRole as BackendSysRole, SysMenu as B
 export interface AdminUser {
   id: number
   username: string
-  displayName: string
-  nickname?: string
+  nickname: string
   email: string
   avatar?: string
   avatarUrl?: string
@@ -132,8 +131,7 @@ export function transformSysUserToAdminUser(backendUser: BackendSysUser): AdminU
   return {
     id: backendUser.id,
     username: backendUser.username,
-    displayName: backendUser.displayName || backendUser.nickname || backendUser.username,
-    nickname: backendUser.nickname,
+    nickname: backendUser.nickname || backendUser.username,
     email: backendUser.email || '',
     avatar: backendUser.avatarUrl,
     avatarUrl: backendUser.avatarUrl,

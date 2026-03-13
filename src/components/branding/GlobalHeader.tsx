@@ -208,11 +208,11 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
             <>
               <Link href="/settings" className="flex items-center gap-2.5 p-2 rounded-xl bg-transparent hover:bg-gray-100/50 dark:hover:bg-gray-800/50 transition-all duration-200">
                 <span className="text-sm font-medium text-slate-700 dark:text-slate-300 hidden sm:block">
-                  Hi {user.displayName || user.username}!
+                  Hi {user.nickname || user.username}!
                 </span>
                 <UserAvatar
                   avatarUrl={user.avatarUrl}
-                  displayName={user.displayName}
+                  nickname={user.nickname}
                   size="sm"
                 />
               </Link>

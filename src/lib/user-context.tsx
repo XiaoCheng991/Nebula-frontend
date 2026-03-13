@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 
 interface UserProfile {
   username: string
-  displayName: string
+  nickname: string
   avatarUrl: string | null
   bio: string
 }
@@ -94,7 +94,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       const data = await getUserProfile()
       setUser({
         username: data.username,
-        displayName: data.displayName,
+        nickname: data.nickname,
         avatarUrl: data.avatar,
         bio: data.bio || '',
       })
@@ -103,7 +103,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         id: data.id,
         username: data.username,
         email: data.email,
-        nickname: data.displayName,
+        nickname: data.nickname,
         avatar: data.avatar,
       }))
     } catch (err: any) {
@@ -130,7 +130,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       if (localUser) {
         const updatedLocalUser = {
           ...localUser,
-          nickname: updates.displayName || localUser.nickname,
+          nickname: updates.nickname || localUser.nickname,
           avatar: updates.avatarUrl || localUser.avatar,
         }
         localStorage.setItem('userInfo', JSON.stringify(updatedLocalUser))
@@ -166,7 +166,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       hasLocalDataRef.current = true
       setUser({
         username: localUser.username,
-        displayName: localUser.nickname || '',
+        nickname: localUser.nickname || '',
         avatarUrl: localUser.avatar || null,
         bio: '',
       })
@@ -197,7 +197,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         hasLocalDataRef.current = true
         setUser({
           username: localUser.username,
-          displayName: localUser.nickname || '',
+          nickname: localUser.nickname || '',
           avatarUrl: localUser.avatar || null,
           bio: '',
         })

@@ -11,7 +11,7 @@ import type { ApiResponse } from '../types'
 export interface UserProfile {
   id: number
   username: string
-  displayName: string
+  nickname: string
   email: string
   avatar: string | null
   bio: string
@@ -23,7 +23,7 @@ export interface UserProfile {
  * 更新用户资料请求
  */
 export interface UpdateProfileRequest {
-  displayName?: string
+  nickname?: string
   bio?: string
   avatar?: string
 }
@@ -56,7 +56,7 @@ export async function updateUserProfile(data: UpdateProfileRequest): Promise<Use
           const userInfo = JSON.parse(userInfoStr)
           const updatedUserInfo = {
             ...userInfo,
-            nickname: data.displayName || userInfo.nickname,
+            nickname: data.nickname || userInfo.nickname,
             avatar: data.avatar || userInfo.avatar,
           }
           localStorage.setItem('userInfo', JSON.stringify(updatedUserInfo))
@@ -82,8 +82,8 @@ export async function updateUserAvatar(avatarUrl: string): Promise<UserProfile> 
 /**
  * 更新用户昵称
  */
-export async function updateUserDisplayName(displayName: string): Promise<UserProfile> {
-  return updateUserProfile({ displayName })
+export async function updateUserNickname(nickname: string): Promise<UserProfile> {
+  return updateUserProfile({ nickname })
 }
 
 /**

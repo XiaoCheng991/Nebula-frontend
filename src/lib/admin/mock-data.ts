@@ -14,7 +14,7 @@ export const mockUsers: AdminUser[] = [
   {
     id: 1,
     username: 'admin',
-    displayName: '超级管理员',
+    nickname: '超级管理员',
     email: 'admin@nebulahub.com',
     avatar: '',
     status: 'active',
@@ -24,7 +24,7 @@ export const mockUsers: AdminUser[] = [
   {
     id: 2,
     username: 'manager',
-    displayName: '运营经理',
+    nickname: '运营经理',
     email: 'manager@nebulahub.com',
     avatar: '',
     status: 'active',
@@ -34,7 +34,7 @@ export const mockUsers: AdminUser[] = [
   {
     id: 3,
     username: 'editor',
-    displayName: '内容编辑',
+    nickname: '内容编辑',
     email: 'editor@nebulahub.com',
     avatar: '',
     status: 'active',

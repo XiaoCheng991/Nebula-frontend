@@ -35,7 +35,7 @@ export default function DashboardPage() {
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-slate-800 dark:text-white">仪表盘</h1>
             <p className="text-slate-500 mt-1 dark:text-gray-300">
-              欢迎回来，{user?.displayName || user?.username}
+              欢迎回来，{user?.nickname || user?.username}
             </p>
           </div>
           <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl border border-blue-500/20">

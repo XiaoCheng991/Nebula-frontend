@@ -18,7 +18,7 @@ import { ProtectedRoute } from "@/components/auth/AuthGuard"
 
 interface UserProfile {
   username: string
-  displayName: string
+  nickname: string
   avatarUrl: string | null
   bio: string
 }
@@ -36,7 +36,7 @@ export default function SettingsPage() {
 
   const [profile, setProfile] = useState<UserProfile>({
     username: "",
-    displayName: "",
+    nickname: "",
     avatarUrl: null,
     bio: "",
   })
@@ -45,7 +45,7 @@ export default function SettingsPage() {
     if (user) {
       setProfile({
         username: user.username,
-        displayName: user.displayName,
+        nickname: user.nickname,
         avatarUrl: user.avatarUrl,
         bio: user.bio,
       })
@@ -143,14 +143,14 @@ export default function SettingsPage() {
       // 调用API保存用户档案
       await put('/api/user/profile', {
         username: profile.username,
-        nickname: profile.displayName,
+        nickname: profile.nickname,
         bio: profile.bio,
         avatar: profile.avatarUrl,
       })
 
       // 更新全局用户状态
       updateUser({
-        displayName: profile.displayName,
+        nickname: profile.nickname,
         avatarUrl: profile.avatarUrl,
       })
 
@@ -210,7 +210,7 @@ export default function SettingsPage() {
               <div className="relative">
                 <UserAvatar
                   avatarUrl={profile.avatarUrl}
-                  displayName={profile.displayName}
+                  nickname={profile.nickname}
                   username={profile.username}
                   size="lg"
                   className="w-24 h-24 shadow-lg ring-4 ring-blue-500/10"
@@ -278,19 +278,19 @@ export default function SettingsPage() {
                 <p className="text-xs text-muted-foreground">用户名唯一且不可修改</p>
               </div>
 
-              {/* 显示名称 */}
+              {/* 昵称 */}
               <div className="space-y-2 sm:col-span-2">
-                <Label htmlFor="displayName">显示名称</Label>
+                <Label htmlFor="nickname">昵称</Label>
                 <Input
-                  id="displayName"
-                  value={profile.displayName}
-                  onChange={(e) => setProfile(prev => ({ ...prev, displayName: e.target.value }))}
-                  placeholder="输入显示名称"
+                  id="nickname"
+                  value={profile.nickname}
+                  onChange={(e) => setProfile(prev => ({ ...prev, nickname: e.target.value }))}
+                  placeholder="输入昵称"
                   maxLength={100}
                 />
                 <div className="flex justify-end">
                   <span className="text-xs text-muted-foreground">
-                    {profile.displayName?.length || 0}/100
+                    {profile.nickname?.length || 0}/100
                   </span>
                 </div>
               </div>

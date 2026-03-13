@@ -33,7 +33,7 @@ interface UserDialogProps {
 export function UserDialog({ open, onOpenChange, user, onSave }: UserDialogProps) {
   const [formData, setFormData] = React.useState<Partial<AdminUser>>({
     username: '',
-    displayName: '',
+    nickname: '',
     email: '',
     status: 'active',
     roleIds: [],
@@ -45,7 +45,7 @@ export function UserDialog({ open, onOpenChange, user, onSave }: UserDialogProps
     } else {
       setFormData({
         username: '',
-        displayName: '',
+        nickname: '',
         email: '',
         status: 'active',
         roleIds: [],
@@ -82,11 +82,11 @@ export function UserDialog({ open, onOpenChange, user, onSave }: UserDialogProps
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="displayName">显示名称 *</Label>
+              <Label htmlFor="nickname">昵称 *</Label>
               <Input
-                id="displayName"
-                value={formData.displayName}
-                onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
+                id="nickname"
+                value={formData.nickname}
+                onChange={(e) => setFormData({ ...formData, nickname: e.target.value })}
               />
             </div>
           </div>

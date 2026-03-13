@@ -4,7 +4,7 @@ import { useMemo, useState } from "react"
 
 interface UserAvatarProps {
   avatarUrl?: string | null
-  displayName?: string | null
+  nickname?: string | null
   email?: string | null
   username?: string | null
   size?: "sm" | "md" | "lg"
@@ -13,7 +13,7 @@ interface UserAvatarProps {
 
 export function UserAvatar({
   avatarUrl,
-  displayName,
+  nickname,
   email,
   username,
   size = "md",
@@ -29,9 +29,9 @@ export function UserAvatar({
 
   const sizeClass = sizeClasses[size]
 
-  // 获取用于显示的文字：优先使用 displayName，其次 username，最后 email
+  // 获取用于显示的文字：优先使用 nickname，其次 username，最后 email
   const displayText = useMemo(() => {
-    const text = displayName || username || email || ""
+    const text = nickname || username || email || ""
     if (!text) return "U"
 
     // 提取所有中文字符
@@ -49,12 +49,12 @@ export function UserAvatar({
     }
 
     return selectedChar
-  }, [displayName, username, email])
+  }, [nickname, username, email])
 
   // 生成优雅的默认头像 URL
   const defaultAvatarUrl = useMemo(() => {
     // 生成一个随机的渐变色（基于用户名，但色彩更柔和）
-    const seed = (displayName || username || email || "").charCodeAt(0) || 0
+    const seed = (nickname || username || email || "").charCodeAt(0) || 0
     const hue1 = 200 + (seed * 47) % 60  // 蓝色系 (200-260)
     const hue2 = 260 + (seed * 73) % 40  // 紫色系 (260-300)
 
@@ -111,7 +111,7 @@ export function UserAvatar({
 
     // 转换为 Data URI
     return `data:image/svg+xml,${encodeURIComponent(svg)}`
-  }, [displayText, displayName, username, email])
+  }, [displayText, nickname, username, email])
 
   const finalAvatarUrl = avatarUrl || defaultAvatarUrl
 
@@ -120,7 +120,7 @@ export function UserAvatar({
       {(!imageError) ? (
         <img
           src={finalAvatarUrl}
-          alt={displayName || "Avatar"}
+          alt={nickname || "Avatar"}
           className={`${sizeClass} rounded-full object-cover ${className}`}
           onError={() => setImageError(true)}
         />

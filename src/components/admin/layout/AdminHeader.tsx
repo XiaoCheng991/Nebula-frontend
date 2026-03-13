@@ -127,12 +127,12 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({ className }) => {
             <Link href="/admin/settings" className="flex items-center gap-2">
               <UserAvatar
                 avatarUrl={user.avatar}
-                displayName={user.displayName}
+                nickname={user.nickname}
                 size="sm"
               />
               <div className="hidden text-left md:block">
                 <p className="text-sm font-medium text-gray-900 dark:text-white">
-                  {user.displayName}
+                  {user.nickname}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   {user.email}

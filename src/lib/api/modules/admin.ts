@@ -27,7 +27,6 @@ export interface SysUser {
   email?: string
   phone?: string
   nickname?: string
-  displayName?: string
   avatarName?: string
   avatarUrl?: string
   avatarSize?: number
