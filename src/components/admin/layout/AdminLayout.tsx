@@ -75,8 +75,10 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         <AdminHeader />
 
         {/* 内容 */}
-        <main className="flex-1 overflow-y-auto p-6">
-          {children}
+        <main className="flex-1 overflow-y-auto p-6 bg-gradient-to-br from-[var(--glass-bg)] to-transparent">
+          <div className="backdrop-blur-xl">
+            {children}
+          </div>
         </main>
       </div>
     </div>

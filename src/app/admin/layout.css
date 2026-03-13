@@ -83,8 +83,8 @@ html[data-theme="light"] {
 
 [data-theme="light"] .admin-layout::before {
   background:
-    radial-gradient(ellipse 80% 50% at 20% 20%, rgba(232, 137, 12, 0.06), transparent),
-    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(232, 137, 12, 0.04), transparent);
+    radial-gradient(ellipse 80% 50% at 20% 20%, rgba(37, 99, 235, 0.06), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(37, 99, 235, 0.04), transparent);
 }
 
 /* ===== 侧边栏 ===== */
@@ -98,13 +98,24 @@ html[data-theme="light"] {
 
 /* ===== 头部 ===== */
 .admin-header {
-  background: var(--glass-bg);
+  background: rgba(255, 255, 255, 0.03);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   position: relative;
   z-index: 5;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+[data-theme="light"] .admin-header {
+  background: rgba(255, 255, 255, 0.6);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* 搜索框特殊样式 - 增加左右边距 */
+.admin-input[type="search"] {
+  padding-left: 2.5rem !important;
+  padding-right: 3.5rem !important;
+}
 /* ===== 菜单项 ===== */
 .menu-item {
   position: relative;
@@ -207,6 +218,9 @@ html[data-theme="light"] {
 
 .submenu .menu-item {
   margin-left: var(--space-4);
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 6px var(--space-4);
   font-size: 13px;
   color: var(--text-tertiary);
 }
@@ -313,10 +327,6 @@ html[data-theme="light"] {
   transition: all var(--duration) var(--ease);
 }
 
-/* 搜索框特殊样式 - 增加左边距 */
-.admin-input[type="search"] {
-  padding-left: 3rem;
-}
 
 .admin-input::placeholder {
   color: var(--text-muted);
