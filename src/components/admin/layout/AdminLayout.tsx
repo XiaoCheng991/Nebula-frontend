@@ -9,6 +9,7 @@ import { AdminHeader } from './AdminHeader'
 import { useAdminStore } from '@/hooks/useAdminStore'
 import { useThemeEffect } from '@/hooks/useTheme'
 import '@/app/admin/layout.css'
+import '@/app/admin/page-styles.css'
 
 interface AdminLayoutProps {
   children: React.ReactNode

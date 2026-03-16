@@ -211,11 +211,12 @@ const getIcon = (iconName?: string): React.ElementType | null => {
 interface MenuItemProps {
   item: AdminMenuType
   level: number
+  isFirst?: boolean
 }
 
-const MenuItem: React.FC<MenuItemProps> = ({ item, level }) => {
+const MenuItem: React.FC<MenuItemProps> = ({ item, level, isFirst = false }) => {
   const pathname = usePathname()
-  const [isExpanded, setIsExpanded] = React.useState(true)
+  const [isExpanded, setIsExpanded] = React.useState(isFirst)
 
   const menuChildren = item.children?.filter((c) => c.type === 'menu') ?? []
   const hasChildren = menuChildren.length > 0
@@ -334,8 +335,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
             </button>
           </div>
         ) : (
-          menus.map((menu) => (
-            <MenuItem key={menu.id} item={menu} level={0} />
+          menus.map((menu, index) => (
+            <MenuItem key={menu.id} item={menu} level={0} isFirst={index === 0} />
           ))
         )}
       </nav>

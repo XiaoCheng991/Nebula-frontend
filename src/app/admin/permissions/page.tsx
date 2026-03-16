@@ -1,20 +1,15 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Edit, Trash2, Key, Plus } from 'lucide-react'
-import { DataTable } from '@/components/admin/table/DataTable'
-import { ColumnDef } from '@tanstack/react-table'
-import { Badge } from '@/components/ui/badge'
-import { Checkbox } from '@/components/ui/checkbox'
-import { PermissionDialog } from '@/components/admin/permissions/PermissionDialog'
+import { Edit, Trash2, Key, Plus, Search } from 'lucide-react'
 import { AdminPermission } from '@/lib/admin/types'
+import { ResizableTable } from '@/app/admin/_components/table/ResizableTable'
 
 export default function PermissionsPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingPermission, setEditingPermission] = useState<AdminPermission | null>(null)
   const [permissions, setPermissions] = useState<AdminPermission[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
 
   const handleAddPermission = () => {
     setEditingPermission(null)
@@ -43,114 +38,133 @@ export default function PermissionsPage() {
     }
   }
 
-  const columns: ColumnDef<AdminPermission>[] = [
+  const filteredPermissions = permissions.filter(p =>
+    p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.code.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  const columns = [
     {
-      id: 'select',
-      header: ({ table }) => (
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && 'indeterminate')
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="全选"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="选择"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
+      key: 'index',
+      header: '序号',
+      width: 80,
+      minWidth: 60,
+      render: (_: any, __: any, index: number) => (
+        <span className="text-mono">{index + 1}</span>
+      )
     },
     {
-      accessorKey: 'name',
+      key: 'name',
       header: '权限名称',
-      cell: ({ row }) => (
+      width: 200,
+      minWidth: 150,
+      render: (value: string) => (
         <div className="flex items-center gap-2">
           <Key className="h-4 w-4 text-purple-500" />
-          <span className="font-medium">{row.original.name}</span>
+          <span className="font-medium">{value}</span>
         </div>
-      ),
+      )
     },
     {
-      accessorKey: 'code',
+      key: 'code',
       header: '权限编码',
-      cell: ({ row }) => (
-        <Badge variant="outline">{row.original.code}</Badge>
-      ),
+      width: 200,
+      minWidth: 150,
+      render: (value: string) => (
+        <span className="text-mono">{value}</span>
+      )
     },
     {
-      accessorKey: 'type',
+      key: 'type',
       header: '类型',
-      cell: ({ row }) => (
-        <Badge variant={row.original.type === 'page' ? 'default' : 'secondary'}>
-          {row.original.type === 'page' ? '页面' : '按钮'}
-        </Badge>
-      ),
+      width: 100,
+      minWidth: 80,
+      render: (value: string) => (
+        <span className={`admin-badge ${value === 'page' ? 'info' : ''}`}>
+          {value === 'page' ? '页面' : '按钮'}
+        </span>
+      )
     },
     {
-      accessorKey: 'path',
+      key: 'path',
       header: '路由路径',
-      cell: ({ row }) => row.original.path || '-',
+      width: 200,
+      minWidth: 150,
     },
     {
-      accessorKey: 'description',
+      key: 'description',
       header: '描述',
-      cell: ({ row }) => row.original.description || '-',
+      width: 250,
+      minWidth: 200,
     },
     {
-      id: 'actions',
+      key: 'actions',
       header: '操作',
-      cell: ({ row }) => (
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => handleEditPermission(row.original)}>
+      width: 150,
+      minWidth: 120,
+      render: (_: any, permission: AdminPermission) => (
+        <div className="action-buttons">
+          <button
+            className="action-btn"
+            title="编辑"
+            onClick={() => handleEditPermission(permission)}
+          >
             <Edit className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon">
+          </button>
+          <button className="action-btn danger" title="删除">
             <Trash2 className="h-4 w-4" />
-          </Button>
+          </button>
         </div>
-      ),
-    },
+      )
+    }
   ]
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">权限管理</h1>
-          <p className="text-muted-foreground mt-1">管理系统权限配置</p>
+      {/* 页面标题 */}
+      <div className="page-header">
+        <div className="page-header-icon">
+          <Key />
         </div>
-        <Button className="gap-2" onClick={handleAddPermission}>
+        <div>
+          <h1 className="page-header-title">权限管理</h1>
+          <p className="page-header-subtitle">管理系统权限配置</p>
+        </div>
+        <button className="btn-primary gap-2 ml-auto" onClick={handleAddPermission}>
           <Plus className="h-4 w-4" />
           新增权限
-        </Button>
+        </button>
       </div>
 
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle>权限列表</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <DataTable
-            columns={columns}
-            data={permissions}
-            searchKey="name"
-            searchPlaceholder="搜索权限..."
-          />
-        </CardContent>
-      </Card>
+      {/* 权限列表 */}
+      <div className="data-table-container">
+        <div className="data-table-header">
+          <div>
+            <h2 className="data-table-title">权限列表</h2>
+            <p className="data-table-description">共 {filteredPermissions.length} 条记录</p>
+          </div>
+          <div className="search-container">
+            <div className="search-input-wrapper">
+              <Search className="search-icon" />
+              <input
+                type="text"
+                placeholder="搜索权限..."
+                className="search-input"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
 
-      <PermissionDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        permission={editingPermission}
-        onSave={handleSavePermission}
-      />
+        <div className="p-4">
+          <ResizableTable
+            columns={columns}
+            data={filteredPermissions}
+            emptyText="暂无权限数据"
+          />
+        </div>
+      </div>
     </div>
   )
 }

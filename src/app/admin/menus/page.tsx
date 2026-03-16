@@ -1,12 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Edit, Trash2, Menu, Plus, ChevronRight, ChevronDown, Folder, FileText, RefreshCw } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
-import { MenuDialog } from '@/components/admin/menus/MenuDialog';
 import { getMenuTree } from '@/lib/api/modules/admin';
 import { AdminMenu } from '@/lib/admin/types';
 import { transformSysMenuToAdminMenu } from '@/lib/admin/types';
@@ -28,72 +24,64 @@ function MenuTreeItem({ menu, level, onEdit, onAddChild }: MenuTreeItemProps) {
     return Menu;
   };
 
-  const getVariant = (): "default" | "secondary" | "outline" => {
-    if (menu.type === 'directory') return 'default';
-    if (menu.type === 'menu') return 'secondary';
-    return 'outline';
-  };
-
   const Icon = getIcon();
 
   return (
     <div className="select-none">
       <div
-        className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-muted group"
+        className="tree-item"
         style={{ paddingLeft: `${level * 24 + 12}px` }}
       >
         <button
           onClick={() => setExpanded(!expanded)}
-          className="w-4 h-4 flex items-center justify-center"
+          className="tree-toggle"
           type="button"
         >
           {hasChildren ? (
             expanded ? (
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              <ChevronDown className="h-4 w-4" />
             ) : (
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              <ChevronRight className="h-4 w-4" />
             )
           ) : (
             <span className="w-4" />
           )}
         </button>
 
-        <Icon className="h-4 w-4 text-muted-foreground" />
+        <Icon className="tree-icon" />
 
-        <span className="flex-1 font-medium">{menu.name}</span>
+        <span className="tree-label">{menu.name}</span>
 
-        <Badge variant={getVariant()} className="text-xs">
+        <span className={`tree-badge ${menu.type === 'directory' ? 'info' : ''}`}>
           {menu.type === 'directory' ? '目录' : menu.type === 'menu' ? '菜单' : '按钮'}
-        </Badge>
+        </span>
 
         {menu.path && (
-          <span className="text-sm text-muted-foreground">{menu.path}</span>
+          <span className="text-mono">{menu.path}</span>
         )}
 
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="action-buttons opacity-0 group-hover:opacity-100 transition-opacity">
           {menu.type !== 'button' && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
+            <button
+              className="action-btn"
               onClick={() => onAddChild(menu.id)}
               type="button"
+              title="添加子菜单"
             >
               <Plus className="h-4 w-4" />
-            </Button>
+            </button>
           )}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
+          <button
+            className="action-btn"
             onClick={() => onEdit(menu)}
             type="button"
+            title="编辑"
           >
             <Edit className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8" type="button">
+          </button>
+          <button className="action-btn danger" type="button" title="删除">
             <Trash2 className="h-4 w-4" />
-          </Button>
+          </button>
         </div>
       </div>
 
@@ -180,42 +168,46 @@ export default function MenusPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">菜单管理</h1>
-          <p className="text-muted-foreground mt-1">管理系统菜单结构</p>
+      {/* 页面标题 */}
+      <div className="page-header">
+        <div className="page-header-icon">
+          <Menu />
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" className="gap-2" onClick={fetchMenus}>
+        <div>
+          <h1 className="page-header-title">菜单管理</h1>
+          <p className="page-header-subtitle">管理系统菜单结构</p>
+        </div>
+        <div className="flex gap-2 ml-auto">
+          <button className="btn-secondary gap-2" onClick={fetchMenus}>
             <RefreshCw className="h-4 w-4" />
             刷新
-          </Button>
-          <Button className="gap-2" onClick={handleAddMenu}>
+          </button>
+          <button className="btn-primary gap-2" onClick={handleAddMenu}>
             <Plus className="h-4 w-4" />
             新增菜单
-          </Button>
+          </button>
         </div>
       </div>
 
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2">
-            <Menu className="h-5 w-5" />
-            菜单树
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+      {/* 菜单树 */}
+      <div className="data-table-container">
+        <div className="data-table-header">
+          <div className="flex items-center gap-2">
+            <Menu className="h-5 w-5 text-[var(--accent)]" />
+            <h2 className="data-table-title">菜单树</h2>
+          </div>
+        </div>
+
+        <div className="p-4">
           {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-              <span className="ml-2">加载中...</span>
+            <div className="loading-state">
+              <div className="loading-spinner" />
+              <span>加载中...</span>
             </div>
           ) : menus.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              暂无菜单数据
-            </div>
+            <div className="empty-state">暂无菜单数据</div>
           ) : (
-            <div className="border rounded-lg divide-y">
+            <div className="space-y-1">
               {menus.map(menu => (
                 <MenuTreeItem
                   key={menu.id}
@@ -227,16 +219,8 @@ export default function MenusPage() {
               ))}
             </div>
           )}
-        </CardContent>
-      </Card>
-
-      <MenuDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        menu={editingMenu}
-        parentMenuId={parentMenuId}
-        onSave={handleSaveMenu}
-      />
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,14 +1,15 @@
-// src/app/admin/im/messages/page.tsx
-
 'use client'
 
 import React from 'react'
+import { EmptyPage } from '@/app/admin/_components/EmptyPage'
+import { MessageSquare } from 'lucide-react'
 
-export default function ImMessagesPage() {
+export default function MessagesPage() {
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">消息管理</h1>
-      <p className="text-gray-500 dark:text-gray-400">功能开发中...</p>
-    </div>
+    <EmptyPage
+      icon={MessageSquare}
+      title="消息管理"
+      subtitle="管理聊天消息"
+    />
   )
 }

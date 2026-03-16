@@ -1,14 +1,15 @@
-// src/app/admin/blog/categories/page.tsx
-
 'use client'
 
 import React from 'react'
+import { EmptyPage } from '@/app/admin/_components/EmptyPage'
+import { Folder } from 'lucide-react'
 
-export default function BlogCategoriesPage() {
+export default function CategoriesPage() {
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">分类管理</h1>
-      <p className="text-gray-500 dark:text-gray-400">功能开发中...</p>
-    </div>
+    <EmptyPage
+      icon={Folder}
+      title="分类管理"
+      subtitle="管理文章分类"
+    />
   )
 }

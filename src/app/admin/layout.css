@@ -122,8 +122,8 @@ html[data-theme="light"] {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: 10px var(--space-4);
-  margin: 3px var(--space-2);
+  padding: 8px var(--space-4);
+  margin: 2px var(--space-2);
   border-radius: var(--radius);
   color: var(--text-secondary);
   font-size: 15px;
@@ -218,9 +218,9 @@ html[data-theme="light"] {
 
 .submenu .menu-item {
   margin-left: var(--space-4);
-  margin-top: 0;
-  margin-bottom: 0;
-  padding: 6px var(--space-4);
+  margin-top: 1px;
+  margin-bottom: 1px;
+  padding: 7px var(--space-4);
   font-size: 13px;
   color: var(--text-tertiary);
 }
