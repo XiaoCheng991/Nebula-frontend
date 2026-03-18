@@ -216,12 +216,36 @@ interface MenuItemProps {
 
 const MenuItem: React.FC<MenuItemProps> = ({ item, level, isFirst = false }) => {
   const pathname = usePathname()
-  const [isExpanded, setIsExpanded] = React.useState(isFirst)
-
   const menuChildren = item.children?.filter((c) => c.type === 'menu') ?? []
   const hasChildren = menuChildren.length > 0
   const isActive = pathname === item.path
   const IconComponent = getIcon(item.icon)
+
+  // 检查当前菜单或其子菜单是否处于激活状态
+  const isCurrentMenuOrChildActive = () => {
+    if (isActive) return true
+    if (!hasChildren) return false
+    return menuChildren.some(child => {
+      if (child.path === pathname) return true
+      if (child.children) {
+        return child.children.some(grandChild => grandChild.path === pathname)
+      }
+      return false
+    })
+  }
+
+  const [isExpanded, setIsExpanded] = React.useState(() => {
+    // 如果是当前页面或子菜单被激活，自动展开
+    if (isCurrentMenuOrChildActive()) return true
+    return isFirst
+  })
+
+  // 当 pathname 变化时，检查是否需要自动展开
+  React.useEffect(() => {
+    if (isCurrentMenuOrChildActive()) {
+      setIsExpanded(true)
+    }
+  }, [pathname])
 
   // 有子菜单的项（无论层级）都渲染button用于展开/收起
   if (hasChildren) {

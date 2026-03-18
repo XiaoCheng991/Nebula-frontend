@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { UserAvatar } from '@/components/ui/user-avatar';
 import { LogoutButton } from '@/components/auth/LogoutButton';
 import { useUser } from '@/lib/user-context';
-import { MessageCircle, Settings, Sparkles, FolderUp, LogOut, Loader2, Moon, Sun, Monitor, ChevronDown, Shield } from 'lucide-react';
+import { MessageCircle, Settings, Sparkles, FolderUp, LogOut, Loader2, Moon, Sun, Monitor, ChevronDown, Shield, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useThemeStore } from '@/hooks/useTheme';
 import { useAdminStore } from '@/hooks/useAdminStore';
@@ -80,9 +80,9 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
     return (
       <Link
         href="/admin"
-        className="flex items-center gap-2 p-2 rounded-lg transition-colors duration-200 hover:bg-gray-100/50 dark:hover:bg-gray-800/50"
+        className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group"
       >
-        <Shield className="h-5 w-5" />
+        <Shield className="h-5 w-5 text-[var(--accent)] group-hover:scale-110 transition-transform" />
         <span className="text-sm font-medium hidden sm:block">管理后台</span>
       </Link>
     );
@@ -116,26 +116,26 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="flex items-center gap-1 w-auto px-2">
+          <Button variant="ghost" size="icon" className="flex items-center gap-1 w-auto px-2 rounded-xl hover:bg-white/10 dark:hover:bg-white/5">
             {getThemeIcon()}
             <ChevronDown className="h-4 w-4 opacity-50" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="rounded-[25px]">
-          <DropdownMenuItem onClick={() => setTheme('light')} className="flex items-center gap-2 cursor-pointer">
+        <DropdownMenuContent align="end" className="rounded-2xl border-0 shadow-2xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl">
+          <DropdownMenuItem onClick={() => setTheme('light')} className="flex items-center gap-3 cursor-pointer rounded-xl py-2.5">
             <Sun className="h-4 w-4" />
-            <span>浅色</span>
-            {theme === 'light' && <span className="ml-auto text-xs text-muted-foreground">✓</span>}
+            <span className="font-medium">浅色</span>
+            {theme === 'light' && <span className="ml-auto text-xs text-[var(--accent)]">✓</span>}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setTheme('dark')} className="flex items-center gap-2 cursor-pointer">
+          <DropdownMenuItem onClick={() => setTheme('dark')} className="flex items-center gap-3 cursor-pointer rounded-xl py-2.5">
             <Moon className="h-4 w-4" />
-            <span>深色</span>
-            {theme === 'dark' && <span className="ml-auto text-xs text-muted-foreground">✓</span>}
+            <span className="font-medium">深色</span>
+            {theme === 'dark' && <span className="ml-auto text-xs text-[var(--accent)]">✓</span>}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setTheme('system')} className="flex items-center gap-2 cursor-pointer">
+          <DropdownMenuItem onClick={() => setTheme('system')} className="flex items-center gap-3 cursor-pointer rounded-xl py-2.5">
             <Monitor className="h-4 w-4" />
-            <span>跟随系统</span>
-            {theme === 'system' && <span className="ml-auto text-xs text-muted-foreground">✓</span>}
+            <span className="font-medium">跟随系统</span>
+            {theme === 'system' && <span className="ml-auto text-xs text-[var(--accent)]">✓</span>}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -143,20 +143,37 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
   };
 
   return (
-    <header className={`w-full sticky top-0 z-50 bg-transparent backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 ${className}`} aria-label="站点头部">
-      <div className="container mx-auto px-6 py-3 grid grid-cols-3 items-center">
+    <header className={`w-full sticky top-0 z-50 overflow-hidden ${className}`} aria-label="站点头部">
+      {/* 背景效果 */}
+      <div className="absolute inset-0 bg-gradient-to-r from-[var(--accent)]/3 via-transparent to-[var(--accent)]/2 pointer-events-none" />
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-[var(--accent)]/5 rounded-full blur-3xl -translate-y-48 pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-[var(--accent)]/3 rounded-full blur-3xl translate-y-32 pointer-events-none" />
+
+      {/* 头部内容 */}
+      <div className="relative z-10 container mx-auto px-6 py-3 grid grid-cols-3 items-center bg-white/50 dark:bg-black/50 backdrop-blur-xl border-b border-[var(--glass-border)]">
         {/* 左侧 - Logo */}
         <div className="flex items-center justify-start">
-          <Link href="/home" className="flex items-center gap-3">
-            <img src={src} alt="NebulaHub Logo" style={{ height: 40, width: 'auto' }} onError={handleError} className="rounded-xl" />
+          <Link href="/home" className="flex items-center gap-3 group">
+            <div className="relative">
+              <img
+                src={src}
+                alt="NebulaHub Logo"
+                style={{ height: 40, width: 'auto' }}
+                onError={handleError}
+                className="rounded-xl transition-transform duration-300 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[var(--accent)]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            </div>
             <div className="flex flex-col">
-              <span className="text-lg font-bold text-slate-800 dark:text-white tracking-tight">
-                Nebula<span className="font-semibold text-slate-500 dark:text-slate-400">Hub</span>
+              <span className="text-lg font-bold tracking-tight">
+                <span className="text-slate-800 dark:text-white">Nebula</span>
+                <span className="font-semibold text-[var(--accent)]">Hub</span>
               </span>
-              <span className="text-[11px] font-medium text-orange-500 tracking-wide leading-tight">
+              <span className="text-[11px] font-medium tracking-wide leading-tight flex items-center gap-1">
+                <Zap className="h-3 w-3 text-orange-500" />
+                <span className="text-orange-500">橙光</span>
+                <span className="text-slate-400 mx-1">|</span>
                 <span className="text-slate-500">Nova Pro</span>
-                <span className="mx-1.5 text-slate-400">|</span>
-                橙光
               </span>
             </div>
           </Link>
@@ -167,30 +184,30 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
           <nav className="hidden md:flex items-center space-x-1">
             <Link
               href="/dashboard"
-              className="flex items-center gap-2 p-2 rounded-lg transition-colors duration-200 hover:bg-gray-100/50 dark:hover:bg-gray-800/50"
+              className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group"
             >
-              <Sparkles className="h-5 w-5" />
+              <Sparkles className="h-5 w-5 text-[var(--accent)] group-hover:scale-110 transition-transform" />
               <span className="text-sm font-medium hidden sm:block">仪表盘</span>
             </Link>
             <Link
               href="/chat"
-              className="flex items-center gap-2 p-2 rounded-lg transition-colors duration-200 hover:bg-gray-100/50 dark:hover:bg-gray-800/50"
+              className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group"
             >
-              <MessageCircle className="h-5 w-5" />
+              <MessageCircle className="h-5 w-5 text-blue-500 group-hover:scale-110 transition-transform" />
               <span className="text-sm font-medium hidden sm:block">消息</span>
             </Link>
             <Link
               href="/drive"
-              className="flex items-center gap-2 p-2 rounded-lg transition-colors duration-200 hover:bg-gray-100/50 dark:hover:bg-gray-800/50"
+              className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group"
             >
-              <FolderUp className="h-5 w-5" />
+              <FolderUp className="h-5 w-5 text-green-500 group-hover:scale-110 transition-transform" />
               <span className="text-sm font-medium hidden sm:block">文件</span>
             </Link>
             <Link
               href="/settings"
-              className="flex items-center gap-2 p-2 rounded-lg transition-colors duration-200 hover:bg-gray-100/50 dark:hover:bg-gray-800/50"
+              className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group"
             >
-              <Settings className="h-5 w-5" />
+              <Settings className="h-5 w-5 text-purple-500 group-hover:scale-110 transition-transform" />
               <span className="text-sm font-medium hidden sm:block">设置</span>
             </Link>
           </nav>
@@ -206,8 +223,8 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
             </div>
           ) : user ? (
             <>
-              <Link href="/settings" className="flex items-center gap-2.5 p-2 rounded-xl bg-transparent hover:bg-gray-100/50 dark:hover:bg-gray-800/50 transition-all duration-200">
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-300 hidden sm:block">
+              <Link href="/settings" className="flex items-center gap-2.5 p-2 rounded-xl bg-white/10 dark:bg-white/5 hover:bg-white/20 dark:hover:bg-white/10 transition-all duration-300 group">
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300 hidden sm:block group-hover:text-[var(--accent)] transition-colors">
                   Hi {user.nickname || user.username}!
                 </span>
                 <UserAvatar
@@ -222,13 +239,13 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
             <>
               <Link
                 href="/login"
-                className="px-4 py-2 rounded-xl text-sm font-medium bg-gray-100/60 dark:bg-gray-800/60 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 border border-gray-300/50 dark:border-gray-600/50 transition-all text-slate-700 dark:text-slate-300"
+                className="px-4 py-2 rounded-xl text-sm font-medium bg-white/50 dark:bg-white/10 hover:bg-white/70 dark:hover:bg-white/20 border border-[var(--glass-border)] transition-all duration-300 backdrop-blur-sm"
               >
                 登录
               </Link>
               <Link
                 href="/register"
-                className="px-4 py-2 rounded-xl text-sm font-medium bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white transition-all shadow-md shadow-blue-500/20"
+                className="px-4 py-2 rounded-xl text-sm font-medium bg-gradient-to-r from-[var(--accent)] to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white transition-all duration-300 shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 hover:scale-105"
               >
                 注册
               </Link>

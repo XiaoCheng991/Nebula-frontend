@@ -38,7 +38,7 @@ export default function DashboardPage() {
               欢迎回来，{user?.nickname || user?.username}
             </p>
           </div>
-          <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl border border-blue-500/20">
+          <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[var(--accent)]/10 to-orange-500/10 rounded-xl border border-[var(--accent)]/20">
             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
             <span className="text-sm text-slate-600 font-medium dark:text-gray-200">系统运行正常</span>
           </div>
@@ -47,7 +47,7 @@ export default function DashboardPage() {
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {stats.map((stat, index) => (
-            <Card key={index} className="hover:shadow-lg transition-all duration-300 group">
+            <Card key={index} className="admin-card hover:shadow-lg transition-all duration-300 group">
               <CardContent className="p-5">
                 <div className="flex items-start justify-between">
                   <div>
@@ -61,16 +61,16 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <div className={`p-3 rounded-xl ${
-                    index === 0 ? 'bg-blue-500/10' :
-                    index === 1 ? 'bg-green-500/10' :
-                    index === 2 ? 'bg-purple-500/10' :
-                    'bg-amber-500/10'
+                    index === 0 ? 'bg-orange-500/10' :
+                    index === 1 ? 'bg-amber-500/10' :
+                    index === 2 ? 'bg-yellow-500/10' :
+                    'bg-orange-400/10'
                   } group-hover:scale-110 transition-transform`}>
                     <stat.icon className={`h-5 w-5 ${
-                      index === 0 ? 'text-blue-500' :
-                      index === 1 ? 'text-green-500' :
-                      index === 2 ? 'text-purple-500' :
-                      'text-amber-500'
+                      index === 0 ? 'text-orange-500' :
+                      index === 1 ? 'text-amber-500' :
+                      index === 2 ? 'text-yellow-500' :
+                      'text-orange-400'
                     }`} />
                   </div>
                 </div>
@@ -81,17 +81,17 @@ export default function DashboardPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Recent Activity */}
-          <Card>
+          <Card className="admin-card">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-slate-800 dark:text-white">最近活动</h3>
-                <span className="text-xs px-2 py-1 bg-muted rounded-full text-muted-foreground">实时</span>
+                <span className="text-xs px-2 py-1 bg-[var(--accent)]/10 rounded-full text-[var(--accent)]">实时</span>
               </div>
               <div className="space-y-3">
                 {recentActivity.map((activity) => (
-                  <div key={activity.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
-                      <span className="text-sm font-medium text-blue-600 dark:text-blue-400">{activity.user.charAt(0)}</span>
+                  <div key={activity.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-[var(--accent)]/5 transition-colors">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500/20 to-amber-500/20 flex items-center justify-center">
+                      <span className="text-sm font-medium text-orange-600 dark:text-orange-400">{activity.user.charAt(0)}</span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-slate-700 dark:text-gray-200">{activity.user}</p>
@@ -105,25 +105,25 @@ export default function DashboardPage() {
           </Card>
 
           {/* Quick Actions */}
-          <Card>
+          <Card className="admin-card">
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold mb-4 text-slate-800 dark:text-white">快捷操作</h3>
               <div className="grid grid-cols-2 gap-3">
-                <Button variant="outline" className="h-20 flex-col items-center justify-center gap-2 hover:bg-blue-50 dark:hover:bg-blue-950/30 hover:border-blue-200 dark:hover:border-blue-800 transition-all group">
-                  <div className="p-2 rounded-lg bg-blue-500/10 group-hover:bg-blue-500 group-hover:text-white transition-colors">
-                    <MessageCircle className="h-5 w-5 text-blue-500 group-hover:text-white" />
+                <Button variant="outline" className="h-20 flex-col items-center justify-center gap-2 hover:bg-orange-50 dark:hover:bg-orange-950/30 hover:border-orange-200 dark:hover:border-orange-800 transition-all group">
+                  <div className="p-2 rounded-lg bg-orange-500/10 group-hover:bg-orange-500 group-hover:text-white transition-colors">
+                    <MessageCircle className="h-5 w-5 text-orange-500 group-hover:text-white" />
                   </div>
                   <span className="text-sm font-medium text-slate-600 dark:text-gray-200">消息</span>
                 </Button>
-                <Button variant="outline" className="h-20 flex-col items-center justify-center gap-2 hover:bg-green-50 dark:hover:bg-green-950/30 hover:border-green-200 dark:hover:border-green-800 transition-all group">
-                  <div className="p-2 rounded-lg bg-green-500/10 group-hover:bg-green-500 group-hover:text-white transition-colors">
-                    <FileText className="h-5 w-5 text-green-500 group-hover:text-white" />
+                <Button variant="outline" className="h-20 flex-col items-center justify-center gap-2 hover:bg-amber-50 dark:hover:bg-amber-950/30 hover:border-amber-200 dark:hover:border-amber-800 transition-all group">
+                  <div className="p-2 rounded-lg bg-amber-500/10 group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                    <FileText className="h-5 w-5 text-amber-500 group-hover:text-white" />
                   </div>
                   <span className="text-sm font-medium text-slate-600 dark:text-gray-200">文件</span>
                 </Button>
-                <Button variant="outline" className="h-20 flex-col items-center justify-center gap-2 hover:bg-purple-50 dark:hover:bg-purple-950/30 hover:border-purple-200 dark:hover:border-purple-800 transition-all group">
-                  <div className="p-2 rounded-lg bg-purple-500/10 group-hover:bg-purple-500 group-hover:text-white transition-colors">
-                    <Settings className="h-5 w-5 text-purple-500 group-hover:text-white" />
+                <Button variant="outline" className="h-20 flex-col items-center justify-center gap-2 hover:bg-yellow-50 dark:hover:bg-yellow-950/30 hover:border-yellow-200 dark:hover:border-yellow-800 transition-all group">
+                  <div className="p-2 rounded-lg bg-yellow-500/10 group-hover:bg-yellow-500 group-hover:text-white transition-colors">
+                    <Settings className="h-5 w-5 text-yellow-500 group-hover:text-white" />
                   </div>
                   <span className="text-sm font-medium text-slate-600 dark:text-gray-200">设置</span>
                 </Button>
@@ -139,7 +139,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Welcome Section */}
-        <Card>
+        <Card className="admin-card">
           <CardContent className="p-6">
             <div className="flex items-start gap-4">
               <div className="p-3 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20">
@@ -151,7 +151,7 @@ export default function DashboardPage() {
                   您的应用程序仪表盘已准备就绪。从左侧导航栏访问各种功能，开启您的私密交流之旅。
                 </p>
               </div>
-              <Button className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 shadow-lg shadow-blue-500/25">
+              <Button className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-lg shadow-orange-500/25">
                 开始探索
               </Button>
             </div>

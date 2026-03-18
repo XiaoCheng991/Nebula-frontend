@@ -120,22 +120,22 @@ export default function ChatPage() {
     <ProtectedRoute>
       <ChatLayout>
         {/*手动计算固定距离*/}
-        <div className="flex h-[calc(100vh-85px)] overflow-hidden bg-gradient-to-br from-muted/50 to-background">
+        <div className="flex h-[calc(100vh-85px)] overflow-hidden bg-gradient-to-br from-[var(--accent)]/5 via-transparent to-[var(--accent)]/3">
         {/* Sidebar - Contact list */}
-        <div className="h-full border-r bg-background flex flex-col shadow-sm pl-2">
+        <div className="h-full border-r border-[var(--glass-border)] bg-white/50 dark:bg-black/50 backdrop-blur-xl flex flex-col shadow-sm pl-2">
           {/* Header */}
-          <div className="p-4 border-b bg-background">
+          <div className="p-4 border-b border-[var(--glass-border)] bg-white/50 dark:bg-black/50 backdrop-blur-xl">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-foreground">聊天</h2>
               <div className="flex gap-2">
-                <Button variant="ghost" size="icon" className="hover:bg-muted">
+                <Button variant="ghost" size="icon" className="hover:bg-white/10 dark:hover:bg-white/5">
                   <UserPlus className="h-5 w-5 text-muted-foreground" />
                 </Button>
-                <Button variant="ghost" size="icon" className="hover:bg-muted">
+                <Button variant="ghost" size="icon" className="hover:bg-white/10 dark:hover:bg-white/5">
                   <Users className="h-5 w-5 text-muted-foreground" />
                 </Button>
                 <Link href="/dashboard">
-                  <Button variant="ghost" size="icon" className="hover:bg-muted">
+                  <Button variant="ghost" size="icon" className="hover:bg-white/10 dark:hover:bg-white/5">
                     <MoreVertical className="h-5 w-5 text-muted-foreground" />
                   </Button>
                 </Link>
@@ -146,7 +146,7 @@ export default function ChatPage() {
               <Input
                 type="text"
                 placeholder="搜索对话..."
-                className="pl-10 bg-muted border-border focus:border-blue-400 focus:ring-blue-400/20"
+                className="pl-10 bg-white/50 dark:bg-white/5 border-[var(--glass-border)] focus:border-[var(--accent)] focus:ring-[var(--accent)]/20"
               />
             </div>
           </div>
@@ -159,21 +159,21 @@ export default function ChatPage() {
                 <div
                   key={conversation.id}
                   className={cn(
-                    "flex items-center gap-3 p-3 hover:bg-muted cursor-pointer transition-all duration-200 border-l-4",
+                    "flex items-center gap-3 p-3 hover:bg-[var(--accent)]/5 cursor-pointer transition-all duration-200 border-l-4",
                     activeConversation === conversation.id
-                      ? "bg-blue-50 border-l-blue-500 dark:bg-blue-950/30"
+                      ? "bg-orange-50 border-l-orange-500 dark:bg-orange-950/30"
                       : "border-l-transparent"
                   )}
                   onClick={() => setActiveConversation(conversation.id)}
                 >
                   <div className="relative">
-                    <Avatar className="w-12 h-12 ring-2 ring-muted">
+                    <Avatar className="w-12 h-12 ring-2 ring-[var(--glass-border)]">
                       <AvatarImage src={conversation.avatar} />
                       <AvatarFallback className={cn(
                         "text-lg",
                         conversation.type === 'group'
-                          ? "bg-gradient-to-br from-violet-400 to-violet-500 text-white"
-                          : "bg-gradient-to-br from-blue-400 to-blue-500 text-white"
+                          ? "bg-gradient-to-br from-amber-400 to-orange-500 text-white"
+                          : "bg-gradient-to-br from-orange-400 to-orange-500 text-white"
                       )}>
                         {conversation.type === 'group' ? '👥' : conversation.name.charAt(0)}
                       </AvatarFallback>
@@ -200,7 +200,7 @@ export default function ChatPage() {
                         {conversation.lastMessage}
                       </p>
                       {conversation.unread > 0 && (
-                        <span className="bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center ml-2 font-medium">
+                        <span className="bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center ml-2 font-medium">
                           {conversation.unread}
                         </span>
                       )}
@@ -215,20 +215,20 @@ export default function ChatPage() {
         </div>
 
         {/* Chat Area */}
-        <div className="h-full flex-1 flex flex-col bg-background/50 backdrop-blur-sm">
+        <div className="h-full flex-1 flex flex-col bg-white/50 dark:bg-black/50 backdrop-blur-sm">
           {activeConv ? (
             <div className="flex flex-col h-full">
               {/* Chat Header */}
-              <div className="border-b p-4 flex items-center justify-between bg-background shadow-sm z-10">
+              <div className="border-b border-[var(--glass-border)] p-4 flex items-center justify-between bg-white/50 dark:bg-black/50 backdrop-blur-xl shadow-sm z-10">
                 <div className="flex items-center gap-3">
                   <div className="relative">
-                    <Avatar className="w-10 h-10 ring-2 ring-muted">
+                    <Avatar className="w-10 h-10 ring-2 ring-[var(--glass-border)]">
                       <AvatarImage src={activeConv.avatar} />
                       <AvatarFallback className={cn(
                         "font-medium",
                         activeConv.type === 'group'
-                          ? "bg-gradient-to-br from-violet-400 to-violet-500 text-white"
-                          : "bg-gradient-to-br from-blue-400 to-blue-500 text-white"
+                          ? "bg-gradient-to-br from-amber-400 to-orange-500 text-white"
+                          : "bg-gradient-to-br from-orange-400 to-orange-500 text-white"
                       )}>
                         {activeConv.type === 'group' ? '👥' : activeConv.name.charAt(0)}
                       </AvatarFallback>
@@ -243,13 +243,13 @@ export default function ChatPage() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="ghost" size="icon" className="hover:bg-muted">
+                  <Button variant="ghost" size="icon" className="hover:bg-white/10 dark:hover:bg-white/5">
                     <Phone className="h-5 w-5 text-muted-foreground" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="hover:bg-muted">
+                  <Button variant="ghost" size="icon" className="hover:bg-white/10 dark:hover:bg-white/5">
                     <Video className="h-5 w-5 text-muted-foreground" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="hover:bg-muted">
+                  <Button variant="ghost" size="icon" className="hover:bg-white/10 dark:hover:bg-white/5">
                     <MoreVertical className="h-5 w-5 text-muted-foreground" />
                   </Button>
                 </div>
@@ -258,12 +258,12 @@ export default function ChatPage() {
               {/* Messages & Input Container - Use flex to ensure input stays at bottom */}
               <div className="flex-1 flex flex-col">
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-gradient-to-b from-muted/50 to-background">
+                <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-gradient-to-b from-[var(--accent)]/5 to-transparent">
                   {messages.map((message, index) => (
                     <div key={message.id} className="flex flex-col items-start w-full">
                       {/* 时间标签 - 仅在间隔超过5分钟时显示 */}
                       {shouldShowTime(index, messages) && (
-                        <div className="self-center my-2 px-3 py-1 bg-muted text-muted-foreground text-xs rounded-full">
+                        <div className="self-center my-2 px-3 py-1 bg-[var(--accent)]/10 text-muted-foreground text-xs rounded-full">
                           {formatTime(message.timestamp instanceof Date ? message.timestamp : new Date(message.timestamp))}
                         </div>
                       )}
@@ -272,8 +272,8 @@ export default function ChatPage() {
                           className={cn(
                             "max-w-xs lg:max-w-md px-4 py-2 rounded-2xl shadow-sm transition-all duration-200 hover:shadow-md",
                             message.senderId === 'me'
-                              ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-br-sm ml-auto'
-                              : 'bg-background text-foreground rounded-tl-sm border border-border mr-auto'
+                              ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-br-sm ml-auto'
+                              : 'bg-white/80 dark:bg-white/5 text-foreground rounded-tl-sm border border-[var(--glass-border)] mr-auto'
                           )}
                         >
                           <p className="leading-relaxed">{message.content}</p>
@@ -285,9 +285,9 @@ export default function ChatPage() {
                 </div>
 
                 {/* Message Input - Fixed at bottom */}
-                <div className="border-t p-2 bg-background shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] flex-shrink-0">
+                <div className="border-t border-[var(--glass-border)] p-2 bg-white/50 dark:bg-black/50 backdrop-blur-xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] flex-shrink-0">
                   <div className="flex items-end gap-2">
-                    <div className="flex-1 bg-muted rounded-2xl p-2 border border-border focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-400/20 transition-all">
+                    <div className="flex-1 bg-white/50 dark:bg-white/5 rounded-2xl p-2 border border-[var(--glass-border)] focus-within:border-[var(--accent)] focus-within:ring-2 focus-within:ring-[var(--accent)]/20 transition-all">
                       <textarea
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
@@ -303,8 +303,8 @@ export default function ChatPage() {
                       className={cn(
                         "h-10 w-10 p-0 rounded-xl transition-all duration-200",
                         newMessage.trim()
-                          ? "bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg shadow-blue-500/30"
-                          : "bg-muted"
+                          ? "bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-lg shadow-orange-500/30"
+                          : "bg-[var(--glass-bg)]"
                       )}
                     >
                       <Send className="h-4 w-4" />
@@ -314,10 +314,10 @@ export default function ChatPage() {
               </div>
             </div>
           ) : (
-            <div className="flex-1 flex items-center justify-center text-muted-foreground bg-gradient-to-br from-muted/50 to-background">
+            <div className="flex-1 flex items-center justify-center text-muted-foreground bg-gradient-to-br from-[var(--accent)]/5 to-transparent">
               <div className="text-center">
-                <div className="w-20 h-20 mx-auto mb-4 bg-muted rounded-full flex items-center justify-center">
-                  <MessageCircle className="h-10 w-10" />
+                <div className="w-20 h-20 mx-auto mb-4 bg-white/50 dark:bg-white/5 rounded-full flex items-center justify-center">
+                  <MessageCircle className="h-10 w-10 text-[var(--accent)]" />
                 </div>
                 <p className="text-lg font-medium">选择一个聊天开始对话</p>
                 <p className="text-sm mt-1">从左侧选择一个对话或创建新对话</p>

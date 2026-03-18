@@ -130,7 +130,7 @@ export function ResizableTable({
                     position: 'sticky',
                     top: 0,
                     zIndex: 10,
-                    backgroundColor: 'var(--glass-bg)',
+                    backgroundColor: 'transparent',
                     backdropFilter: 'var(--glass-blur)',
                     WebkitBackdropFilter: 'var(--glass-blur)',
                     borderBottom: '1px solid var(--glass-border)'
@@ -173,7 +173,7 @@ export function ResizableTable({
               data.map((row, rowIndex) => (
                 <tr
                   key={row.id || rowIndex}
-                  className="hover:bg-[var(--glass-bg)] transition-colors"
+                  className="hover:bg-[rgba(245,166,35,0.05)] transition-colors"
                 >
                   {columns.map((column) => (
                     <td

@@ -152,7 +152,7 @@
 }
 
 .admin-table th {
-  background: var(--glass-bg);
+  background: transparent;
   color: var(--text-tertiary);
   font-size: 0.75rem;
   font-weight: 600;
@@ -183,7 +183,7 @@
 }
 
 .admin-table tbody tr:hover {
-  background: var(--glass-bg);
+  background: rgba(245, 166, 35, 0.05);
 }
 
 .admin-table tbody tr:last-child td {
@@ -621,6 +621,127 @@
   background: var(--glass-bg);
   border-radius: 0.25rem;
   color: var(--text-tertiary);
+}
+
+.form-input.text-mono {
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+/* ===== 确认弹窗 ===== */
+.confirm-dialog-content {
+  background: var(--bg-base) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 1rem !important;
+  box-shadow: var(--shadow-sm) !important;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  padding: 0 !important;
+  max-width: 26rem !important;
+  overflow: hidden;
+}
+
+.confirm-dialog-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1.75rem 1.5rem 1rem;
+  gap: 0.75rem;
+}
+
+.confirm-dialog-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.confirm-dialog-icon-wrapper[data-variant="default"] {
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  color: var(--accent);
+}
+
+.confirm-dialog-icon-wrapper[data-variant="danger"] {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #ef4444;
+}
+
+.confirm-dialog-title {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.confirm-dialog-description {
+  font-size: 0.875rem;
+  color: var(--text-tertiary);
+  line-height: 1.5;
+  margin-top: 0;
+}
+
+.confirm-dialog-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem 1.5rem;
+}
+
+.confirm-dialog-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--duration) var(--ease);
+  border: none;
+  min-width: 5rem;
+}
+
+.confirm-dialog-btn-cancel {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+}
+
+.confirm-dialog-btn-cancel:hover {
+  background: var(--glass-bg-hover);
+  color: var(--text-primary);
+}
+
+.confirm-dialog-btn-confirm {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.confirm-dialog-btn-confirm:hover {
+  box-shadow: var(--shadow-glow);
+  transform: translateY(-1px);
+}
+
+.confirm-dialog-btn-danger {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.confirm-dialog-btn-danger:hover {
+  background: rgba(239, 68, 68, 0.22);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.15);
 }
 
 /* ===== 响应式网格 ===== */

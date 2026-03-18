@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Users, Plus, Search, Edit, Trash2, Shield, RefreshCw } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { useConfirm } from '@/components/ui/confirm-dialog';
 import { getUserList, updateUserStatus, deleteUser } from '@/lib/api/modules/admin';
 import type { SysUser } from '@/lib/api/modules/admin';
 import { ResizableTable, formatDate } from '@/app/admin/_components/table/ResizableTable';
@@ -18,6 +19,7 @@ export default function UserManagementPage() {
     pages: 0,
   });
   const { toast } = useToast();
+  const { confirm, ConfirmDialog } = useConfirm();
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -80,7 +82,14 @@ export default function UserManagementPage() {
   };
 
   const handleDelete = async (user: SysUser) => {
-    if (!confirm(`确定要删除用户 ${user.username} 吗？此操作不可恢复。`)) {
+    const confirmed = await confirm({
+      title: '删除用户',
+      description: `确定要删除用户 ${user.username} 吗？此操作不可恢复。`,
+      confirmText: '删除',
+      cancelText: '取消',
+      variant: 'danger',
+    });
+    if (!confirmed) {
       return;
     }
     try {
@@ -267,6 +276,9 @@ export default function UserManagementPage() {
           />
         </div>
       </div>
+
+      {/* 确认弹窗 */}
+      <ConfirmDialog />
     </div>
   );
 }

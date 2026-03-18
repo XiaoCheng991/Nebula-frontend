@@ -6,11 +6,11 @@
 /* ===== 暗色主题 ===== */
 :root,
 [data-theme="dark"] {
-  --bg-base: #08080c;
-  --glass-bg: rgba(255, 255, 255, 0.04);
-  --glass-bg-hover: rgba(255, 255, 255, 0.07);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-blur: blur(24px);
+  --bg-base: #1c1c1e;
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-bg-hover: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.10);
+  --glass-blur: none;
 
   --text-primary: rgba(255, 255, 255, 0.95);
   --text-secondary: rgba(255, 255, 255, 0.6);
@@ -25,26 +25,26 @@
   --shadow-glow: 0 0 24px rgba(245, 166, 35, 0.15);
 }
 
-/* ===== 亮色主题 ===== */
+/* ===== 亮色主题 - 纯净白色基调 ===== */
 [data-theme="light"],
 html[data-theme="light"] {
-  --bg-base: #f5f5f7;
-  --glass-bg: rgba(255, 255, 255, 0.72);
-  --glass-bg-hover: rgba(255, 255, 255, 0.88);
+  --bg-base: #ffffff;
+  --glass-bg: rgba(255, 255, 255, 0.95);
+  --glass-bg-hover: rgba(255, 255, 255, 0.95);
   --glass-border: rgba(0, 0, 0, 0.06);
   --glass-blur: blur(24px);
 
-  --text-primary: rgba(0, 0, 0, 0.88);
-  --text-secondary: rgba(0, 0, 0, 0.55);
-  --text-tertiary: rgba(0, 0, 0, 0.35);
-  --text-muted: rgba(0, 0, 0, 0.2);
+  --text-primary: rgba(0, 0, 0, 0.90);
+  --text-secondary: rgba(0, 0, 0, 0.60);
+  --text-tertiary: rgba(0, 0, 0, 0.40);
+  --text-muted: rgba(0, 0, 0, 0.20);
 
-  --accent: #2563eb;
-  --accent-soft: rgba(37, 99, 235, 0.08);
-  --accent-border: rgba(37, 99, 235, 0.2);
+  --accent: #f59e0b;
+  --accent-soft: rgba(245, 158, 11, 0.10);
+  --accent-border: rgba(245, 158, 11, 0.25);
 
-  --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.06);
-  --shadow-glow: 0 0 24px rgba(37, 99, 235, 0.1);
+  --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.08);
+  --shadow-glow: 0 0 24px rgba(245, 158, 11, 0.12);
 }
 
 /* ===== 全局变量 ===== */
@@ -83,8 +83,8 @@ html[data-theme="light"] {
 
 [data-theme="light"] .admin-layout::before {
   background:
-    radial-gradient(ellipse 80% 50% at 20% 20%, rgba(37, 99, 235, 0.06), transparent),
-    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(37, 99, 235, 0.04), transparent);
+    radial-gradient(ellipse 80% 50% at 20% 20%, rgba(245, 158, 11, 0.02), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(245, 158, 11, 0.01), transparent);
 }
 
 /* ===== 侧边栏 ===== */
@@ -107,8 +107,8 @@ html[data-theme="light"] {
 }
 
 [data-theme="light"] .admin-header {
-  background: rgba(255, 255, 255, 0.6);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.80);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 /* 搜索框特殊样式 - 增加左右边距 */
@@ -347,7 +347,7 @@ html[data-theme="light"] {
 }
 
 .admin-table th {
-  background: var(--glass-bg);
+  background: transparent;
   color: var(--text-tertiary);
   font-size: 11px;
   font-weight: 600;
@@ -366,7 +366,7 @@ html[data-theme="light"] {
 }
 
 .admin-table tbody tr:hover td {
-  background: var(--glass-bg);
+  background: rgba(245, 166, 35, 0.05);
 }
 
 /* ===== 徽章 ===== */

@@ -70,6 +70,7 @@ export interface SysMenu {
   sortOrder?: number
   isVisible?: boolean
   isSystem?: boolean
+  parentName?: string
   children?: SysMenu[]
   createTime?: string
   updateTime?: string

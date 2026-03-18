@@ -195,10 +195,10 @@ export default function SettingsPage() {
         </div>
 
         {/* 头像设置 */}
-        <Card>
+        <Card className="admin-card">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5 text-blue-500" />
+              <User className="h-5 w-5 text-orange-500" />
               个人头像
             </CardTitle>
             <CardDescription>
@@ -213,13 +213,13 @@ export default function SettingsPage() {
                   nickname={profile.nickname}
                   username={profile.username}
                   size="lg"
-                  className="w-24 h-24 shadow-lg ring-4 ring-blue-500/10"
+                  className="w-24 h-24 shadow-lg ring-4 ring-orange-500/10"
                 />
               </div>
 
               <div className="flex-1">
                 <Label htmlFor="avatar-upload" className="cursor-pointer">
-                  <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg shadow-blue-500/25">
+                  <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all shadow-lg shadow-orange-500/25">
                     {uploading ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -254,10 +254,10 @@ export default function SettingsPage() {
         </Card>
 
         {/* 基本信息 */}
-        <Card>
+        <Card className="admin-card">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5 text-cyan-500" />
+              <User className="h-5 w-5 text-amber-500" />
               基本信息
             </CardTitle>
             <CardDescription>
@@ -273,7 +273,7 @@ export default function SettingsPage() {
                   id="username"
                   value={profile.username}
                   disabled
-                  className="bg-muted"
+                  className="bg-[var(--glass-bg)]"
                 />
                 <p className="text-xs text-muted-foreground">用户名唯一且不可修改</p>
               </div>
@@ -299,7 +299,7 @@ export default function SettingsPage() {
         </Card>
 
         {/* 个人简介 */}
-        <Card>
+        <Card className="admin-card">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-2">
               <span className="text-xl">💬</span>
@@ -332,7 +332,7 @@ export default function SettingsPage() {
               <Button
                 onClick={handleSave}
                 disabled={saving}
-                className="gap-2 px-6 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg shadow-blue-500/25"
+                className="gap-2 px-6 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-lg shadow-orange-500/25"
               >
                 {saving ? (
                   <>

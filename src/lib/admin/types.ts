@@ -48,8 +48,16 @@ export interface AdminMenu {
   sortOrder: number
   type: 'directory' | 'menu' | 'button'
   permissionCode?: string
+  parentName?: string
+  visible?: boolean
+  status?: 'ACTIVE' | 'INACTIVE'
   children?: AdminMenu[]
   createdAt?: string
+  // 用于扁平化表格展示
+  _level?: number
+  _parentPath?: string
+  _currentPath?: string
+  _sortOrder?: number
 }
 
 export interface Dictionary {
@@ -172,6 +180,9 @@ export function transformSysMenuToAdminMenu(backendMenu: BackendSysMenu): AdminM
     sortOrder: backendMenu.sortOrder || 0,
     type: (backendMenu.menuType as 'directory' | 'menu' | 'button') || 'menu',
     permissionCode: backendMenu.permission,
+    parentName: backendMenu.parentName,
+    visible: backendMenu.isVisible !== false,
+    status: 'ACTIVE',
     children: backendMenu.children?.map(transformSysMenuToAdminMenu),
     createdAt: backendMenu.createTime,
   }
