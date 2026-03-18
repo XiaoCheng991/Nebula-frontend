@@ -95,6 +95,26 @@
   @apply bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl;
 }
 
+/* 液态毛玻璃变量 - 全局可用 */
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-bg-hover: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-blur: blur(24px);
+}
+
+.dark {
+  --glass-bg: rgba(28, 28, 30, 0.85);
+  --glass-bg-hover: rgba(38, 38, 40, 0.9);
+  --glass-border: rgba(255, 255, 255, 0.10);
+  --glass-blur: blur(24px);
+}
+
+/* 暗色模式 body 背景 */
+.dark body {
+  background-color: #1c1c1e;
+}
+
 /* Bento grid layout */
 .bento-grid {
   @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6;

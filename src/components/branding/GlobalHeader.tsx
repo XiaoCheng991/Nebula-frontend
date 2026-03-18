@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { UserAvatar } from '@/components/ui/user-avatar';
 import { LogoutButton } from '@/components/auth/LogoutButton';
 import { useUser } from '@/lib/user-context';
-import { MessageCircle, Settings, Sparkles, FolderUp, LogOut, Loader2, Moon, Sun, Monitor, ChevronDown, Shield, Zap } from 'lucide-react';
+import { MessageCircle, Settings, Sparkles, FolderUp, LogOut, Loader2, Moon, Sun, Monitor, ChevronDown, Shield, Zap, BookOpen, User, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useThemeStore } from '@/hooks/useTheme';
 import { useAdminStore } from '@/hooks/useAdminStore';
@@ -201,11 +201,11 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
               <span className="text-sm font-medium hidden sm:block">文件</span>
             </Link>
             <Link
-              href="/settings"
+              href="/blog"
               className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group"
             >
-              <Settings className="h-5 w-5 text-purple-500 group-hover:scale-110 transition-transform" />
-              <span className="text-sm font-medium hidden sm:block">设置</span>
+              <BookOpen className="h-5 w-5 text-purple-500 group-hover:scale-110 transition-transform" />
+              <span className="text-sm font-medium hidden sm:block">博客</span>
             </Link>
           </nav>
         </div>
@@ -219,19 +219,48 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
               <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
             </div>
           ) : user ? (
-            <>
-              <Link href="/settings" className="flex items-center gap-2.5 p-2 rounded-xl bg-white/10 dark:bg-white/5 hover:bg-white/20 dark:hover:bg-white/10 transition-all duration-300 group">
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-300 hidden sm:block group-hover:text-[var(--accent)] transition-colors">
-                  Hi {user.nickname || user.username}!
-                </span>
-                <UserAvatar
-                  avatarUrl={user.avatarUrl}
-                  nickname={user.nickname}
-                  size="sm"
-                />
-              </Link>
-              <LogoutButton iconOnly />
-            </>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2.5 p-2 rounded-xl bg-white/10 dark:bg-white/5 hover:bg-white/20 dark:hover:bg-white/10 transition-all duration-300 group focus-visible:ring-0 focus-visible:ring-offset-0 outline-none">
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300 hidden sm:block group-hover:text-[var(--accent)] transition-colors">
+                    Hi {user.nickname || user.username}!
+                  </span>
+                  <UserAvatar
+                    avatarUrl={user.avatarUrl}
+                    nickname={user.nickname}
+                    size="sm"
+                  />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 rounded-2xl border-0 shadow-2xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl p-2">
+                <div className="px-3 py-2 mb-1 border-b border-[var(--glass-border)]">
+                  <p className="text-sm font-medium text-slate-800 dark:text-white">{user.nickname || user.username}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">@{user.username}</p>
+                </div>
+                <DropdownMenuItem asChild className="flex items-center gap-3 cursor-pointer rounded-xl py-2.5 px-3">
+                  <Link href="/settings">
+                    <Settings className="h-4 w-4 text-slate-500" />
+                    <span className="font-medium">设置</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="flex items-center gap-3 cursor-pointer rounded-xl py-2.5 px-3">
+                  <Link href="/settings">
+                    <User className="h-4 w-4 text-slate-500" />
+                    <span className="font-medium">个人资料</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="flex items-center gap-3 cursor-pointer rounded-xl py-2.5 px-3">
+                  <Link href="/help">
+                    <HelpCircle className="h-4 w-4 text-slate-500" />
+                    <span className="font-medium">帮助中心</span>
+                  </Link>
+                </DropdownMenuItem>
+                <div className="h-px bg-[var(--glass-border)] my-1" />
+                <DropdownMenuItem className="flex items-center gap-3 cursor-pointer rounded-xl py-2.5 px-3 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30">
+                  <LogoutButton iconOnly={false} />
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <>
               <Link

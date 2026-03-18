@@ -72,7 +72,7 @@ export const apiLogger = {
   requestSuccess(metadata: RequestMetadata) {
     if (!isDevelopment) return
 
-    log('info', formatRequestMetadata(metadata))
+    log('debug', formatRequestMetadata(metadata))
   },
 
   /**
