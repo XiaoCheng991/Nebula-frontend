@@ -116,7 +116,7 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="flex items-center gap-1 w-auto px-2 rounded-xl hover:bg-white/10 dark:hover:bg-white/5">
+          <Button variant="ghost" size="icon" className="flex items-center gap-1 w-auto px-2 rounded-xl hover:bg-white/10 dark:hover:bg-white/5 focus-visible:ring-0 focus-visible:ring-offset-0">
             {getThemeIcon()}
             <ChevronDown className="h-4 w-4 opacity-50" />
           </Button>
@@ -150,20 +150,17 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
       <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-[var(--accent)]/3 rounded-full blur-3xl translate-y-32 pointer-events-none" />
 
       {/* 头部内容 */}
-      <div className="relative z-10 container mx-auto px-6 py-3 grid grid-cols-3 items-center bg-white/50 dark:bg-black/50 backdrop-blur-xl border-b border-[var(--glass-border)]">
+      <div className="relative z-10 px-6 py-3 grid grid-cols-3 items-center bg-white/70 dark:bg-gray-900/80 backdrop-blur-xl border-b border-[var(--glass-border)]">
         {/* 左侧 - Logo */}
         <div className="flex items-center justify-start">
           <Link href="/home" className="flex items-center gap-3 group">
-            <div className="relative">
-              <img
-                src={src}
-                alt="NebulaHub Logo"
-                style={{ height: 40, width: 'auto' }}
-                onError={handleError}
-                className="rounded-xl transition-transform duration-300 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[var(--accent)]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </div>
+            <img
+              src={src}
+              alt="NebulaHub Logo"
+              style={{ height: 40, width: 'auto' }}
+              onError={handleError}
+              className="rounded-xl transition-transform duration-300 group-hover:scale-110"
+            />
             <div className="flex flex-col">
               <span className="text-lg font-bold tracking-tight">
                 <span className="text-slate-800 dark:text-white">Nebula</span>

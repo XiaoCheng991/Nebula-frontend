@@ -83,7 +83,7 @@ export default function Home() {
           {/* Bento Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Feature 1: 私密聊天 */}
-            <Card className="admin-card overflow-hidden group cursor-pointer border-0">
+            <Card className="admin-card relative overflow-hidden group cursor-pointer border-0">
               <CardContent className="p-6 pb-16">
                 <div className="flex items-start gap-4 mb-4">
                   <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/20 group-hover:scale-110 transition-transform flex-shrink-0">
@@ -111,7 +111,7 @@ export default function Home() {
             </Card>
 
             {/* Feature 2: 单聊群聊 */}
-            <Card className="admin-card overflow-hidden group cursor-pointer border-0">
+            <Card className="admin-card relative overflow-hidden group cursor-pointer border-0">
               <CardContent className="p-6 pb-16">
                 <div className="flex items-start gap-4 mb-4">
                   <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/20 group-hover:scale-110 transition-transform flex-shrink-0">
@@ -139,7 +139,7 @@ export default function Home() {
             </Card>
 
             {/* Feature 3: 大文件传输 */}
-            <Card className="admin-card overflow-hidden group cursor-pointer border-0">
+            <Card className="admin-card relative overflow-hidden group cursor-pointer border-0">
               <CardContent className="p-6 pb-16">
                 <div className="flex items-start gap-4 mb-4">
                   <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-amber-500 rounded-xl flex items-center justify-center shadow-lg shadow-yellow-500/20 group-hover:scale-110 transition-transform flex-shrink-0">
@@ -167,7 +167,7 @@ export default function Home() {
             </Card>
 
             {/* Feature 4: 原图分享 */}
-            <Card className="admin-card overflow-hidden group cursor-pointer border-0">
+            <Card className="admin-card relative overflow-hidden group cursor-pointer border-0">
               <CardContent className="p-6 pb-16">
                 <div className="flex items-start gap-4 mb-4">
                   <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-yellow-500 rounded-xl flex items-center justify-center shadow-lg shadow-orange-400/20 group-hover:scale-110 transition-transform flex-shrink-0">
@@ -195,7 +195,7 @@ export default function Home() {
             </Card>
 
             {/* Feature 5: 快速上手 */}
-            <Card className="admin-card overflow-hidden group cursor-pointer border-0">
+            <Card className="admin-card relative overflow-hidden group cursor-pointer border-0">
               <CardContent className="p-6 pb-16">
                 <div className="flex items-start gap-4 mb-4">
                   <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center shadow-lg shadow-amber-400/20 group-hover:scale-110 transition-transform flex-shrink-0">
@@ -223,7 +223,7 @@ export default function Home() {
             </Card>
 
             {/* Feature 6: 专属空间 */}
-            <Card className="admin-card overflow-hidden group cursor-pointer border-0">
+            <Card className="admin-card relative overflow-hidden group cursor-pointer border-0">
               <CardContent className="p-6 pb-16">
                 <div className="flex items-start gap-4 mb-4">
                   <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-xl flex items-center justify-center shadow-lg shadow-yellow-400/20 group-hover:scale-110 transition-transform flex-shrink-0">
@@ -256,7 +256,7 @@ export default function Home() {
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-24">
         <div className="max-w-3xl mx-auto text-center">
-          <div className="admin-card p-12 rounded-3xl">
+          <div className="admin-card relative p-12 rounded-3xl">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 text-slate-800 dark:text-white">
               准备好开始了吗？
             </h2>
