@@ -69,7 +69,7 @@ function MenuDetailDrawer({ menu, isOpen, onClose, onSave, isEdit }: MenuDetailD
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <SheetContent side="right" style={{ background: 'var(--bg-base)', borderColor: 'var(--glass-border)' }} className="sm:max-w-2xl overflow-y-auto">
+      <SheetContent side="right" style={{ background: 'var(--bg-base)', borderColor: 'var(--glass-border)' }} className="sm:max-w-2xl overflow-y-auto" onOpenAutoFocus={(e) => e.preventDefault()}>
         <SheetHeader className="pb-0">
           <SheetTitle className="text-base">{isEdit ? '编辑菜单' : '新增菜单'}</SheetTitle>
           <SheetDescription>
@@ -447,9 +447,9 @@ export default function MenusPage() {
       {/* 菜单表格 */}
       <div className="data-table-container">
         <div className="data-table-header">
-          <div>
+          <div className="data-table-header-left">
             <h2 className="data-table-title">菜单列表</h2>
-            <p className="data-table-description">共 {menus.length} 个顶级菜单</p>
+            <span className="data-table-description">共 {menus.length} 个顶级菜单</span>
           </div>
         </div>
 

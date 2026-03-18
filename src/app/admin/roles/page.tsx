@@ -168,25 +168,27 @@ export default function RoleManagementPage() {
       {/* 角色列表 */}
       <div className="data-table-container">
         <div className="data-table-header">
-          <div>
+          <div className="data-table-header-left">
             <h2 className="data-table-title">角色列表</h2>
-            <p className="data-table-description">共 {pagination.total} 条记录</p>
+            <span className="data-table-description">共 {pagination.total} 条记录</span>
           </div>
-          <div className="search-container">
-            <div className="search-input-wrapper">
-              <Search className="search-icon" />
-              <input
-                type="text"
-                placeholder="搜索角色名称、标识..."
-                className="search-input"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              />
+          <div className="data-table-header-right">
+            <div className="search-container">
+              <div className="search-input-wrapper">
+                <Search className="search-icon" />
+                <input
+                  type="text"
+                  placeholder="搜索角色名称、标识..."
+                  className="search-input"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                />
+              </div>
+              <button className="btn-search" onClick={handleSearch}>
+                搜索
+              </button>
             </div>
-            <button className="btn-search" onClick={handleSearch}>
-              搜索
-            </button>
           </div>
         </div>
 

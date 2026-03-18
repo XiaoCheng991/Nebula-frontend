@@ -139,20 +139,22 @@ export default function PermissionsPage() {
       {/* 权限列表 */}
       <div className="data-table-container">
         <div className="data-table-header">
-          <div>
+          <div className="data-table-header-left">
             <h2 className="data-table-title">权限列表</h2>
-            <p className="data-table-description">共 {filteredPermissions.length} 条记录</p>
+            <span className="data-table-description">共 {filteredPermissions.length} 条记录</span>
           </div>
-          <div className="search-container">
-            <div className="search-input-wrapper">
-              <Search className="search-icon" />
-              <input
-                type="text"
-                placeholder="搜索权限..."
-                className="search-input"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+          <div className="data-table-header-right">
+            <div className="search-container">
+              <div className="search-input-wrapper">
+                <Search className="search-icon" />
+                <input
+                  type="text"
+                  placeholder="搜索权限..."
+                  className="search-input"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
             </div>
           </div>
         </div>

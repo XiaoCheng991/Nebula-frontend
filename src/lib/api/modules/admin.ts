@@ -226,6 +226,8 @@ export interface SysDictData {
   dictValue: string
   sortOrder: number
   status: string // ACTIVE-启用, DISABLED-禁用
+  isDefault?: boolean
+  remark?: string
   createTime?: string
   updateTime?: string
 }
@@ -269,10 +271,53 @@ export async function deleteDictType(dictId: number): Promise<ApiResponse<void>>
 }
 
 /**
- * 获取字典数据列表
+ * 新增字典类型
+ */
+export async function addDictType(data: Partial<SysDictType>): Promise<ApiResponse<void>> {
+  return post<ApiResponse<void>>('/api/admin/system/dict-type', data)
+}
+
+/**
+ * 更新字典类型
+ */
+export async function updateDictType(data: Partial<SysDictType>): Promise<ApiResponse<void>> {
+  return put<ApiResponse<void>>('/api/admin/system/dict-type', data)
+}
+
+// ======== 字典数据管理 API ========
+
+/**
+ * 获取字典数据列表（分页）
  */
 export async function getDictDataList(
-  dictTypeId: number
-): Promise<ApiResponse<SysDictData[]>> {
-  return get<ApiResponse<SysDictData[]>>(`/api/admin/system/dict-data/${dictTypeId}/list`)
+  dictTypeId: number,
+  pageNum: number = 1,
+  pageSize: number = 10,
+): Promise<ApiResponse<PageResponse<SysDictData>>> {
+  const params = new URLSearchParams()
+  params.append('dictTypeId', dictTypeId.toString())
+  params.append('pageNum', pageNum.toString())
+  params.append('pageSize', pageSize.toString())
+  return get<ApiResponse<PageResponse<SysDictData>>>(`/api/admin/system/dict-data/list?${params.toString()}`)
+}
+
+/**
+ * 新增字典数据
+ */
+export async function addDictData(data: Partial<SysDictData>): Promise<ApiResponse<void>> {
+  return post<ApiResponse<void>>('/api/admin/system/dict-data', data)
+}
+
+/**
+ * 更新字典数据
+ */
+export async function updateDictData(data: Partial<SysDictData>): Promise<ApiResponse<void>> {
+  return put<ApiResponse<void>>('/api/admin/system/dict-data', data)
+}
+
+/**
+ * 删除字典数据
+ */
+export async function deleteDictData(dictDataId: number): Promise<ApiResponse<void>> {
+  return del<ApiResponse<void>>(`/api/admin/system/dict-data/${dictDataId}`)
 }

@@ -122,7 +122,7 @@ export function ResizableTable({
               {columns.map((column, index) => (
                 <th
                   key={column.key}
-                  className="relative px-4 py-3 text-left text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider select-none"
+                  className="relative text-left font-semibold text-[var(--text-tertiary)] uppercase tracking-wider select-none"
                   style={{
                     width: column.width,
                     minWidth: column.minWidth,
@@ -133,20 +133,25 @@ export function ResizableTable({
                     backgroundColor: 'transparent',
                     backdropFilter: 'var(--glass-blur)',
                     WebkitBackdropFilter: 'var(--glass-blur)',
-                    borderBottom: '1px solid var(--glass-border)'
+                    borderBottom: '1px solid var(--glass-border)',
+                    padding: '0.5rem 0.75rem',
+                    fontSize: '0.6875rem',
                   }}
                 >
                   <div className="flex items-center justify-between">
                     <span className="truncate">{column.header}</span>
-                    {/* 拖动调整手柄 */}
+                    {/* 拖动调整手柄 - 加宽到 16px 居中，更好选中 */}
                     {index < columns.length - 1 && (
                       <div
-                        className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-[var(--accent)] transition-colors"
+                        className="absolute top-0 bottom-0 cursor-col-resize"
+                        style={{ right: '-8px', width: '16px' }}
                         onMouseDown={(e) => {
                           e.preventDefault()
                           setResizing({ index, startX: e.clientX, startWidth: column.width || 150 })
                         }}
-                      />
+                      >
+                        <div className="absolute left-1/2 top-0 bottom-0 w-[3px] -translate-x-1/2 rounded-full bg-transparent transition-colors hover:bg-[var(--accent)] group-hover:bg-[var(--glass-border)]" />
+                      </div>
                     )}
                   </div>
                 </th>
@@ -156,7 +161,7 @@ export function ResizableTable({
           <tbody className="divide-y divide-[var(--glass-border)]">
             {loading ? (
               <tr>
-                <td colSpan={columns.length} className="px-4 py-12 text-center">
+                <td colSpan={columns.length} className="px-4 py-8 text-center">
                   <div className="loading-state">
                     <div className="loading-spinner" />
                     <span>加载中...</span>
@@ -165,7 +170,7 @@ export function ResizableTable({
               </tr>
             ) : data.length === 0 ? (
               <tr>
-                <td colSpan={columns.length} className="px-4 py-12 text-center">
+                <td colSpan={columns.length} className="px-4 py-8 text-center">
                   <div className="empty-state">{emptyText}</div>
                 </td>
               </tr>
@@ -178,14 +183,16 @@ export function ResizableTable({
                   {columns.map((column) => (
                     <td
                       key={column.key}
-                      className="px-4 py-3 text-sm text-[var(--text-secondary)]"
+                      className="text-[var(--text-secondary)]"
                       style={{
                         width: column.width,
                         minWidth: column.minWidth,
                         maxWidth: column.maxWidth,
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap'
+                        whiteSpace: 'nowrap',
+                        padding: '0.375rem 0.75rem',
+                        fontSize: '0.8125rem',
                       }}
                       title={String(renderCell(column, row, rowIndex))}
                     >

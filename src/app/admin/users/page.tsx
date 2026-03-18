@@ -239,11 +239,12 @@ export default function UserManagementPage() {
       {/* 用户列表 */}
       <div className="data-table-container">
         <div className="data-table-header">
-          <div>
+          <div className="data-table-header-left">
             <h2 className="data-table-title">用户列表</h2>
-            <p className="data-table-description">共 {pagination.total} 条记录</p>
+            <span className="data-table-description">共 {pagination.total} 条记录</span>
           </div>
-          <div className="search-container">
+          <div className="data-table-header-right">
+            <div className="search-container">
             <div className="search-input-wrapper">
               <Search className="search-icon" />
               <input
@@ -258,6 +259,7 @@ export default function UserManagementPage() {
             <button className="btn-search" onClick={handleSearch}>
               搜索
             </button>
+            </div>
           </div>
         </div>
 
