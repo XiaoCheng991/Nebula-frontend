@@ -59,6 +59,7 @@
     "@types/react-easy-crop": "^1.16.0",
     "@types/react-syntax-highlighter": "^15.5.13",
     "autoprefixer": "^10.4.20",
+    "babel-plugin-transform-remove-console": "^6.9.4",
     "eslint": "^8.57.1",
     "eslint-config-next": "14.2.14",
     "glob": "^10.4.5",

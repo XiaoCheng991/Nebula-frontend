@@ -4,26 +4,29 @@
  * 说明：
  * - Sa-Token token 由后端通过 Cookie 下发与校验
  * - 前端不再保存 access/refresh token，也不再负责刷新
- * - 这里仅维护一个“会话存在”的本地提示位，配合 user-info 接口做最终校验
+ * - 这里仅维护一个"会话存在"的本地提示位，配合 user-info 接口做最终校验
  */
 
 import { apiLogger } from '@/lib/utils/logger'
 
 const TOKEN_KEY = 'satoken'
-const AUTH_STATE_KEY = 'auth_session_active'
 
 function isBrowser(): boolean {
-  return typeof window !== 'undefined' && typeof window.localStorage !== 'undefined'
+  return typeof window !== 'undefined'
 }
 
-function setSessionState(isActive: boolean): void {
-  if (!isBrowser()) return
+/**
+ * 检查是否已经登录
+ *
+ * - 直接检查 Cookie 中的 token，不需要额外的 localStorage 状态位
+ * - Cookie 是浏览器原生机制，配合 httpOnly 属性更安全
+ * - 消除 XSS 伪造认证状态的风险
+ */
+export function isAuthenticated(): boolean {
+  if (!isBrowser()) return false
 
-  if (isActive) {
-    localStorage.setItem(AUTH_STATE_KEY, '1')
-  } else {
-    localStorage.removeItem(AUTH_STATE_KEY)
-  }
+  const cookies = document.cookie.split(';').map(c => c.trim())
+  return cookies.some(c => c.startsWith(`${TOKEN_KEY}=`))
 }
 
 /**
@@ -39,7 +42,7 @@ export function initTokenManager(): void {
  * 注意：若后端设置 HttpOnly，该值在浏览器端不可读，会返回 null。
  */
 export function getAccessToken(): string | null {
-  if (!isBrowser() || typeof document === 'undefined') return null
+  if (!isBrowser()) return null
 
   const cookies = document.cookie.split(';').map(c => c.trim())
   const tokenCookie = cookies.find(c => c.startsWith(`${TOKEN_KEY}=`))
@@ -50,40 +53,15 @@ export function getAccessToken(): string | null {
 }
 
 /**
- * 保存 Token 对（兼容旧调用）
- *
- * Sa-Token 场景下，token 应由后端 Set-Cookie 管理。
- * 这里仅更新本地会话提示状态。
- */
-export function setTokens(_tokens: { accessToken: string; refreshToken: string; expiresIn?: number }): void {
-  setSessionState(true)
-
-  apiLogger.auth('login', { session: 'cookie' })
-}
-
-export function markAuthenticated(): void {
-  setSessionState(true)
-}
-
-/**
- * 清除 Token
+ * 清除 Token（仅清除 Cookie，localStorage 不再使用）
  */
 export function clearTokens(): void {
   if (!isBrowser()) return
 
-  localStorage.removeItem(TOKEN_KEY)
-  localStorage.removeItem(AUTH_STATE_KEY)
+  // 清除 Cookie 中的 token
   document.cookie = `${TOKEN_KEY}=; path=/; max-age=0`
 
   apiLogger.auth('logout')
-}
-
-/**
- * 检查是否已登录
- */
-export function isAuthenticated(): boolean {
-  if (!isBrowser()) return false
-  return localStorage.getItem(AUTH_STATE_KEY) === '1'
 }
 
 /**
