@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -26,7 +26,24 @@ interface GitHubConfirmRequest {
   email?: string
 }
 
-export default function GitHubCallbackPage() {
+// Loading 状态组件
+function GitHubCallbackLoading() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 p-4">
+      <Card className="w-full max-w-md text-center">
+        <CardContent className="py-12">
+          <div className="flex justify-center mb-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          </div>
+          <p className="text-muted-foreground">正在处理GitHub登录...</p>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+// 实际的回调页面内容
+function GitHubCallbackContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [status, setStatus] = useState<"loading" | "confirm" | "success" | "error">("loading")
@@ -255,5 +272,14 @@ export default function GitHubCallbackPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+// 使用 Suspense 包装，解决 useSearchParams() 的静态生成问题
+export default function GitHubCallbackPage() {
+  return (
+    <Suspense fallback={<GitHubCallbackLoading />}>
+      <GitHubCallbackContent />
+    </Suspense>
   )
 }
