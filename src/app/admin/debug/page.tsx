@@ -48,12 +48,9 @@ export default function DebugPage() {
     setLoading(true);
     setError(null);
     try {
-      console.log('[Debug] 测试用户API...');
       const result = await getCurrentAdminUser();
-      console.log('[Debug] 用户API结果:', result);
       setApiResult(result);
     } catch (err) {
-      console.error('[Debug] API调用失败:', err);
       setError(err instanceof Error ? err.message : '未知错误');
     } finally {
       setLoading(false);
@@ -64,9 +61,7 @@ export default function DebugPage() {
     setLoading(true);
     setError(null);
     try {
-      console.log('[Debug] 重新加载管理员数据...');
       await loadAdminData();
-      console.log('[Debug] 加载完成，当前菜单:', useAdminStore.getState().menus);
       setApiResult(useAdminStore.getState().menus);
     } catch (err) {
       console.error('[Debug] 加载失败:', err);
