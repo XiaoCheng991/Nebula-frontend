@@ -1,7 +1,9 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react';
+
 const Card = dynamic(() => import('@/components/ui/card').then(mod => mod.Card), { ssr: false });
 const CardContent = dynamic(() => import('@/components/ui/card').then(mod => mod.CardContent), { ssr: false });
 const CardHeader = dynamic(() => import('@/components/ui/card').then(mod => mod.CardHeader), { ssr: false });
@@ -12,10 +14,19 @@ import { getCurrentUserMenus, getCurrentAdminUser } from '@/lib/api/modules/admi
 import { useAdminStore } from '@/hooks/useAdminStore';
 
 export default function DebugPage() {
+  const router = useRouter();
   const [apiResult, setApiResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { menus, loadAdminData } = useAdminStore();
+
+  // 添加认证检查
+  useEffect(() => {
+    const token = document.cookie.split(', ').find(row => row.startsWith('satoken='));
+    if (!token) {
+      router.push('/login');
+    }
+  }, [router])
 
   const testMenuApi = async () => {
     setLoading(true);
