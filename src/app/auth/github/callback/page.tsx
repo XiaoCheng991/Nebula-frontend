@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 import { toast } from "@/components/ui/use-toast"
 import { CheckCircle, XCircle, Github } from "lucide-react"
 import { supabase } from "@/lib/supabase/client"
-import { isSupabaseMode } from "@/lib/api/mode-config"
 
 // Loading 状态组件
 function GitHubCallbackLoading() {
@@ -32,11 +31,6 @@ function GitHubCallbackContent() {
  }, [])
 
  const handleGithubCallback = async () => {
-  if (!isSupabaseMode()) {
-   setError("当前不是 Supabase 模式")
-   setStatus("error")
-   return
-  }
 
   try {
    // 获取 session

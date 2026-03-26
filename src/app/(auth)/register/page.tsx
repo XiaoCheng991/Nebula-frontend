@@ -4,8 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { toast } from "@/components/ui/use-toast"
-import { register } from "@/lib/api/adapters"
-import { isSupabaseMode } from "@/lib/api/mode-config"
+import { register, loginWithGithub } from "@/lib/api/adapters"
 import { Github, ArrowRight, Check } from "lucide-react"
 import { PublicRoute } from "@/components/auth/AuthGuard"
 
@@ -51,19 +50,7 @@ export default function RegisterPage() {
   setLoading(true)
 
   try {
-   // Supabase 模式：使用 register 适配器
-   if (isSupabaseMode()) {
-    await register(username, email, password, username)
-   } else {
-    // Java Backend 模式
-    // @ts-ignore - Java Backend 的 register 接受对象参数
-    await register({
-     username,
-     email,
-     password,
-     nickname: username,
-    })
-   }
+   await register(username, email, password, username)
 
    toast({
     title: "注册成功",
@@ -85,41 +72,16 @@ export default function RegisterPage() {
  }
 
  const handleGithubLogin = async () => {
-  if (isSupabaseMode()) {
-   // Supabase 模式：使用 GitHub OAuth
+  try {
+   setLoading(true)
+   await loginWithGithub()
+  } catch (error: any) {
    toast({
-    title: "GitHub 注册",
-    description: "请前往 Supabase 控制台配置 GitHub OAuth 提供者",
+    title: "GitHub 注册失败",
+    description: error?.message || "网络错误，请稍后重试",
     variant: "destructive",
    })
-  } else {
-   // Java Backend 模式
-   setLoading(true)
-   try {
-    const res = await fetch(
-     `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/api/oauth/github/authorize`,
-     { credentials: 'include' }
-    )
-    const data = await res.json()
-
-    if (data.code === 200 && data.data?.authorizeUrl) {
-     window.location.href = data.data.authorizeUrl
-    } else {
-     toast({
-      title: "获取授权链接失败",
-      description: data.message || "请稍后重试",
-      variant: "destructive",
-     })
-    }
-   } catch (error) {
-    toast({
-     title: "获取授权链接失败",
-     description: "网络错误，请稍后重试",
-     variant: "destructive",
-    })
-   } finally {
-    setLoading(false)
-   }
+   setLoading(false)
   }
  }
 
@@ -131,14 +93,10 @@ export default function RegisterPage() {
 
  return (
   <PublicRoute>
-   {/* 页面容器 - 和登录页保持一致 */}
    <div className="min-h-screen w-full flex flex-col items-center justify-start pt-20 sm:pt-24 pb-8 px-4 sm:px-6">
-    {/* 背景色 - 和登录页完全一致 */}
     <div className="fixed inset-0 -z-10 bg-[#fafafa] dark:bg-[#0d0d0d]" />
 
-    {/* 内容区域 */}
     <div className="w-full max-w-[360px]">
-     {/* 标题 */}
      <div className="text-center mb-6">
       <h1 className="text-xl font-semibold text-gray-900 dark:text-white tracking-tight">
        创建账户
@@ -148,10 +106,8 @@ export default function RegisterPage() {
       </p>
      </div>
 
-     {/* 注册卡片 - 和登录页样式统一 */}
      <div className="bg-white dark:bg-[#141414] rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-none border border-gray-100 dark:border-white/[0.06] overflow-hidden">
       <div className="p-5 space-y-4">
-       {/* GitHub 登录按钮 */}
        <button
         onClick={handleGithubLogin}
         disabled={loading}
@@ -161,7 +117,6 @@ export default function RegisterPage() {
         <span>使用 GitHub 注册</span>
        </button>
 
-       {/* 分隔线 */}
        <div className="relative flex items-center justify-center">
         <div className="absolute inset-0 flex items-center">
          <div className="w-full border-t border-gray-100 dark:border-white/[0.04]" />
@@ -171,9 +126,7 @@ export default function RegisterPage() {
         </span>
        </div>
 
-       {/* 表单 */}
        <form onSubmit={handleEmailRegister} className="space-y-3">
-        {/* 用户名 */}
         <div className="space-y-1.5">
          <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400 ml-0.5">
           用户名
@@ -192,7 +145,6 @@ export default function RegisterPage() {
          />
         </div>
 
-        {/* 邮箱 */}
         <div className="space-y-1.5">
          <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400 ml-0.5">
           邮箱
@@ -209,7 +161,6 @@ export default function RegisterPage() {
          />
         </div>
 
-        {/* 密码 */}
         <div className="space-y-1.5">
          <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400 ml-0.5">
           密码
@@ -227,7 +178,6 @@ export default function RegisterPage() {
          />
         </div>
 
-        {/* 确认密码 */}
         <div className="space-y-1.5">
          <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400 ml-0.5">
           确认密码
@@ -244,7 +194,6 @@ export default function RegisterPage() {
          />
         </div>
 
-        {/* 密码强度提示 */}
         {password.length > 0 && (
          <div className="space-y-1.5 px-1">
           {passwordRequirements.map((req, index) => (
@@ -262,7 +211,6 @@ export default function RegisterPage() {
          </div>
         )}
 
-        {/* 注册按钮 */}
         <button
          type="submit"
          disabled={loading}
@@ -284,7 +232,6 @@ export default function RegisterPage() {
       </div>
      </div>
 
-     {/* 登录链接 */}
      <p className="text-center mt-5 text-[13px] text-gray-500 dark:text-gray-400">
       已有账户？{" "}
       <Link
