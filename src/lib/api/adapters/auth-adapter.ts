@@ -105,11 +105,16 @@ export async function loginWithGithub(): Promise<void> {
   throw new Error('当前不是 Supabase 模式')
  }
 
+ // 确定重定向 URL
+ const redirectTo = typeof window !== 'undefined'
+  ? `${window.location.origin}/auth/github/callback`
+  : 'https://www.xiaocheng991.site/auth/v1/callback'
+
  // 打开 GitHub 授权页面
  await supabase.auth.signInWithOAuth({
   provider: 'github',
   options: {
-   redirectTo: `${window.location.origin}/auth/callback`,
+   redirectTo,
   },
  })
 }

@@ -27,21 +27,17 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
   const [src, setSrc] = React.useState<string>('/logo_icon.svg');
   const [isMounted, setIsMounted] = React.useState(false);
 
-  // 所有Hooks必须放在组件最顶部，不能放在条件返回之后
   React.useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // 当用户登录后，加载管理员权限信息
   useEffect(() => {
     if (user && !userLoading) {
       loadAdminData().catch(() => {
-        // 忽略错误，非管理员用户会正常失败
       })
     }
   }, [user?.username, userLoading, loadAdminData])
 
-  // 服务端渲染和客户端挂载前只渲染简单骨架，避免hydration错误
   if (!isMounted) {
     return (
       <header className={`w-full sticky top-0 z-50 bg-transparent backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 ${className}`}>
@@ -72,7 +68,6 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
       setMounted(true);
     }, []);
 
-    // 避免 hydration 不匹配，客户端挂载后才渲染
     if (!mounted || !hasAdminAccess) {
       return null;
     }
@@ -90,6 +85,7 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
 
   const ThemeSwitcher: React.FC = () => {
     const { theme, setTheme } = useThemeStore();
+    const [isOpen, setIsOpen] = React.useState(false);
 
     const getThemeIcon = () => {
       switch (theme) {
@@ -102,43 +98,57 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
       }
     };
 
-    const getThemeLabel = () => {
-      switch (theme) {
-        case 'light':
-          return '浅色';
-        case 'dark':
-          return '深色';
-        case 'system':
-          return '系统';
-      }
-    };
-
     return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="flex items-center gap-1 w-auto px-2 rounded-xl hover:bg-white/10 dark:hover:bg-white/5 focus-visible:ring-0 focus-visible:ring-offset-0">
-            {getThemeIcon()}
-            <ChevronDown className="h-4 w-4 opacity-50" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="rounded-2xl border-0 shadow-2xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl">
-          <DropdownMenuItem onClick={() => setTheme('light')} className="flex items-center gap-3 cursor-pointer rounded-xl py-2.5">
-            <Sun className="h-4 w-4" />
-            <span className="font-medium">浅色</span>
-            {theme === 'light' && <span className="ml-auto text-xs text-[var(--accent)]">✓</span>}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setTheme('dark')} className="flex items-center gap-3 cursor-pointer rounded-xl py-2.5">
-            <Moon className="h-4 w-4" />
-            <span className="font-medium">深色</span>
-            {theme === 'dark' && <span className="ml-auto text-xs text-[var(--accent)]">✓</span>}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setTheme('system')} className="flex items-center gap-3 cursor-pointer rounded-xl py-2.5">
-            <Monitor className="h-4 w-4" />
-            <span className="font-medium">跟随系统</span>
-            {theme === 'system' && <span className="ml-auto text-xs text-[var(--accent)]">✓</span>}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <div className="relative">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex items-center gap-1 px-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+        >
+          {getThemeIcon()}
+          <ChevronDown className={`h-4 w-4 opacity-50 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        </button>
+
+        {isOpen && (
+          <>
+            <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+            <div className="absolute top-full right-0 mt-2 rounded-2xl bg-white dark:bg-gray-900 shadow-2xl backdrop-blur-xl p-2 z-50 min-w-[140px]">
+              <button
+                onClick={() => { setTheme('light'); setIsOpen(false); }}
+                className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-all ${
+                  theme === 'light'
+                    ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg'
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200'
+                }`}
+              >
+                <Sun className="h-4 w-4" />
+                <span className="text-sm font-medium">浅色</span>
+              </button>
+              <button
+                onClick={() => { setTheme('dark'); setIsOpen(false); }}
+                className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-all ${
+                  theme === 'dark'
+                    ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg'
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200'
+                }`}
+              >
+                <Moon className="h-4 w-4" />
+                <span className="text-sm font-medium">深色</span>
+              </button>
+              <button
+                onClick={() => { setTheme('system'); setIsOpen(false); }}
+                className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-all ${
+                  theme === 'system'
+                    ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg'
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200'
+                }`}
+              >
+                <Monitor className="h-4 w-4" />
+                <span className="text-sm font-medium">跟随系统</span>
+              </button>
+            </div>
+          </>
+        )}
+      </div>
     );
   };
 
@@ -271,7 +281,7 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
               </Link>
               <Link
                 href="/register"
-                className="px-4 py-2 rounded-xl text-sm font-medium bg-gradient-to-r from-[var(--accent)] to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white transition-all duration-300 shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 hover:scale-105"
+                className="px-4 py-2 rounded-xl text-sm font-medium bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white transition-all duration-300 shadow-lg shadow-orange-500/25 hover:shadow-orange-500/30 hover:scale-105"
               >
                 注册
               </Link>
