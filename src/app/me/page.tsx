@@ -258,7 +258,7 @@ export default function MePage() {
                 <a
                   key={memo.id}
                   href={`/memo/${memo.id}`}
-                  className="shrink-0 w-64 flex flex-col rounded-lg border border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 hover:shadow-sm hover:-translate-y-0.5 transition-all overflow-hidden bg-white dark:bg-zinc-900/40"
+                  className="shrink-0 w-64 flex flex-col rounded-lg border border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 transition-all overflow-hidden bg-white/80 dark:bg-zinc-900/40"
                 >
                   <div className="flex-1 flex flex-col justify-between p-3 min-h-[144px]">
                     <div className="flex-1 overflow-hidden max-h-24">
@@ -266,7 +266,7 @@ export default function MePage() {
                         {memo.content}
                       </p>
                     </div>
-                    <div className="flex items-center gap-2 mt-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                    <div className="flex items-center gap-2 mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-700">
                       <img
                         src={memo.author.avatar}
                         alt={memo.author.name}
@@ -315,10 +315,10 @@ export default function MePage() {
               <a
                 key={article.id}
                 href={`/blog/${article.id}`}
-                className="group flex items-start justify-between gap-4 py-4 border-b border-zinc-100 dark:border-zinc-800 hover:border-primary/20 dark:hover:border-primary/30 transition-colors"
+                className="group flex items-start justify-between gap-4 py-4 border-b border-zinc-200 dark:border-zinc-800 hover:border-primary/20 dark:hover:border-primary/30 transition-colors"
               >
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-medium text-zinc-800 dark:text-zinc-200 group-hover:text-primary transition-colors line-clamp-2 mb-1">
+                  <h3 className="text-sm font-medium text-zinc-900 dark:text-zinc-100 group-hover:text-primary transition-colors line-clamp-2 mb-1">
                     {article.title}
                   </h3>
                   <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 mb-2">
