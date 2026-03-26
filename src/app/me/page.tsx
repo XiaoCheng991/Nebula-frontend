@@ -143,7 +143,7 @@ export default function MePage() {
       <main className="max-w-7xl mx-auto px-4 py-8">
         {/* 自我介绍区 */}
         <section className="mb-8">
-          <Card className="border-0 bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl shadow-lg">
+          <Card className="border-0 bg-white/90 dark:bg-zinc-900/60 backdrop-blur-xl shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4 min-w-0 flex-1">
@@ -155,7 +155,7 @@ export default function MePage() {
                       className="w-10 h-10 rounded-full border-2 border-orange-200 dark:border-orange-800 transition-transform duration-300 hover:scale-110"
                     />
                     <div className="min-w-0">
-                      <div className="font-bold text-sm text-zinc-800 dark:text-zinc-200">
+                      <div className="font-bold text-sm text-zinc-900 dark:text-zinc-100">
                         {profiles[0].name}
                       </div>
                       <div className="text-xs text-zinc-400 dark:text-zinc-500">
@@ -225,7 +225,7 @@ export default function MePage() {
               <Badge
                 key={index}
                 variant="secondary"
-                className="px-3 py-1.5 text-xs font-medium cursor-pointer hover:opacity-80 transition-opacity bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
+                className="px-3 py-1.5 text-xs font-medium cursor-pointer hover:opacity-80 transition-opacity bg-zinc-200 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200"
               >
                 {tag.name}
                 <span className="ml-1 opacity-60">({tag.count})</span>
