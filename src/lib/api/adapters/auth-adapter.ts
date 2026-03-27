@@ -16,7 +16,9 @@ export interface LoginResponse {
     username: string
     email?: string | null
     nickname?: string | null
-    avatar?: string | null
+    avatarUrl?: string | null
+    avatarName?: string | null
+    avatarSize?: number | null
   }
 }
 
@@ -61,8 +63,9 @@ async function buildLoginResponse(user: any): Promise<LoginResponse> {
     username: userInfoData?.username || user.email || '',
     email: user.email,
     nickname: userInfoData?.nickname || user.user_metadata?.nickname || '',
-    avatar: userInfoData?.avatar_url || user.user_metadata?.avatar || null,
-    avatar_name: userInfoData?.avatar_name || user.user_metadata?.avatar_name || null,
+    avatarUrl: userInfoData?.avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.avatar || null,
+    avatarName: userInfoData?.avatar_name || user.user_metadata?.avatar_name || null,
+    avatarSize: userInfoData?.avatar_size || user.user_metadata?.avatar_size || null,
   }
 
   if (typeof window !== 'undefined') {
@@ -179,7 +182,9 @@ export async function getUserInfo(): Promise<LoginResponse['userInfo']> {
     username: userInfoData?.username || user.email || '',
     email: user.email,
     nickname: userInfoData?.nickname || user.user_metadata?.nickname || '',
-    avatar: userInfoData?.avatar_url || user.user_metadata?.avatar || null,
+    avatarUrl: userInfoData?.avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.avatar || null,
+    avatarName: userInfoData?.avatar_name || user.user_metadata?.avatar_name || null,
+    avatarSize: userInfoData?.avatar_size || user.user_metadata?.avatar_size || null,
   }
 }
 

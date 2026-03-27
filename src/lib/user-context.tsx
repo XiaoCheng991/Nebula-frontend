@@ -105,7 +105,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
    localStorage.setItem('userInfo', JSON.stringify({
     id: data.id,
     nickname: data.nickname || '',
-    avatar: data.avatar || null,
+    avatarUrl: data.avatar || null,
    }))
   } catch (err: any) {
    setError(err.message)
@@ -132,8 +132,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     const updatedLocalUser = {
      ...localUser,
      nickname: updates.nickname || localUser.nickname,
-     avatar: updates.avatarUrl || localUser.avatar,
-     avatar_name: updates.avatarName !== undefined ? updates.avatarName : localUser.avatar_name,
+     avatarUrl: updates.avatarUrl || localUser.avatarUrl,
+     avatarName: updates.avatarName !== undefined ? updates.avatarName : localUser.avatarName,
     }
     localStorage.setItem('userInfo', JSON.stringify(updatedLocalUser))
    }
@@ -169,7 +169,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
    setUser({
     username: localUser.username,
     nickname: localUser.nickname || '',
-    avatarUrl: localUser.avatar || null,
+    avatarUrl: localUser.avatarUrl || null,
     bio: '',
    })
    setLoading(false)
@@ -200,7 +200,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     setUser({
      username: localUser.username,
      nickname: localUser.nickname || '',
-     avatarUrl: localUser.avatar || null,
+     avatarUrl: localUser.avatarUrl || null,
      bio: '',
     })
     setLoading(false)

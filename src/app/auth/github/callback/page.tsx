@@ -46,20 +46,20 @@ function GitHubCallbackContent() {
       if (!authData.session) {
         console.error("No session found")
         // 尝试使用 onAuthStateChange 等待 session
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+        const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
           console.log("Auth event:", event, session)
           if (event === 'SIGNED_IN' && session) {
             await processSession(session)
-            subscription.unsubscribe()
+            data.subscription.unsubscribe()
           } else if (event === 'TOKEN_REFRESHED' && session) {
             await processSession(session)
-            subscription.unsubscribe()
+            data.subscription.unsubscribe()
           }
         })
 
         // 设置超时保护
         setTimeout(() => {
-          subscription.unsubscribe()
+          data.subscription.unsubscribe()
           if (status === "loading") {
             setError("登录超时，请检查 GitHub 授权是否成功")
             setStatus("error")

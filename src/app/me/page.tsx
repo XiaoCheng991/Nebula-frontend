@@ -213,8 +213,8 @@ export default function MePage() {
    if (localUser) {
     localStorage.setItem('userInfo', JSON.stringify({
      ...localUser,
-     avatar: url,
-     avatar_name: path,
+     avatarUrl: url,
+     avatarName: path,
     }));
    }
 

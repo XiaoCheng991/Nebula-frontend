@@ -43,7 +43,7 @@ export default function SettingsPage() {
     username: user.username,
     nickname: user.nickname,
     avatarUrl: user.avatarUrl,
-    avatarName: localUser?.avatar_name || null,
+    avatarName: localUser?.avatarName || null,
     bio: user.bio,
    })
   }
