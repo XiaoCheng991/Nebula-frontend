@@ -137,7 +137,7 @@ export interface AdminState {
  */
 export function transformSysUserToAdminUser(backendUser: BackendSysUser): AdminUser {
   return {
-    id: backendUser.id,
+    id: typeof backendUser.id === 'string' ? parseInt(backendUser.id, 10) : backendUser.id,
     username: backendUser.username,
     nickname: backendUser.nickname || backendUser.username,
     email: backendUser.email || '',
