@@ -476,7 +476,7 @@ export async function getCurrentUserMenus(): Promise<ApiResponse<SysMenu[]>> {
   // 6. 构建树形结构
   function buildTree(parentId: number | null): SysMenu[] {
     return menuList
-      .filter(m => m.parent_id === parentId || (parentId === null && (m.parent_id === 0 || !m.parent_id)))
+      .filter(m => m.parentId === parentId || (parentId === null && (m.parentId === 0 || !m.parentId)))
       .map(m => ({
         ...m,
         children: buildTree(m.id),
