@@ -26,7 +26,7 @@ export default function Home() {
      {/* Badge */}
      <div className="inline-flex items-center gap-2 bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-[var(--glass-border)] px-4 py-2 rounded-full text-sm font-medium mb-8 shadow-lg">
       <Sparkles className="h-4 w-4 text-[var(--accent)]" />
-      <span className="text-foreground">强子出品 · 个人碎碎念个站</span>
+      <span className="text-foreground">强子出品 · 碎碎念个站</span>
      </div>
 
      {/* 标题 */}
@@ -44,7 +44,7 @@ export default function Home() {
       记录<span className="font-semibold text-orange-600 dark:text-orange-400">碎碎念</span>
      </p>
      <p className="text-lg text-slate-500 dark:text-slate-400 mb-12 max-w-xl mx-auto">
-      一个安静的个人空间，记录日常想法、收藏好文章、存储珍贵文件。
+      安静的个人空间，记录日常想法、收藏好文章、存储珍贵文件。
       <br />
       在这里，只做最真实的自己。
      </p>

@@ -18,30 +18,33 @@ const protectedPaths = ['/dashboard', '/chat', '/drive', '/settings']
 const adminPaths = ['/admin']
 
 // 公开路径（无需登录）
-const publicPaths = ['/', '/login', '/register', '/forgot-password']
+const publicPaths = ['/', '/login', '/register', '/forgot-password', '/home']
+
+// OAuth 回调路径（特殊处理 - 不参与受保护检测）
+const oauthCallbackPaths = ['/auth/github/callback', '/auth/callback']
 
 // 检查是否已登录（支持 Supabase 的 cookie）
 function isAuthenticated(req: NextRequest): boolean {
   // Supabase 的 cookie 名称格式: sb-[project-ref]-auth-token
-  // 或者是 sb-access-token 和 sb-refresh-token
   const cookies = req.cookies
 
   // 检查是否有 Supabase 的认证 cookie
   const hasSupabaseToken = Array.from(cookies.getAll()).some(cookie =>
-    cookie.name.startsWith('sb-') &&
-    (cookie.name.includes('auth-token') || cookie.name.includes('access-token'))
+    cookie.name.startsWith('sb-')
   )
-
-  // 同时检查是否有 userInfo localStorage 的标记（通过另一个 cookie 或 header）
-  // 但中间件无法访问 localStorage，所以只能依赖 Supabase cookie
 
   return hasSupabaseToken
 }
 
 export async function middleware(req: NextRequest) {
-  const isLoggedIn = isAuthenticated(req)
-
   const { pathname } = req.nextUrl
+
+  // OAuth 回调路径直接放行（让客户端处理 token）
+  if (oauthCallbackPaths.some(path => pathname === path || pathname.startsWith(path))) {
+    return NextResponse.next()
+  }
+
+  const isLoggedIn = isAuthenticated(req)
 
   // 情况1：已登录用户访问登录/注册页 -> 重定向到 dashboard
   if ((pathname === '/login' || pathname === '/register') && isLoggedIn) {

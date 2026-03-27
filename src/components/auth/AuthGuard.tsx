@@ -1,10 +1,11 @@
 "use client"
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { isAuthenticated, initTokenManager } from '@/lib/auth/token-manager'
+import { isAuthenticatedSync, isUserLoggedIn } from '@/lib/auth/token-manager'
 import { Loader2 } from 'lucide-react'
 import { useAuthPrompt } from '@/hooks/useAuthPrompt'
+import { supabase } from '@/lib/supabase/client'
 
 /**
  * 认证守卫组件（HOC）
@@ -41,29 +42,58 @@ export function AuthGuard({
   const router = useRouter()
   const pathname = usePathname()
   const { requireAuth: checkAuth, requireGuest: checkGuest } = useAuthPrompt()
+  const [isLoading, setIsLoading] = useState(true)
+  const [isAuth, setIsAuth] = useState(false)
 
   useEffect(() => {
-    if (requireAuth) {
-      // 需要认证的页面（dashboard、chat、drive、settings）
-      checkAuth(pathname)
-    } else {
-      // 不需要认证的页面（login、register）
-      checkGuest()
+    const checkAuthentication = async () => {
+      // 先快速检查 localStorage
+      const hasLocalAuth = isAuthenticatedSync()
+
+      if (requireAuth) {
+        // 需要认证的页面
+        if (!hasLocalAuth) {
+          // 没有本地认证，检查 Supabase session
+          const { data: { session } } = await supabase.auth.getSession()
+          if (!session) {
+            checkAuth(pathname)
+          }
+        }
+      } else {
+        // 不需要认证的页面（登录/注册）
+        if (hasLocalAuth) {
+          checkGuest()
+        }
+      }
+
+      setIsAuth(hasLocalAuth)
+      setIsLoading(false)
     }
+
+    checkAuthentication()
   }, [requireAuth, pathname, checkAuth, checkGuest])
 
-  // 检查认证状态
-  const authenticated = isAuthenticated()
+  // 检查认证状态（使用 Supabase 实时状态）
+  useEffect(() => {
+    // 立即使用同步检查更新状态（用于快速响应）
+    setIsAuth(isUserLoggedIn())
 
-  // 需要认证但未登录 -> 显示页面内容，Toast 会提示
-  // （不阻止页面渲染，用户体验更好）
-  if (requireAuth && !authenticated) {
-    return <>{children}</>
-  }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN') {
+        setIsAuth(true)
+      } else if (event === 'SIGNED_OUT') {
+        setIsAuth(false)
+      }
+    })
 
-  // 不需要认证但已登录 -> 显示页面内容，Toast 会提示并跳转
-  if (!requireAuth && authenticated) {
-    return <>{children}</>
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [])
+
+  // 如果正在加载，显示 loading
+  if (isLoading && fallback) {
+    return <>{fallback}</>
   }
 
   // 认证状态正确，显示内容

@@ -89,13 +89,15 @@ function GitHubCallbackContent() {
     const user = session.user
     console.log("Processing session for user:", user.email)
 
-    // 构建用户信息
+    // 构建用户信息（与 login/register 保持一致）
     const userInfo = {
       id: user.id,
       username: user.user_metadata?.login || user.user_metadata?.username || user.email?.split('@')[0] || '',
       email: user.email,
       nickname: user.user_metadata?.name || user.user_metadata?.nickname || user.user_metadata?.login || '',
-      avatar: user.user_metadata?.avatar_url || null,
+      avatarUrl: user.user_metadata?.avatar_url || user.user_metadata?.avatar || null,
+      avatarName: user.user_metadata?.avatar_name || null,
+      avatarSize: user.user_metadata?.avatar_size || null,
     }
 
     // 保存到 localStorage
