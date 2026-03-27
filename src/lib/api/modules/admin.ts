@@ -160,7 +160,7 @@ export async function getUserList(
   let query = supabase
     .from('sys_users')
     .select('*', { count: 'exact' })
-    .order('created_at', { ascending: false })
+    .order('create_time', { ascending: false })
 
   // 关键词搜索
   if (keyword) {
@@ -173,7 +173,9 @@ export async function getUserList(
     return buildResponse(null as any, 500, '获取用户列表失败')
   }
 
-  return buildPageResponse(users || [], count || 0)
+  // 显式类型转换
+  const sysUsers = (users || []) as SysUser[]
+  return buildPageResponse(sysUsers, count || 0)
 }
 
 /**
