@@ -717,7 +717,6 @@ export async function addDictType(data: Partial<SysDictType>): Promise<ApiRespon
   if (data.status !== undefined) insertData.status = data.status
   if (data.isSystem !== undefined) insertData.is_system = data.isSystem
   if (data.remark !== undefined) insertData.remark = data.remark
-  if (data.sortOrder !== undefined) insertData.sort_order = data.sortOrder
 
   const { error } = await supabase
     .from('sys_dict_type')
