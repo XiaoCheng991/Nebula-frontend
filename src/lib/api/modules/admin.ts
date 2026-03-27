@@ -710,11 +710,24 @@ export async function deleteDictType(dictId: number): Promise<ApiResponse<void>>
  * 新增字典类型
  */
 export async function addDictType(data: Partial<SysDictType>): Promise<ApiResponse<void>> {
-  // 构建插入数据，只包含已定义的字段
-  const insertData: Record<string, any> = {}
-  if (data.dictName !== undefined) insertData.dict_name = data.dictName
-  if (data.dictCode !== undefined) insertData.dict_code = data.dictCode
-  if (data.status !== undefined) insertData.status = data.status
+  // 检查必填字段
+  if (!data.dictName || !data.dictCode || !data.status) {
+    return buildResponse(undefined, 400, '字典名称、字典代码和状态为必填项')
+  }
+
+  // 构建插入数据
+  const insertData: Partial<{
+    dict_name: string
+    dict_code: string
+    status: string
+    is_system?: boolean
+    remark?: string
+  }> = {
+    dict_name: data.dictName,
+    dict_code: data.dictCode,
+    status: data.status,
+  }
+
   if (data.isSystem !== undefined) insertData.is_system = data.isSystem
   if (data.remark !== undefined) insertData.remark = data.remark
 
@@ -792,13 +805,28 @@ export async function getDictDataList(
  * 新增字典数据
  */
 export async function addDictData(data: Partial<SysDictData>): Promise<ApiResponse<void>> {
-  // 构建插入数据，只包含已定义的字段
-  const insertData: Record<string, any> = {}
-  if (data.dictTypeId !== undefined) insertData.dict_type_id = data.dictTypeId
-  if (data.dictLabel !== undefined) insertData.dict_label = data.dictLabel
-  if (data.dictValue !== undefined) insertData.dict_value = data.dictValue
+  // 检查必填字段
+  if (data.dictTypeId === undefined || !data.dictLabel || !data.dictValue || !data.status) {
+    return buildResponse(undefined, 400, '字典类型 ID、字典标签、字典值和状态为必填项')
+  }
+
+  // 构建插入数据
+  const insertData: Partial<{
+    dict_type_id: number
+    dict_label: string
+    dict_value: string
+    sort_order: number
+    status: string
+    is_default?: boolean
+    remark?: string
+  }> = {
+    dict_type_id: data.dictTypeId,
+    dict_label: data.dictLabel,
+    dict_value: data.dictValue,
+    status: data.status,
+  }
+
   if (data.sortOrder !== undefined) insertData.sort_order = data.sortOrder
-  if (data.status !== undefined) insertData.status = data.status
   if (data.isDefault !== undefined) insertData.is_default = data.isDefault
   if (data.remark !== undefined) insertData.remark = data.remark
 
