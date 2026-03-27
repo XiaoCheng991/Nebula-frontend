@@ -9,6 +9,7 @@ interface UserProfile {
  username: string
  nickname: string
  avatarUrl: string | null
+ avatarName?: string | null
  bio: string
 }
 
@@ -132,6 +133,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
      ...localUser,
      nickname: updates.nickname || localUser.nickname,
      avatar: updates.avatarUrl || localUser.avatar,
+     avatar_name: updates.avatarName !== undefined ? updates.avatarName : localUser.avatar_name,
     }
     localStorage.setItem('userInfo', JSON.stringify(updatedLocalUser))
    }

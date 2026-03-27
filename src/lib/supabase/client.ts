@@ -48,3 +48,57 @@ export const isAuthenticated = async (): Promise<boolean> => {
  const { data: { session } } = await supabase.auth.getSession()
  return !!session
 }
+
+/**
+ * 获取头像的公开 URL
+ */
+export function getAvatarUrl(avatarName: string | null): string | null {
+ if (!avatarName) return null
+ return `${supabaseUrl}/storage/v1/object/public/avatar/${avatarName}`
+}
+
+/**
+ * 上传头像到 Supabase Storage
+ * @param file 图片文件
+ * @param userId 用户 ID
+ * @returns 上传后的文件路径
+ */
+export async function uploadAvatar(file: File, userId: string): Promise<{ path: string; url: string }> {
+ const fileExt = file.name.split('.').pop() || 'jpg'
+ const fileName = `${userId}_${Date.now()}.${fileExt}`
+ const filePath = `${fileName}`
+
+ const { data, error } = await supabase.storage
+  .from('avatar')
+  .upload(filePath, file, {
+   upsert: true,
+  })
+
+ if (error) {
+  throw new Error(`上传失败：${error.message}`)
+ }
+
+ // 获取公开 URL
+ const { data: urlData } = supabase.storage
+  .from('avatar')
+  .getPublicUrl(filePath)
+
+ return {
+  path: filePath,
+  url: urlData.publicUrl,
+ }
+}
+
+/**
+ * 删除旧头像
+ * @param filePath 文件路径
+ */
+export async function deleteAvatar(filePath: string): Promise<void> {
+ const { error } = await supabase.storage
+  .from('avatar')
+  .remove([filePath])
+
+ if (error) {
+  console.warn('删除头像失败:', error.message)
+ }
+}
