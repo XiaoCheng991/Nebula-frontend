@@ -8,7 +8,7 @@ import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from '@/components/ui/use-toast'
 import { ToastAction } from '@/components/ui/toast'
-import { isAuthenticatedSyncSync } from '@/lib/auth/token-manager'
+import { isAuthenticatedSync } from '@/lib/auth/token-manager'
 import React from 'react'
 
 interface LoginPromptOptions {
