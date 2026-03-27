@@ -471,7 +471,7 @@ export async function getCurrentUserMenus(): Promise<ApiResponse<SysMenu[]>> {
     return buildResponse([], 500, '获取菜单失败')
   }
 
-  const menuList = allMenus || []
+  const menuList = (allMenus || []) as SysMenu[]
 
   // 6. 构建树形结构
   function buildTree(parentId: number | null): SysMenu[] {
@@ -480,7 +480,7 @@ export async function getCurrentUserMenus(): Promise<ApiResponse<SysMenu[]>> {
       .map(m => ({
         ...m,
         children: buildTree(m.id),
-      })) as SysMenu[]
+      }))
   }
 
   return buildResponse(buildTree(null))
