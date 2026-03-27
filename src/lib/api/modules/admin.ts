@@ -515,15 +515,15 @@ export async function getMenuTree(): Promise<ApiResponse<SysMenu[]>> {
     return buildResponse([], 500, '获取菜单树失败')
   }
 
-  const menuList = menus || []
+  const menuList = (menus || []) as SysMenu[]
 
   function buildTree(parentId: number | null): SysMenu[] {
     return menuList
-      .filter(m => m.parent_id === parentId || (parentId === null && (m.parent_id === 0 || !m.parent_id)))
+      .filter(m => m.parentId === parentId || (parentId === null && (m.parentId === 0 || !m.parentId)))
       .map(m => ({
         ...m,
         children: buildTree(m.id),
-      })) as SysMenu[]
+      }))
   }
 
   return buildResponse(buildTree(null))
@@ -545,7 +545,7 @@ export async function getAllRoles(): Promise<ApiResponse<SysRole[]>> {
     return buildResponse([], 500, '获取角色列表失败')
   }
 
-  return buildResponse(roles || [])
+  return buildResponse((roles || []) as SysRole[])
 }
 
 /**
@@ -572,7 +572,7 @@ export async function getRoleList(
     return buildResponse(null as any, 500, '获取角色列表失败')
   }
 
-  return buildPageResponse(roles || [], count || 0)
+  return buildPageResponse((roles || []) as SysRole[], count || 0)
 }
 
 /**
@@ -610,7 +610,7 @@ export async function getRolesByUserId(userId: number | string): Promise<ApiResp
     return buildResponse([], 500, '获取角色详情失败')
   }
 
-  return buildResponse(roles || [])
+  return buildResponse((roles || []) as SysRole[])
 }
 
 // ======== 字典类型管理 API ========
@@ -653,7 +653,7 @@ export async function getDictTypeList(
     return buildResponse(null as any, 500, '获取字典类型列表失败')
   }
 
-  return buildPageResponse(dictTypes || [], count || 0)
+  return buildPageResponse((dictTypes || []) as SysDictType[], count || 0)
 }
 
 /**
@@ -670,7 +670,7 @@ export async function getAllDictTypes(): Promise<ApiResponse<SysDictType[]>> {
     return buildResponse([], 500, '获取字典类型失败')
   }
 
-  return buildResponse(dictTypes || [])
+  return buildResponse((dictTypes || []) as SysDictType[])
 }
 
 /**
@@ -687,7 +687,7 @@ export async function getDictTypeById(dictId: number): Promise<ApiResponse<SysDi
     return buildResponse(null as any, 404, '字典类型不存在')
   }
 
-  return buildResponse(dictType)
+  return buildResponse(dictType as SysDictType)
 }
 
 /**
@@ -725,6 +725,10 @@ export async function addDictType(data: Partial<SysDictType>): Promise<ApiRespon
  * 更新字典类型
  */
 export async function updateDictType(data: Partial<SysDictType>): Promise<ApiResponse<void>> {
+  if (!data.id) {
+    return buildResponse(undefined, 400, '字典类型 ID 不能为空')
+  }
+
   const { error } = await supabase
     .from('sys_dict_type')
     .update(data)
@@ -773,7 +777,7 @@ export async function getDictDataList(
     return buildResponse(null as any, 500, '获取字典数据失败')
   }
 
-  return buildPageResponse(dictData || [], count || 0)
+  return buildPageResponse((dictData || []) as SysDictData[], count || 0)
 }
 
 /**
@@ -795,6 +799,10 @@ export async function addDictData(data: Partial<SysDictData>): Promise<ApiRespon
  * 更新字典数据
  */
 export async function updateDictData(data: Partial<SysDictData>): Promise<ApiResponse<void>> {
+  if (!data.id) {
+    return buildResponse(undefined, 400, '字典数据 ID 不能为空')
+  }
+
   const { error } = await supabase
     .from('sys_dict_data')
     .update(data)
