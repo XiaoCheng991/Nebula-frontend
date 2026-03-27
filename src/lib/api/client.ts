@@ -1,5 +1,8 @@
 /**
- * 核心 HTTP 客户端（Sa-Token Cookie Session 模式）
+ * 核心 HTTP 客户端（已废弃 - 迁移到 Supabase）
+ *
+ * 注意：此文件已废弃，所有 API 调用现在都直接通过 Supabase
+ * 保留此文件仅用于向后兼容，新的 API 模块应该直接使用 supabase 客户端
  *
  * 特性：
  * - 所有请求默认携带 Cookie（credentials: include）
@@ -21,8 +24,10 @@ import { handleApiError } from '@/lib/utils/error-handler'
 
 /**
  * API 基础 URL
+ * Note: 已迁移到 Supabase，不再使用 Java 后端
+ * 此文件保留仅用于向后兼容，新的 API 应该直接使用 Supabase
  */
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
+const API_BASE_URL = '' // 已废弃，不再使用
 
 /**
  * 登录过期的错误消息列表

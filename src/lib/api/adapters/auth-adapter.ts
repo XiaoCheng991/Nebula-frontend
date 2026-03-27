@@ -44,6 +44,10 @@ export async function login(
  * 构建登录响应
  */
 async function buildLoginResponse(user: any): Promise<LoginResponse> {
+  // 先获取当前 session
+  const { data: sessionData } = await supabase.auth.getSession()
+  const session = sessionData.session
+
   let userInfoData: any = null
   if (user.email) {
     try {
@@ -60,9 +64,9 @@ async function buildLoginResponse(user: any): Promise<LoginResponse> {
 
   const userInfo = {
     id: userInfoData?.id || user.id,
-    username: userInfoData?.username || user.email || '',
+    username: userInfoData?.username || user.user_metadata?.username || user.email?.split('@')[0] || '',
     email: user.email,
-    nickname: userInfoData?.nickname || user.user_metadata?.nickname || '',
+    nickname: userInfoData?.nickname || user.user_metadata?.nickname || user.user_metadata?.name || '',
     avatarUrl: userInfoData?.avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.avatar || null,
     avatarName: userInfoData?.avatar_name || user.user_metadata?.avatar_name || null,
     avatarSize: userInfoData?.avatar_size || user.user_metadata?.avatar_size || null,
@@ -70,15 +74,14 @@ async function buildLoginResponse(user: any): Promise<LoginResponse> {
 
   if (typeof window !== 'undefined') {
     localStorage.setItem('userInfo', JSON.stringify(userInfo))
+    // 触发自定义事件通知其他组件
     window.dispatchEvent(new Event('auth-change'))
   }
 
-  const session = await supabase.auth.getSession()
-
   return {
-    token: session.data.session?.access_token,
-    expiresIn: session.data.session?.expires_at
-      ? Number(session.data.session.expires_at) - Math.floor(Date.now() / 1000)
+    token: session?.access_token,
+    expiresIn: session?.expires_at
+      ? Number(session.expires_at) - Math.floor(Date.now() / 1000)
       : 0,
     userInfo,
   }
@@ -129,7 +132,8 @@ export async function register(
   password: string,
   nickname?: string
 ): Promise<LoginResponse> {
-  const { data, error } = await supabase.auth.signUp({
+  // 先注册
+  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -140,10 +144,37 @@ export async function register(
     },
   })
 
-  if (error) throw new Error(error.message)
-  if (!data.user) throw new Error('注册失败')
+  if (signUpError) throw new Error(signUpError.message)
+  if (!signUpData.user) throw new Error('注册失败')
 
-  return await buildLoginResponse(data.user)
+  // 注册后立即登录（如果邮箱不需要验证，会有session）
+  if (signUpData.session) {
+    return await buildLoginResponse(signUpData.user)
+  }
+
+  // 如果没有session（需要邮箱验证），尝试直接登录
+  // 注意：有些配置下signUp后不会自动登录
+  try {
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+
+    if (signInError) {
+      // 如果登录失败（可能需要邮箱验证），返回注册信息
+      console.log('Auto-login after register failed:', signInError.message)
+      // 仍然构建用户响应，但可能没有token
+      return await buildLoginResponse(signUpData.user)
+    }
+
+    if (signInData.user) {
+      return await buildLoginResponse(signInData.user)
+    }
+  } catch (e) {
+    console.log('Auto-login error:', e)
+  }
+
+  return await buildLoginResponse(signUpData.user)
 }
 
 /**

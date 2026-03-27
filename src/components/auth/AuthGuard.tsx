@@ -50,23 +50,26 @@ export function AuthGuard({
       // 先快速检查 localStorage
       const hasLocalAuth = isAuthenticatedSync()
 
+      // 同时检查 Supabase session
+      const { data: { session } } = await supabase.auth.getSession()
+      const hasSupabaseAuth = !!session
+
+      // 只要有一个认证方式就认为已登录
+      const isAuth = hasLocalAuth || hasSupabaseAuth
+
       if (requireAuth) {
         // 需要认证的页面
-        if (!hasLocalAuth) {
-          // 没有本地认证，检查 Supabase session
-          const { data: { session } } = await supabase.auth.getSession()
-          if (!session) {
-            checkAuth(pathname)
-          }
+        if (!isAuth) {
+          checkAuth(pathname)
         }
       } else {
         // 不需要认证的页面（登录/注册）
-        if (hasLocalAuth) {
+        if (isAuth) {
           checkGuest()
         }
       }
 
-      setIsAuth(hasLocalAuth)
+      setIsAuth(isAuth)
       setIsLoading(false)
     }
 

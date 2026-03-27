@@ -1,8 +1,8 @@
 /**
- * 文件相关 API
+ * 文件相关 API（Supabase 模式）
  */
 
-import { uploadFile } from '../client'
+import { supabase } from '@/lib/supabase/client'
 
 /**
  * 文件上传响应
@@ -13,22 +13,72 @@ export interface FileUploadResponse {
 }
 
 /**
- * 上传单个文件
+ * 上传单个文件到 Supabase Storage
  */
 export async function uploadSingleFile(
   file: File,
   onProgress?: (progress: number) => void
 ): Promise<FileUploadResponse> {
-  return uploadFile('/api/upload', file, onProgress)
+  const { data: { session } } = await supabase.auth.getSession()
+
+  if (!session) {
+    throw new Error('未登录，无法上传文件')
+  }
+
+  const fileExt = file.name.split('.').pop()
+  const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
+  const filePath = `uploads/${session.user.id}/${fileName}`
+
+  const { error } = await supabase.storage
+    .from('nebula-hub-files')
+    .upload(filePath, file, {
+      upsert: false,
+    })
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  const { data: { publicUrl } } = supabase.storage
+    .from('nebula-hub-files')
+    .getPublicUrl(filePath)
+
+  return {
+    url: publicUrl,
+    fileName,
+  }
 }
 
 /**
- * 上传头像
+ * 上传头像到 Supabase Storage
  */
 export async function uploadAvatar(
   file: File,
   onProgress?: (progress: number) => void
 ): Promise<string> {
-  const result = await uploadFile('/api/upload/avatar', file, onProgress)
-  return result.url
+  const { data: { session } } = await supabase.auth.getSession()
+
+  if (!session) {
+    throw new Error('未登录，无法上传头像')
+  }
+
+  const fileExt = file.name.split('.').pop()
+  const fileName = `avatar-${Date.now()}.${fileExt}`
+  const filePath = `avatars/${session.user.id}/${fileName}`
+
+  const { error } = await supabase.storage
+    .from('nebula-hub-avatars')
+    .upload(filePath, file, {
+      upsert: true,
+    })
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  const { data: { publicUrl } } = supabase.storage
+    .from('nebula-hub-avatars')
+    .getPublicUrl(filePath)
+
+  return publicUrl
 }

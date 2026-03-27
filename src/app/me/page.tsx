@@ -121,14 +121,19 @@ export default function MePage() {
  const [showCropDialog, setShowCropDialog] = useState(false);
  const [selectedImage, setSelectedImage] = useState<string | null>(null);
  const [originalFile, setOriginalFile] = useState<File | null>(null);
- const [uploading, setUploading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
- // 获取本地用户信息
- const localUser = getLocalUserInfo();
- const userId = user?.username || localUser?.id?.toString() || null;
- const userNickname = user?.nickname || localUser?.nickname || "Orange";
- const userAvatar = user?.avatarUrl || localUser?.avatarUrl || null;
+  // 标记客户端挂载
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
+  // 获取本地用户信息（仅在客户端）
+  const localUser = isMounted ? getLocalUserInfo() : null;
+  const userId = user?.username || localUser?.id?.toString() || null;
+  const userNickname = user?.nickname || localUser?.nickname || "用户";
+  const userAvatar = user?.avatarUrl || localUser?.avatarUrl || null;
  // 加载管理员数据
  useEffect(() => {
   if (user && !userLoading) {
@@ -389,13 +394,13 @@ export default function MePage() {
           </div>
           <div className="flex items-center gap-2 mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-700">
            <img
-            src="https://api.dicebear.com/7.x/avataaars/svg?seed=Orange"
-            alt="Orange"
+            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userNickname}`}
+            alt={userNickname}
             className="w-5 h-5 rounded-full"
            />
            <div className="flex items-center gap-2 text-xs">
             <span className="font-medium text-zinc-700 dark:text-zinc-300">
-             Orange
+             {userNickname}
             </span>
             <span className="text-zinc-400">{memo.time}</span>
            </div>
@@ -448,12 +453,12 @@ export default function MePage() {
          <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5">
            <img
-            src="https://api.dicebear.com/7.x/avataaars/svg?seed=Orange"
-            alt="Orange"
+            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userNickname}`}
+            alt={userNickname}
             className="w-4 h-4 rounded-full"
            />
            <span className="text-xs text-zinc-500 dark:text-zinc-400">
-            Orange
+            {userNickname}
            </span>
           </div>
           <div className="flex items-center gap-1.5">
@@ -484,7 +489,7 @@ export default function MePage() {
     <footer className="mt-16 py-8 border-t border-zinc-200 dark:border-zinc-800">
      <div className="text-center">
       <p className="text-xs text-zinc-400 dark:text-zinc-500">
-       © 2024 NebulaHub. Made with ♥ by Orange & Nebula
+       © 2024 NebulaHub. Made with ♥ by {userNickname} & Nebula
       </p>
      </div>
     </footer>

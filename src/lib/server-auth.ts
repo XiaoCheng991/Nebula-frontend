@@ -1,23 +1,28 @@
 /**
- * 服务端认证工具函数（Server Components使用）
+ * 服务端认证工具函数（Server Components使用）- Supabase 模式
  */
 
 import { cookies } from 'next/headers'
 
 export interface ServerUserInfo {
-  id: number
+  id: string
   username: string
-  email: string
+  email: string | null
   nickname: string
-  avatar: string | null
+  avatarUrl: string | null
 }
 
 /**
- * 服务端获取token（从cookie）
+ * 服务端获取 Supabase Token（从 cookie）
  */
 export function getServerToken(): string | null {
   const cookieStore = cookies()
-  return cookieStore.get('satoken')?.value || null
+  // Supabase cookie 格式: sb-[project-ref]-auth-token
+  const supabaseToken = cookieStore.getAll().find(cookie =>
+    cookie.name.startsWith('sb-') && cookie.name.includes('auth-token')
+  )?.value || null
+
+  return supabaseToken
 }
 
 /**
@@ -28,7 +33,7 @@ export function isServerAuthenticated(): boolean {
 }
 
 /**
- * 服务端获取用户信息（通过调用后端API）
+ * 服务端获取用户信息（从 cookie）
  */
 export async function getServerUserInfo(): Promise<ServerUserInfo | null> {
   const token = getServerToken()
@@ -37,27 +42,30 @@ export async function getServerUserInfo(): Promise<ServerUserInfo | null> {
     return null
   }
 
-  try {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
-    const cookieHeader = `satoken=${encodeURIComponent(token)}`
+  // 从 cookie 中获取用户基本信息
+  // 注意：Supabase 模式下，详细的用户信息需要通过客户端获取
+  const cookieStore = cookies()
 
-    const response = await fetch(`${baseUrl}/api/auth/user-info`, {
-      headers: {
-        Cookie: cookieHeader,
-      },
-      credentials: 'include',
-    })
+  // 尝试从 userInfo cookie 或 localStorage 备份中读取
+  // 服务端只能读取 cookie，无法读取 localStorage
+  const userInfoCookie = cookieStore.get('userInfo')?.value
 
-    if (response.ok) {
-      const data = await response.json()
-      if (data.code === 200) {
-        return data.data
+  if (userInfoCookie) {
+    try {
+      const userInfo = JSON.parse(decodeURIComponent(userInfoCookie))
+      return {
+        id: userInfo.id || '',
+        username: userInfo.username || '',
+        email: userInfo.email || null,
+        nickname: userInfo.nickname || '',
+        avatarUrl: userInfo.avatarUrl || null,
       }
+    } catch {
+      // 解析失败
     }
-
-    return null
-  } catch (error) {
-    console.error('获取服务端用户信息失败:', error)
-    return null
   }
+
+  // 如果没有 cookie 数据，只返回空用户信息
+  // 实际的用户数据会在客户端通过 Supabase 获取
+  return null
 }
