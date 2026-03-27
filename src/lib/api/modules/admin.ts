@@ -710,9 +710,18 @@ export async function deleteDictType(dictId: number): Promise<ApiResponse<void>>
  * 新增字典类型
  */
 export async function addDictType(data: Partial<SysDictType>): Promise<ApiResponse<void>> {
+  // 构建插入数据，只包含已定义的字段
+  const insertData: Record<string, any> = {}
+  if (data.dictName !== undefined) insertData.dict_name = data.dictName
+  if (data.dictCode !== undefined) insertData.dict_code = data.dictCode
+  if (data.status !== undefined) insertData.status = data.status
+  if (data.isSystem !== undefined) insertData.is_system = data.isSystem
+  if (data.remark !== undefined) insertData.remark = data.remark
+  if (data.sortOrder !== undefined) insertData.sort_order = data.sortOrder
+
   const { error } = await supabase
     .from('sys_dict_type')
-    .insert(data)
+    .insert(insertData)
 
   if (error) {
     return buildResponse(undefined, 500, '新增字典类型失败')
@@ -784,9 +793,19 @@ export async function getDictDataList(
  * 新增字典数据
  */
 export async function addDictData(data: Partial<SysDictData>): Promise<ApiResponse<void>> {
+  // 构建插入数据，只包含已定义的字段
+  const insertData: Record<string, any> = {}
+  if (data.dictTypeId !== undefined) insertData.dict_type_id = data.dictTypeId
+  if (data.dictLabel !== undefined) insertData.dict_label = data.dictLabel
+  if (data.dictValue !== undefined) insertData.dict_value = data.dictValue
+  if (data.sortOrder !== undefined) insertData.sort_order = data.sortOrder
+  if (data.status !== undefined) insertData.status = data.status
+  if (data.isDefault !== undefined) insertData.is_default = data.isDefault
+  if (data.remark !== undefined) insertData.remark = data.remark
+
   const { error } = await supabase
     .from('sys_dict_data')
-    .insert(data)
+    .insert(insertData)
 
   if (error) {
     return buildResponse(undefined, 500, '新增字典数据失败')
