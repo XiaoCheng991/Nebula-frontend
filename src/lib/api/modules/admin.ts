@@ -394,7 +394,7 @@ export async function deleteUser(userId: number | string): Promise<ApiResponse<v
   const { error } = await supabase
     .from('sys_users')
     .delete()
-    .eq('id', userId)
+    .eq('id', numericUserId)
 
   if (error) {
     return buildResponse(undefined, 500, '删除用户失败')
