@@ -8,7 +8,7 @@ import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from '@/components/ui/use-toast'
 import { ToastAction } from '@/components/ui/toast'
-import { isAuthenticated } from '@/lib/auth/token-manager'
+import { isAuthenticatedSyncSync } from '@/lib/auth/token-manager'
 import React from 'react'
 
 interface LoginPromptOptions {
@@ -50,7 +50,7 @@ export function useAuthPrompt() {
     } = options
 
     // 如果已登录，不显示提示
-    if (isAuthenticated()) {
+    if (isAuthenticatedSync()) {
       return true
     }
 
@@ -94,7 +94,7 @@ export function useAuthPrompt() {
    */
   const requireAuth = useCallback((currentPath?: string) => {
 
-    if (isAuthenticated()) {
+    if (isAuthenticatedSync()) {
       return true
     }
 
@@ -113,7 +113,7 @@ export function useAuthPrompt() {
    */
   const requireGuest = useCallback(() => {
 
-    if (isAuthenticated()) {
+    if (isAuthenticatedSync()) {
       toast({
         title: '您已经登录了',
         description: '正在跳转到控制台...',
