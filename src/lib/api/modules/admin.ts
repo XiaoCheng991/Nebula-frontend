@@ -195,7 +195,7 @@ export async function getUserById(userId: number | string): Promise<ApiResponse<
       return buildResponse(null as any, 404, '用户不存在')
     }
 
-    return buildResponse(user)
+    return buildResponse(user as SysUser)
   }
 
   // 如果是字符串，先尝试作为 number 解析
@@ -211,7 +211,7 @@ export async function getUserById(userId: number | string): Promise<ApiResponse<
       return buildResponse(null as any, 404, '用户不存在')
     }
 
-    return buildResponse(user)
+    return buildResponse(user as SysUser)
   }
 
   // 否则作为邮箱查询
@@ -225,7 +225,7 @@ export async function getUserById(userId: number | string): Promise<ApiResponse<
     return buildResponse(null as any, 404, '用户不存在')
   }
 
-  return buildResponse(user)
+  return buildResponse(user as SysUser)
 }
 
 /**
