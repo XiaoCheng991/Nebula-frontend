@@ -44,14 +44,29 @@ function GitHubCallbackContent() {
       }
 
       if (!authData.session) {
-        console.error("No session found")
-        // 尝试使用 onAuthStateChange 等待 session
+        console.error("No session found - checking URL hash for OAuth callback")
+        // 检查 URL hash 中是否有 access_token
+        const hash = window.location.hash
+        console.log("URL hash:", hash)
+
+        if (hash && hash.includes('access_token')) {
+          console.log("Found access_token in URL hash, waiting for Supabase to process...")
+          // Supabase 会自动从 hash 中解析 token，等待一下再获取 session
+          await new Promise(resolve => setTimeout(resolve, 500))
+          const { data: retryData, error: retryError } = await supabase.auth.getSession()
+          if (retryError || !retryData.session) {
+            setError("无法获取登录会话，请重试")
+            setStatus("error")
+            return
+          }
+          await processSession(retryData.session)
+          return
+        }
+
+        // 没有 session，等待 onAuthStateChange
         const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
           console.log("Auth event:", event, session)
           if (event === 'SIGNED_IN' && session) {
-            await processSession(session)
-            data.subscription.unsubscribe()
-          } else if (event === 'TOKEN_REFRESHED' && session) {
             await processSession(session)
             data.subscription.unsubscribe()
           }
