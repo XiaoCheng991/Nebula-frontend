@@ -40,7 +40,9 @@ export interface LoginResponse {
     username: string
     email: string
     nickname: string
-    avatar: string | null
+    avatarUrl: string | null
+    avatarName: string | null
+    avatarSize: number | null
   }
 }
 
