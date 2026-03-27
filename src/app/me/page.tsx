@@ -127,7 +127,7 @@ export default function MePage() {
  const localUser = getLocalUserInfo();
  const userId = user?.username || localUser?.id?.toString() || null;
  const userNickname = user?.nickname || localUser?.nickname || "Orange";
- const userAvatar = user?.avatarUrl || localUser?.avatar || null;
+ const userAvatar = user?.avatarUrl || localUser?.avatarUrl || null;
 
  // 加载管理员数据
  useEffect(() => {
