@@ -282,10 +282,51 @@ export async function getUserRoleIds(userId: number | string): Promise<ApiRespon
  * 编辑用户
  */
 export async function updateUser(user: Partial<SysUser>): Promise<ApiResponse<void>> {
+  // 构建更新数据，确保 id 是 number 类型
+  const updateData: Partial<{
+    username: string
+    email: string | null
+    phone: string | null
+    nickname: string | null
+    display_name: string | null
+    avatar_url: string | null
+    avatar_name: string | null
+    avatar_size: number | null
+    bio: string | null
+    online_status: string
+    account_status: number
+    last_login_at: string | null
+    last_seen_at: string | null
+  }> = {
+    username: user.username,
+    email: user.email,
+    phone: user.phone,
+    nickname: user.nickname,
+    display_name: user.nickname, // display_name 映射到 nickname
+    avatar_url: user.avatarUrl,
+    avatar_name: user.avatarName,
+    avatar_size: user.avatarSize,
+    bio: user.bio,
+    online_status: user.onlineStatus,
+    account_status: user.accountStatus,
+    last_login_at: user.lastLoginAt,
+    last_seen_at: user.lastSeenAt,
+  }
+
+  // 移除 undefined 值
+  Object.keys(updateData).forEach(key => {
+    if (updateData[key as keyof typeof updateData] === undefined) {
+      delete updateData[key as keyof typeof updateData]
+    }
+  })
+
+  // 确保 user.id 是 number 类型
+  const numericUserId = typeof user.id === 'string' ? parseInt(user.id, 10) : user.id
+
   const { error } = await supabase
     .from('sys_users')
-    .update(user)
-    .eq('id', user.id)
+    .update(updateData)
+    .eq('id', numericUserId)
 
   if (error) {
     return buildResponse(undefined, 500, '更新用户失败')
