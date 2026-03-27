@@ -20,12 +20,28 @@ const adminPaths = ['/admin']
 // 公开路径（无需登录）
 const publicPaths = ['/', '/login', '/register', '/forgot-password']
 
+// 检查是否已登录（支持 Supabase 的 cookie）
+function isAuthenticated(req: NextRequest): boolean {
+  // Supabase 的 cookie 名称格式: sb-[project-ref]-auth-token
+  // 或者是 sb-access-token 和 sb-refresh-token
+  const cookies = req.cookies
+
+  // 检查是否有 Supabase 的认证 cookie
+  const hasSupabaseToken = Array.from(cookies.getAll()).some(cookie =>
+    cookie.name.startsWith('sb-') &&
+    (cookie.name.includes('auth-token') || cookie.name.includes('access-token'))
+  )
+
+  // 同时检查是否有 userInfo localStorage 的标记（通过另一个 cookie 或 header）
+  // 但中间件无法访问 localStorage，所以只能依赖 Supabase cookie
+
+  return hasSupabaseToken
+}
+
 export async function middleware(req: NextRequest) {
-  // Sa-Token 默认 cookie key 为 satoken
-  const token = req.cookies.get('satoken')?.value
+  const isLoggedIn = isAuthenticated(req)
 
   const { pathname } = req.nextUrl
-  const isLoggedIn = !!token
 
   // 情况1：已登录用户访问登录/注册页 -> 重定向到 dashboard
   if ((pathname === '/login' || pathname === '/register') && isLoggedIn) {

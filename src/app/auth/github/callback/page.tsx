@@ -32,58 +32,52 @@ function GitHubCallbackContent() {
 
   const handleGithubCallback = async () => {
     try {
-      // 重要：先处理 OAuth 回调，获取 session
-      // Supabase 会在 URL hash 中返回 access_token
-      const { data: authData, error: authError } = await supabase.auth.getSession()
+      // Supabase 会自动从 URL hash 中解析 OAuth token
+      // 等待一下让 Supabase 客户端处理
+      await new Promise(resolve => setTimeout(resolve, 500))
 
-      if (authError) {
-        console.error("Auth error:", authError)
-        setError(authError.message || "获取会话失败")
+      // 获取会话
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+
+      if (sessionError) {
+        console.error("Session error:", sessionError)
+        setError("获取会话失败: " + sessionError.message)
         setStatus("error")
         return
       }
 
-      if (!authData.session) {
-        console.error("No session found - checking URL hash for OAuth callback")
-        // 检查 URL hash 中是否有 access_token
+      if (!session) {
+        console.error("No session found")
+        // 检查 URL 中是否有错误信息
         const hash = window.location.hash
-        console.log("URL hash:", hash)
-
-        if (hash && hash.includes('access_token')) {
-          console.log("Found access_token in URL hash, waiting for Supabase to process...")
-          // Supabase 会自动从 hash 中解析 token，等待一下再获取 session
-          await new Promise(resolve => setTimeout(resolve, 500))
-          const { data: retryData, error: retryError } = await supabase.auth.getSession()
-          if (retryError || !retryData.session) {
-            setError("无法获取登录会话，请重试")
-            setStatus("error")
-            return
-          }
-          await processSession(retryData.session)
+        if (hash.includes('error=')) {
+          const params = new URLSearchParams(hash.substring(1))
+          const errorDesc = params.get('error_description') || '未知错误'
+          setError("GitHub 登录失败: " + decodeURIComponent(errorDesc))
+          setStatus("error")
           return
         }
 
-        // 没有 session，等待 onAuthStateChange
-        const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
-          console.log("Auth event:", event, session)
-          if (event === 'SIGNED_IN' && session) {
-            await processSession(session)
-            data.subscription.unsubscribe()
+        // 等待 onAuthStateChange 事件
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+          console.log("Auth event:", event, newSession)
+          if (event === 'SIGNED_IN' && newSession) {
+            await processSession(newSession)
+            subscription.unsubscribe()
           }
         })
 
-        // 设置超时保护
+        // 超时保护
         setTimeout(() => {
-          data.subscription.unsubscribe()
-          if (status === "loading") {
-            setError("登录超时，请检查 GitHub 授权是否成功")
-            setStatus("error")
-          }
+          subscription.unsubscribe()
+          setError("登录超时，请重试")
+          setStatus("error")
         }, 10000)
         return
       }
 
-      await processSession(authData.session)
+      // 有 session，直接处理
+      await processSession(session)
     } catch (err: any) {
       console.error("GitHub callback error:", err)
       setError(err.message || "登录失败，请稍后重试")
@@ -93,75 +87,38 @@ function GitHubCallbackContent() {
 
   const processSession = async (session: any) => {
     const user = session.user
-
     console.log("Processing session for user:", user.email)
 
-    // 在 sys_users 中创建或更新用户记录
-    if (user.email) {
-      try {
-        const { data: existingUser } = await supabase
-          .from('sys_users')
-          .select('*')
-          .eq('email', user.email)
-          .single()
-
-        if (!existingUser) {
-          // 创建新用户记录
-          await supabase.from('sys_users').insert({
-            username: user.user_metadata?.login || user.user_metadata?.username || user.email.split('@')[0],
-            email: user.email,
-            nickname: user.user_metadata?.name || user.user_metadata?.nickname || user.user_metadata?.login || user.email.split('@')[0],
-            display_name: user.user_metadata?.name || user.user_metadata?.nickname || user.user_metadata?.login || user.email.split('@')[0],
-            avatar_url: user.user_metadata?.avatar_url,
-            online_status: 'offline',
-            account_status: 1,
-            last_seen_at: new Date().toISOString(),
-          })
-          console.log("Created new sys_users record")
-        } else {
-          // 更新现有用户记录
-          await supabase
-            .from('sys_users')
-            .update({
-              avatar_url: user.user_metadata?.avatar_url,
-              last_seen_at: new Date().toISOString(),
-            })
-            .eq('email', user.email)
-          console.log("Updated existing sys_users record")
-        }
-      } catch (err: any) {
-        console.error("Error updating sys_users:", err)
-        // 继续执行，不影响登录
-      }
-    }
-
-    // 保存用户信息到 localStorage
+    // 构建用户信息
     const userInfo = {
       id: user.id,
-      username: user.user_metadata?.login || user.user_metadata?.username || user.email || '',
+      username: user.user_metadata?.login || user.user_metadata?.username || user.email?.split('@')[0] || '',
       email: user.email,
       nickname: user.user_metadata?.name || user.user_metadata?.nickname || user.user_metadata?.login || '',
       avatar: user.user_metadata?.avatar_url || null,
     }
 
+    // 保存到 localStorage
     if (typeof window !== 'undefined') {
       localStorage.setItem('userInfo', JSON.stringify(userInfo))
+      // 触发自定义事件通知其他组件
       window.dispatchEvent(new Event('auth-change'))
     }
 
-    // 登录成功
+    // 触发 toast 通知
     setStatus("success")
     toast({
       title: "登录成功",
-      description: "欢迎回来，正在跳转...",
+      description: "欢迎回来！",
     })
 
     console.log("Login successful, redirecting to dashboard")
+    console.log("User info:", userInfo)
 
-    // 跳转到首页
+    // 使用 replace 而不是 push，避免回退到回调页面
     setTimeout(() => {
-      router.push("/dashboard")
-    }, 1500)
+      router.replace("/dashboard")
+    }, 1000)
   }
 
   return (
@@ -183,7 +140,7 @@ function GitHubCallbackContent() {
               <CheckCircle className="h-16 w-16 text-green-500" />
             </div>
             <h1 className="text-2xl font-bold mb-2">登录成功！</h1>
-            <p className="text-muted-foreground">欢迎回来，正在跳转...</p>
+            <p className="text-muted-foreground">正在跳转...</p>
           </>
         )}
 
