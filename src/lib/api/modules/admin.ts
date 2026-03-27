@@ -499,7 +499,7 @@ export async function getMenuList(): Promise<ApiResponse<SysMenu[]>> {
     return buildResponse([], 500, '获取菜单列表失败')
   }
 
-  return buildResponse(menus || [])
+  return buildResponse((menus || []) as SysMenu[])
 }
 
 /**
