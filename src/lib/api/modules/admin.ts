@@ -133,19 +133,19 @@ export async function getCurrentAdminUser(): Promise<ApiResponse<SysUser>> {
 
   // 转换为 SysUser 格式
   return buildResponse({
-    id: sysUser.id,
-    username: sysUser.username || '',
-    email: sysUser.email || '',
-    nickname: sysUser.nickname || '',
-    avatarName: sysUser.avatar_url || sysUser.avatar_name || '',
-    avatarUrl: sysUser.avatar_url || '',
-    accountStatus: sysUser.account_status ?? 1,
-    lastLoginAt: sysUser.last_login_at || sysUser.lastSignInAt,
-    lastSeenAt: sysUser.last_seen_at || sysUser.lastSeenAt,
-    createTime: sysUser.create_time || sysUser.createdAt,
-    updateTime: sysUser.update_time || sysUser.updatedAt,
-    bio: sysUser.bio || '',
-    phone: sysUser.phone || '',
+    id: sysUserData.id,
+    username: sysUserData.username || '',
+    email: sysUserData.email || '',
+    nickname: sysUserData.nickname || '',
+    avatarName: sysUserData.avatar_url || sysUserData.avatar_name || '',
+    avatarUrl: sysUserData.avatar_url || '',
+    accountStatus: sysUserData.account_status ?? 1,
+    lastLoginAt: sysUserData.last_login_at || sysUserData.lastSignInAt,
+    lastSeenAt: sysUserData.last_seen_at || sysUserData.lastSeenAt,
+    createTime: sysUserData.create_time || sysUserData.createdAt,
+    updateTime: sysUserData.update_time || sysUserData.updatedAt,
+    bio: sysUserData.bio || '',
+    phone: sysUserData.phone || '',
   })
 }
 
