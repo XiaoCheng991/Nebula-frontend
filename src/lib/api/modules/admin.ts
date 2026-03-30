@@ -733,7 +733,7 @@ export async function addDictType(data: Partial<SysDictType>): Promise<ApiRespon
 
   const { error } = await supabase
     .from('sys_dict_type')
-    .insert(insertData)
+    .insert([insertData])
 
   if (error) {
     return buildResponse(undefined, 500, '新增字典类型失败')
@@ -811,28 +811,28 @@ export async function addDictData(data: Partial<SysDictData>): Promise<ApiRespon
   }
 
   // 构建插入数据
-  const insertData: Partial<{
-    dict_type_id: number
-    dict_label: string
-    dict_value: string
-    sort_order: number
-    status: string
-    is_default?: boolean
-    remark?: string
-  }> = {
-    dict_type_id: data.dictTypeId,
-    dict_label: data.dictLabel,
-    dict_value: data.dictValue,
-    status: data.status,
-  }
-
+const insertData: {
+  dict_type_id: number
+  dict_label: string
+  dict_value: string
+  sort_order: number
+  status: string
+  is_default?: boolean
+  remark?: string
+} = {
+  dict_type_id: data.dictTypeId!,
+  dict_label: data.dictLabel!,
+  dict_value: data.dictValue!,
+  sort_order: data.sortOrder ?? 0,
+  status: data.status!,
+}
   if (data.sortOrder !== undefined) insertData.sort_order = data.sortOrder
   if (data.isDefault !== undefined) insertData.is_default = data.isDefault
   if (data.remark !== undefined) insertData.remark = data.remark
 
   const { error } = await supabase
     .from('sys_dict_data')
-    .insert(insertData)
+    .insert([insertData])
 
   if (error) {
     return buildResponse(undefined, 500, '新增字典数据失败')
