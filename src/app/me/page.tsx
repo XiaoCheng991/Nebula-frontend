@@ -59,7 +59,7 @@ const experiences = [
     role: "IT 研发总部 · 商品研发中心 · 全栈开发工程师",
     descriptions: [
       "作为集团管培生，8 个月内完成全链路岗位培训，荣获 2025 年度<strong>优秀员工奖</strong>（全部门 TOP10%）",
-      "驻场国际知名快餐企业总部参与供应链主数据中台项目，获得甲方领导书面认可",
+      "驻场国际知名快餐企业总部参与货品和货品供应商主数据数据中台项目，获得甲方领导书面认可",
       "设计 OpenClaw 多 Agent 分工体系，采购订单导出效率提升 60%",
       "直连商品中台提供实时库存/价格查询，响应时间 ≤500ms",
     ],
@@ -83,11 +83,11 @@ const experiences = [
 
 const projects = [
   {
-    name: "供应链主数据中台",
+    name: "货品和货品供应商主数据中台",
     status: "进行中",
     statusType: "active",
     description:
-      "国际知名快餐企业供应链主数据中台化建设项目，重塑统一规范的主数据管理体系，服务全国 1500+ 门店。绘制 BPMN 流程图 30+ 张，完成 10+ 个 TMS 品类树接口开发，响应时间≤300ms。",
+      "国际知名快餐企业货品和货品供应商主数据中台化建设项目，重塑统一规范的主数据管理体系，服务全国 1500+ 门店。绘制 BPMN 流程图 30+ 张，完成 10+ 个 TMS 品类树接口开发，响应时间≤300ms。",
     tags: ["Java", "数据中台", "供应链"],
     tagColors: ["tag-blue", "tag-green", "tag-orange"],
   },
@@ -170,25 +170,33 @@ export default function MePage() {
 
       <div className="max-w-[900px] mx-auto px-6 py-20">
         {/* Hero Section */}
-        <section className="min-h-[100vh] flex flex-col justify-center relative">
+        <section className="min-h-[100vh] flex flex-col justify-center relative -mt-32">
           <div
             className="absolute top-[-200px] right-[-200px] w-[500px] h-[500px] bg-[radial-gradient(circle,rgba(59,130,246,0.08)_0%,transparent_70%)] pointer-events-none"
           />
-          <div className="text-[#3b82f6] font-medium tracking-[2px] text-sm uppercase mb-4">
+          {/* GitHub Avatar */}
+          <div className="mb-6">
+            <img
+              src="https://avatars.githubusercontent.com/XiaoCheng991"
+              alt="程永强"
+              className="w-24 h-24 rounded-full border-4 border-[#3b82f6] shadow-lg shadow-[rgba(59,130,246,0.3)]"
+            />
+          </div>
+          <div className="text-[#3b82f6] font-medium tracking-[2px] text-sm uppercase mb-2">
             Hello, I'm
           </div>
           <h1 className="text-[clamp(40px,7vw,72px)] font-bold leading-tight mb-2 bg-gradient-to-r from-white to-[#999] bg-clip-text text-transparent">
             程永强
           </h1>
-          <p className="text-[clamp(20px,3vw,28px)] text-[#999] font-light mb-6">
-            <span className="text-[#60a5fa] font-medium">Java + AI</span> 开发
+          <p className="text-[clamp(20px,3vw,28px)] text-[#999] font-light mb-4">
+            <span className="text-[#60a5fa] font-medium">全栈 + AI</span> 开发
           </p>
-          <p className="text-[16px] text-[#666] max-w-[560px] leading-relaxed mb-8">
+          <p className="text-[16px] text-[#666] max-w-[560px] leading-relaxed mb-6">
             河南工业大学 · 数据科学与大数据技术<br />
             曾就职于 AI 科技企业，目前在大型零售业集团做全栈开发<br />
             正在从 Java 向 AI 迈进，目标：让代码不只是代码
           </p>
-          <div className="flex gap-3 flex-wrap">
+          <div className="flex gap-3 flex-wrap mt-2">
             {socialLinks.map((link, index) => (
               <a
                 key={index}
@@ -398,9 +406,9 @@ export default function MePage() {
         </section>
 
         {/* Footer */}
-        <footer className="py-10 border-t border-[#222] text-center">
+        <footer className="py-16 border-t border-[#222] text-center">
           <p className="text-[13px] text-[#666]">
-            Built with ❤️ by 程永强 · 2026
+            © 2026 程永强。Powered by <span className="text-[#3b82f6]">NebulaHub</span>
           </p>
         </footer>
       </div>
