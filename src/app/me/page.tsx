@@ -1,26 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import {
-  Github,
-  Mail,
-  Calendar,
-  Clock,
-  ArrowRight,
-  Phone,
-  MapPin,
-  ExternalLink,
-  Send,
-} from "lucide-react";
-import { UserAvatar } from "@/components/ui/user-avatar";
-import { AvatarCropDialog } from "@/components/ui/avatar-crop-dialog";
-import { useUser } from "@/lib/user-context";
-import { getLocalUserInfo } from "@/lib/api";
-import { supabase, uploadAvatar, deleteAvatar } from "@/lib/supabase/client";
-import { toast } from "@/components/ui/use-toast";
-import { useAdminStore } from "@/hooks/useAdminStore";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Github, Mail, Phone, MapPin, ExternalLink } from "lucide-react";
 
 const socialLinks = [
   {
@@ -141,126 +121,8 @@ const projects = [
 ];
 
 export default function MePage() {
-  const { user, loading: userLoading } = useUser();
-  const { hasAdminAccess, loadAdminData } = useAdminStore();
-  const [showCropDialog, setShowCropDialog] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  const localUser = isMounted ? getLocalUserInfo() : null;
-  const userId = user?.username || localUser?.id?.toString() || null;
-  const userNickname = user?.nickname || localUser?.nickname || "程永强";
-  const userAvatar = user?.avatarUrl || localUser?.avatarUrl || null;
-
-  useEffect(() => {
-    if (user && !userLoading) {
-      loadAdminData().catch(() => {});
-    }
-  }, [user, userLoading, loadAdminData]);
-
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      toast({
-        title: "文件类型错误",
-        description: "请上传图片文件",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (file.size > 10 * 1024 * 1024) {
-      toast({
-        title: "文件过大",
-        description: "图片大小不能超过 10MB",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const imageUrl = URL.createObjectURL(file);
-    setSelectedImage(imageUrl);
-    setShowCropDialog(true);
-    e.target.value = "";
-  };
-
-  const handleCropComplete = async (croppedImageBlob: Blob) => {
-    if (!userId) {
-      toast({
-        title: "错误",
-        description: "请先登录",
-        variant: "destructive",
-      });
-      setShowCropDialog(false);
-      return;
-    }
-
-    setUploading(true);
-    setShowCropDialog(false);
-
-    try {
-      const file = new File([croppedImageBlob], `avatar_${Date.now()}.jpg`, {
-        type: "image/jpeg",
-      });
-
-      const { path, url } = await uploadAvatar(file, String(userId));
-
-      if (userAvatar && userAvatar.includes("/avatar/")) {
-        const oldPath = userAvatar.split("/").pop() || "";
-        if (oldPath) {
-          await deleteAvatar(oldPath);
-        }
-      }
-
-      const { data: { user: supabaseUser } } = await supabase.auth.getUser();
-      if (supabaseUser) {
-        await supabase.auth.updateUser({
-          data: { avatar_url: url },
-        });
-      }
-
-      if (localUser) {
-        localStorage.setItem(
-          "userInfo",
-          JSON.stringify({
-            ...localUser,
-            avatarUrl: url,
-            avatarName: path,
-          })
-        );
-      }
-
-      window.dispatchEvent(new Event("auth-change"));
-
-      toast({
-        title: "上传成功",
-        description: "头像已更新",
-      });
-    } catch (error: any) {
-      console.error("Avatar upload error:", error);
-      toast({
-        title: "上传失败",
-        description: error.message || "无法上传头像",
-        variant: "destructive",
-      });
-    } finally {
-      setUploading(false);
-      if (selectedImage) {
-        URL.revokeObjectURL(selectedImage);
-        setSelectedImage(null);
-      }
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-[--bg] color-[--text]">
+    <div className="min-h-screen bg-[--bg]">
       <style jsx global>{`
         :root {
           --bg: #0a0a0a;
@@ -304,21 +166,11 @@ export default function MePage() {
           background: rgba(168, 85, 247, 0.15);
           color: var(--purple);
         }
-
-        .fade-in {
-          opacity: 0;
-          transform: translateY(20px);
-          transition: opacity 0.6s, transform 0.6s;
-        }
-        .fade-in.visible {
-          opacity: 1;
-          transform: translateY(0);
-        }
       `}</style>
 
       <div className="max-w-[900px] mx-auto px-6 py-20">
         {/* Hero Section */}
-        <section className="min-h-[100vh] flex flex-col justify-center relative fade-in">
+        <section className="min-h-[100vh] flex flex-col justify-center relative">
           <div
             className="absolute top-[-200px] right-[-200px] w-[500px] h-[500px] bg-[radial-gradient(circle,rgba(59,130,246,0.08)_0%,transparent_70%)] pointer-events-none"
           />
@@ -360,7 +212,7 @@ export default function MePage() {
         </section>
 
         {/* Experience Section */}
-        <section className="py-20 fade-in">
+        <section className="py-20">
           <h2 className="text-[13px] font-semibold tracking-[3px] text-[#3b82f6] uppercase mb-10 flex items-center gap-3">
             工作经历
             <span className="flex-1 h-[1px] bg-[#222]" />
@@ -403,7 +255,7 @@ export default function MePage() {
         </section>
 
         {/* Projects Section */}
-        <section className="py-20 fade-in">
+        <section className="py-20">
           <h2 className="text-[13px] font-semibold tracking-[3px] text-[#3b82f6] uppercase mb-10 flex items-center gap-3">
             项目经历
             <span className="flex-1 h-[1px] bg-[#222]" />
@@ -441,7 +293,7 @@ export default function MePage() {
         </section>
 
         {/* Skills Section */}
-        <section className="py-20 fade-in">
+        <section className="py-20">
           <h2 className="text-[13px] font-semibold tracking-[3px] text-[#3b82f6] uppercase mb-10 flex items-center gap-3">
             技术栈
             <span className="flex-1 h-[1px] bg-[#222]" />
@@ -466,7 +318,7 @@ export default function MePage() {
         </section>
 
         {/* Education Section */}
-        <section className="py-20 fade-in">
+        <section className="py-20">
           <h2 className="text-[13px] font-semibold tracking-[3px] text-[#3b82f6] uppercase mb-10 flex items-center gap-3">
             教育经历
             <span className="flex-1 h-[1px] bg-[#222]" />
@@ -495,7 +347,7 @@ export default function MePage() {
         </section>
 
         {/* Contact Section */}
-        <section className="py-20 fade-in">
+        <section className="py-20">
           <h2 className="text-[13px] font-semibold tracking-[3px] text-[#3b82f6] uppercase mb-10 flex items-center gap-3">
             联系方式
             <span className="flex-1 h-[1px] bg-[#222]" />
@@ -514,7 +366,9 @@ export default function MePage() {
               className="flex items-center gap-3 px-4 py-4 bg-[#141414] border border-[#222] rounded-[12px] text-[14px] transition-all hover:border-[#3b82f6]"
             >
               <Mail className="w-5 h-5 flex-shrink-0" />
-              <span className="truncate flex-1" title="17516476723@163.com">17516476723@163.com</span>
+              <span className="truncate flex-1" title="17516476723@163.com">
+                17516476723@163.com
+              </span>
             </a>
             <a
               href="https://gitee.com/XiaoCheng991"
@@ -550,32 +404,6 @@ export default function MePage() {
           </p>
         </footer>
       </div>
-
-      {/* Avatar Crop Dialog */}
-      {selectedImage && (
-        <AvatarCropDialog
-          open={showCropDialog}
-          onOpenChange={setShowCropDialog}
-          imageSrc={selectedImage}
-          onCropComplete={handleCropComplete}
-        />
-      )}
-
-      {/* Scroll Animation Script */}
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-            const observer = new IntersectionObserver((entries) => {
-              entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                  entry.target.classList.add('visible');
-                }
-              });
-            }, { threshold: 0.1 });
-            document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-          `,
-        }}
-      />
     </div>
   );
 }

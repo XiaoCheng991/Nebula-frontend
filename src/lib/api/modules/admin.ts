@@ -536,7 +536,7 @@ export async function getMenuTree(): Promise<ApiResponse<SysMenu[]>> {
  */
 export async function getAllRoles(): Promise<ApiResponse<SysRole[]>> {
   const { data: roles, error } = await supabase
-    .from('sys_roles')
+    .from('sys_role')
     .select('*')
     .eq('status', 'ACTIVE')
     .order('sort_order', { ascending: true })
@@ -557,7 +557,7 @@ export async function getRoleList(
   keyword?: string
 ): Promise<ApiResponse<{ records: SysRole[]; total: number; pages: number; current: number; size: number }>> {
   let query = supabase
-    .from('sys_roles')
+    .from('sys_role')
     .select('*', { count: 'exact' })
     .order('created_at', { ascending: false })
 
@@ -602,7 +602,7 @@ export async function getRolesByUserId(userId: number | string): Promise<ApiResp
   }
 
   const { data: roles, error: roleError } = await supabase
-    .from('sys_roles')
+    .from('sys_role')
     .select('*')
     .in('id', roleIds)
 
