@@ -716,16 +716,16 @@ export async function addDictType(data: Partial<SysDictType>): Promise<ApiRespon
   }
 
   // 构建插入数据
-  const insertData: Partial<{
+  const insertData: {
     dict_name: string
     dict_code: string
     status: string
     is_system?: boolean
     remark?: string
-  }> = {
-    dict_name: data.dictName,
-    dict_code: data.dictCode,
-    status: data.status,
+  } = {
+    dict_name: data.dictName!,
+    dict_code: data.dictCode!,
+    status: data.status!,
   }
 
   if (data.isSystem !== undefined) insertData.is_system = data.isSystem

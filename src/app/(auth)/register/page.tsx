@@ -5,244 +5,324 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { toast } from "@/components/ui/use-toast"
 import { register, loginWithGithub } from "@/lib/api/adapters"
-import { Github, ArrowRight, Check } from "lucide-react"
+import { Github, ArrowRight, Check, Sparkles } from "lucide-react"
 import { PublicRoute } from "@/components/auth/AuthGuard"
 
 export default function RegisterPage() {
- const [username, setUsername] = useState("")
- const [email, setEmail] = useState("")
- const [password, setPassword] = useState("")
- const [confirmPassword, setConfirmPassword] = useState("")
- const [loading, setLoading] = useState(false)
- const [focusedField, setFocusedField] = useState<string | null>(null)
- const router = useRouter()
+  const [username, setUsername] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [focusedField, setFocusedField] = useState<string | null>(null)
+  const router = useRouter()
 
- const handleEmailRegister = async (e: React.FormEvent) => {
-  e.preventDefault()
+  const handleEmailRegister = async (e: React.FormEvent) => {
+    e.preventDefault()
 
-  if (password !== confirmPassword) {
-   toast({
-    title: "密码不匹配",
-    description: "两次输入的密码不一致，请检查",
-    variant: "destructive",
-   })
-   return
+    if (password !== confirmPassword) {
+      toast({
+        title: "密码不匹配",
+        description: "两次输入的密码不一致，请检查",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (password.length < 6) {
+      toast({
+        title: "密码太短",
+        description: "密码至少需要 6 个字符",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (username.length < 3) {
+      toast({
+        title: "用户名太短",
+        description: "用户名至少需要 3 个字符",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setLoading(true)
+
+    try {
+      await register(username, email, password, username)
+
+      toast({
+        title: "注册成功",
+        description: "欢迎加入 NebulaHub！正在跳转...",
+      })
+
+      setTimeout(() => {
+        router.push("/dashboard")
+      }, 500)
+    } catch (error: any) {
+      toast({
+        title: "注册失败",
+        description: error.message || "注册失败，请重试",
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
-  if (password.length < 6) {
-   toast({
-    title: "密码太短",
-    description: "密码至少需要 6 个字符",
-    variant: "destructive",
-   })
-   return
+  const handleGithubLogin = async () => {
+    try {
+      setLoading(true)
+      await loginWithGithub()
+    } catch (error: any) {
+      toast({
+        title: "GitHub 注册失败",
+        description: error?.message || "网络错误，请稍后重试",
+        variant: "destructive",
+      })
+      setLoading(false)
+    }
   }
 
-  if (username.length < 3) {
-   toast({
-    title: "用户名太短",
-    description: "用户名至少需要 3 个字符",
-    variant: "destructive",
-   })
-   return
-  }
+  const passwordRequirements = [
+    { met: username.length >= 3, text: "USERNAME_MIN_3" },
+    { met: password.length >= 6, text: "PASS_MIN_6" },
+    { met: password === confirmPassword && password.length > 0, text: "PASS_MATCH" },
+  ]
 
-  setLoading(true)
+  return (
+    <PublicRoute>
+      <div className="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden">
+        {/* 动态渐变背景 */}
+        <div className="fixed inset-0 -z-20 bg-[#030407]" />
 
-  try {
-   await register(username, email, password, username)
-
-   toast({
-    title: "注册成功",
-    description: "欢迎加入 NebulaHub！正在跳转...",
-   })
-
-   setTimeout(() => {
-    router.push("/dashboard")
-   }, 500)
-  } catch (error: any) {
-   toast({
-    title: "注册失败",
-    description: error.message || "注册失败，请重试",
-    variant: "destructive",
-   })
-  } finally {
-   setLoading(false)
-  }
- }
-
- const handleGithubLogin = async () => {
-  try {
-   setLoading(true)
-   await loginWithGithub()
-  } catch (error: any) {
-   toast({
-    title: "GitHub 注册失败",
-    description: error?.message || "网络错误，请稍后重试",
-    variant: "destructive",
-   })
-   setLoading(false)
-  }
- }
-
- const passwordRequirements = [
-  { met: password.length >= 6, text: "至少 6 个字符" },
-  { met: password === confirmPassword && password.length > 0, text: "两次密码一致" },
-  { met: username.length >= 3, text: "用户名至少 3 个字符" },
- ]
-
- return (
-  <PublicRoute>
-   <div className="min-h-screen w-full flex flex-col items-center justify-start pt-20 sm:pt-24 pb-8 px-4 sm:px-6">
-    <div className="fixed inset-0 -z-10 bg-[#fafafa] dark:bg-[#0d0d0d]" />
-
-    <div className="w-full max-w-[360px]">
-     <div className="text-center mb-6">
-      <h1 className="text-xl font-semibold text-gray-900 dark:text-white tracking-tight">
-       创建账户
-      </h1>
-      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-       欢迎加入 NebulaHub
-      </p>
-     </div>
-
-     <div className="bg-white dark:bg-[#141414] rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-none border border-gray-100 dark:border-white/[0.06] overflow-hidden">
-      <div className="p-5 space-y-4">
-       <button
-        onClick={handleGithubLogin}
-        disabled={loading}
-        className="w-full h-11 flex items-center justify-center gap-2.5 rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-sm font-medium transition-all duration-200 hover:bg-gray-800 dark:hover:bg-gray-100 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-       >
-        <Github className="h-[18px] w-[18px]" />
-        <span>使用 GitHub 注册</span>
-       </button>
-
-       <div className="relative flex items-center justify-center">
-        <div className="absolute inset-0 flex items-center">
-         <div className="w-full border-t border-gray-100 dark:border-white/[0.04]" />
-        </div>
-        <span className="relative bg-white dark:bg-[#141414] px-2.5 text-[11px] text-gray-400 dark:text-gray-500 font-medium">
-         或使用邮箱注册
-        </span>
-       </div>
-
-       <form onSubmit={handleEmailRegister} className="space-y-3">
-        <div className="space-y-1.5">
-         <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400 ml-0.5">
-          用户名
-         </label>
-         <input
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          onFocus={() => setFocusedField('username')}
-          onBlur={() => setFocusedField(null)}
-          className="w-full h-10 px-3 rounded-lg bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/[0.06] text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-blue-500/50 focus:ring-[3px] focus:ring-blue-500/10 transition-all duration-200"
-          placeholder="用户名（至少 3 个字符）"
-          required
-          minLength={3}
-          maxLength={50}
-         />
+        {/* 网格背景装饰 */}
+        <div className="fixed inset-0 -z-10 opacity-5">
+          <div
+            className="w-full h-full"
+            style={{
+              backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+              backgroundSize: '50px 50px'
+            }}
+          />
         </div>
 
-        <div className="space-y-1.5">
-         <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400 ml-0.5">
-          邮箱
-         </label>
-         <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          onFocus={() => setFocusedField('email')}
-          onBlur={() => setFocusedField(null)}
-          className="w-full h-10 px-3 rounded-lg bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/[0.06] text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-blue-500/50 focus:ring-[3px] focus:ring-blue-500/10 transition-all duration-200"
-          placeholder="your@email.com"
-          required
-         />
+        {/* 技术装饰标签 */}
+        <div className="fixed top-8 left-8 z-10">
+          <div className="flex items-center gap-2 text-[10px] font-mono text-white/30 tracking-widest uppercase">
+            <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
+            SYS.REGISTER // ACTIVE
+          </div>
         </div>
 
-        <div className="space-y-1.5">
-         <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400 ml-0.5">
-          密码
-         </label>
-         <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          onFocus={() => setFocusedField('password')}
-          onBlur={() => setFocusedField(null)}
-          className="w-full h-10 px-3 rounded-lg bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/[0.06] text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-blue-500/50 focus:ring-[3px] focus:ring-blue-500/10 transition-all duration-200"
-          placeholder="设置密码（至少 6 个字符）"
-          required
-          minLength={6}
-         />
+        <div className="fixed bottom-8 left-8 z-10">
+          <div className="text-[10px] font-mono text-white/20 tracking-widest">
+            NEW_USER_PROVISIONING_
+          </div>
         </div>
 
-        <div className="space-y-1.5">
-         <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400 ml-0.5">
-          确认密码
-         </label>
-         <input
-          type="password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          onFocus={() => setFocusedField('confirmPassword')}
-          onBlur={() => setFocusedField(null)}
-          className="w-full h-10 px-3 rounded-lg bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/[0.06] text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-blue-500/50 focus:ring-[3px] focus:ring-blue-500/10 transition-all duration-200"
-          placeholder="再次输入密码"
-          required
-         />
+        <div className="fixed top-1/2 right-8 z-10 -translate-y-1/2">
+          <div className="text-[10px] font-mono text-white/20 tracking-widest writing-vertical-rl">
+            [ NEBULA.ID ]
+          </div>
         </div>
 
-        {password.length > 0 && (
-         <div className="space-y-1.5 px-1">
-          {passwordRequirements.map((req, index) => (
-           <div key={index} className="flex items-center gap-2 text-[11px]">
-            <Check
-             className={`h-3.5 w-3.5 ${
-              req.met ? "text-green-500" : "text-gray-400"
-             }`}
-            />
-            <span className={req.met ? "text-green-600 dark:text-green-400" : "text-gray-500 dark:text-gray-400"}>
-             {req.text}
-            </span>
-           </div>
-          ))}
-         </div>
-        )}
+        <div className="w-full max-w-[440px] px-4">
+          {/* 头部区域 */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full bg-white/5 border border-white/10">
+              <Sparkles className="h-3 w-3 text-amber-400" />
+              <span className="text-[10px] font-mono text-white/60 tracking-wider">NEBULA.ID</span>
+            </div>
+            <h1 className="text-3xl font-medium text-white tracking-tight">
+              Initialize Access
+            </h1>
+            <p className="mt-2 text-sm text-white/40">
+              Join the NebulaHub collaborative network
+            </p>
+          </div>
 
-        <button
-         type="submit"
-         disabled={loading}
-         className="w-full h-10 mt-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/25 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-        >
-         {loading ? (
-          <>
-           <div className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-           <span>注册中...</span>
-          </>
-         ) : (
-          <>
-           <span>创建账户</span>
-           <ArrowRight className="h-4 w-4" />
-          </>
-         )}
-        </button>
-       </form>
+          {/* 主卡片 */}
+          <div className="relative bg-white/5 backdrop-blur-xl rounded-[32px] border border-white/10 overflow-hidden">
+            {/* 卡片顶部光效 */}
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/30 to-transparent" />
+
+            <div className="p-8 space-y-6">
+              {/* GitHub 注册按钮 */}
+              <button
+                onClick={handleGithubLogin}
+                disabled={loading}
+                className="w-full h-14 flex items-center justify-center gap-3 rounded-full bg-white text-black text-sm font-semibold transition-all duration-300 hover:bg-white/90 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-white/10"
+              >
+                <Github className="h-5 w-5" />
+                <span>Continue with GitHub</span>
+              </button>
+
+              {/* 分割线 */}
+              <div className="relative flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-white/5" />
+                </div>
+                <span className="relative bg-[#030407]/80 px-4 text-[10px] text-white/30 font-mono tracking-wider uppercase">
+                  Or register with email
+                </span>
+              </div>
+
+              {/* 注册表单 */}
+              <form onSubmit={handleEmailRegister} className="space-y-4">
+                {/* 用户名 */}
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    onFocus={() => setFocusedField('username')}
+                    onBlur={() => setFocusedField(null)}
+                    className="w-full h-14 px-6 rounded-full bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-amber-500/50 focus:ring-[3px] focus:ring-amber-500/10 transition-all duration-300"
+                    placeholder="username"
+                    required
+                    minLength={3}
+                    maxLength={50}
+                  />
+                  <label className={`absolute left-6 top-1/2 -translate-y-1/2 text-xs font-medium transition-all duration-300 pointer-events-none ${
+                    focusedField === 'username' || username
+                      ? '-top-8 text-amber-400/80'
+                      : 'text-white/30'
+                  }`}>
+                    USERNAME
+                  </label>
+                </div>
+
+                {/* 邮箱 */}
+                <div className="relative">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onFocus={() => setFocusedField('email')}
+                    onBlur={() => setFocusedField(null)}
+                    className="w-full h-14 px-6 rounded-full bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-amber-500/50 focus:ring-[3px] focus:ring-amber-500/10 transition-all duration-300"
+                    placeholder="user@domain.net"
+                    required
+                  />
+                  <label className={`absolute left-6 top-1/2 -translate-y-1/2 text-xs font-medium transition-all duration-300 pointer-events-none ${
+                    focusedField === 'email' || email
+                      ? '-top-8 text-amber-400/80'
+                      : 'text-white/30'
+                  }`}>
+                    IDENTIFIER
+                  </label>
+                </div>
+
+                {/* 密码 */}
+                <div className="relative">
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onFocus={() => setFocusedField('password')}
+                    onBlur={() => setFocusedField(null)}
+                    className="w-full h-14 px-6 rounded-full bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-amber-500/50 focus:ring-[3px] focus:ring-amber-500/10 transition-all duration-300"
+                    placeholder="••••••••••••"
+                    required
+                    minLength={6}
+                  />
+                  <label className={`absolute left-6 top-1/2 -translate-y-1/2 text-xs font-medium transition-all duration-300 pointer-events-none ${
+                    focusedField === 'password' || password
+                      ? '-top-8 text-amber-400/80'
+                      : 'text-white/30'
+                  }`}>
+                    PASSCODE
+                  </label>
+                </div>
+
+                {/* 确认密码 */}
+                <div className="relative">
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onFocus={() => setFocusedField('confirmPassword')}
+                    onBlur={() => setFocusedField(null)}
+                    className="w-full h-14 px-6 rounded-full bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-amber-500/50 focus:ring-[3px] focus:ring-amber-500/10 transition-all duration-300"
+                    placeholder="••••••••••••"
+                    required
+                  />
+                  <label className={`absolute left-6 top-1/2 -translate-y-1/2 text-xs font-medium transition-all duration-300 pointer-events-none ${
+                    focusedField === 'confirmPassword' || confirmPassword
+                      ? '-top-8 text-amber-400/80'
+                      : 'text-white/30'
+                  }`}>
+                    CONFIRM_PASSCODE
+                  </label>
+                </div>
+
+                {/* 密码要求检查 */}
+                {password.length > 0 && (
+                  <div className="space-y-2 px-1 py-3 rounded-xl bg-white/5 border border-white/5">
+                    {passwordRequirements.map((req, index) => (
+                      <div key={index} className="flex items-center gap-3 text-[10px] font-mono">
+                        <div className={`w-4 h-4 rounded-full flex items-center justify-center transition-all duration-300 ${
+                          req.met ? 'bg-green-500/20' : 'bg-white/5'
+                        }`}>
+                          <Check className={`h-3 w-3 transition-all duration-300 ${
+                            req.met ? 'text-green-400 scale-100' : 'text-white/20 scale-75'
+                          }`} />
+                        </div>
+                        <span className={req.met ? 'text-green-400/80' : 'text-white/20'}>
+                          {req.text}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* 注册按钮 */}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full h-16 mt-4 rounded-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white text-base font-semibold transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-amber-500/30 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+                >
+                  {loading ? (
+                    <>
+                      <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>Provisioning...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Initialize Account</span>
+                      <ArrowRight className="h-5 w-5" />
+                    </>
+                  )}
+                </button>
+              </form>
+            </div>
+
+            {/* 卡片底部光效 */}
+            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
+          </div>
+
+          {/* 登录链接 */}
+          <p className="text-center mt-8 text-sm text-white/30">
+            Already have an account?{" "}
+            <Link
+              href="/login"
+              className="text-amber-400 hover:text-amber-300 font-medium transition-colors"
+            >
+              Sign in
+            </Link>
+          </p>
+        </div>
+
+        {/* 底部版本信息 */}
+        <div className="fixed bottom-4 right-4 z-10">
+          <div className="text-[10px] font-mono text-white/20">
+            V03.01 // BUILD_2026
+          </div>
+        </div>
       </div>
-     </div>
-
-     <p className="text-center mt-5 text-[13px] text-gray-500 dark:text-gray-400">
-      已有账户？{" "}
-      <Link
-       href="/login"
-       className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
-      >
-       立即登录
-      </Link>
-     </p>
-    </div>
-   </div>
-  </PublicRoute>
- )
+    </PublicRoute>
+  )
 }

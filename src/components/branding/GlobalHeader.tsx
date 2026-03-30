@@ -151,18 +151,18 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
               <span className="text-sm font-medium hidden sm:block">仪表盘</span>
             </Link>
             <Link
-              href="/chat"
-              className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group"
-            >
-              <MessageCircle className="h-5 w-5 text-blue-500 group-hover:scale-110 transition-transform" />
-              <span className="text-sm font-medium hidden sm:block">消息</span>
-            </Link>
-            <Link
               href="/drive"
               className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group"
             >
               <FolderUp className="h-5 w-5 text-green-500 group-hover:scale-110 transition-transform" />
               <span className="text-sm font-medium hidden sm:block">文件</span>
+            </Link>
+            <Link
+              href="/blog"
+              className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group"
+            >
+              <BookOpen className="h-5 w-5 text-orange-500 group-hover:scale-110 transition-transform" />
+              <span className="text-sm font-medium hidden sm:block">博客</span>
             </Link>
             <Link
               href="/me"
