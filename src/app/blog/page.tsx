@@ -25,7 +25,8 @@ import { UserAvatar } from "@/components/ui/user-avatar";
 import { AvatarCropDialog } from "@/components/ui/avatar-crop-dialog";
 import { useUser } from "@/lib/user-context";
 import { getLocalUserInfo } from "@/lib/api";
-import { supabase, uploadAvatar, deleteAvatar } from "@/lib/supabase/client";
+import { supabase } from "@/lib/supabase/client";
+import { uploadAvatar } from "@/lib/api/modules/file";
 import { toast } from "@/components/ui/use-toast";
 import { useAdminStore } from "@/hooks/useAdminStore";
 
@@ -196,22 +197,14 @@ export default function BlogPage() {
         type: 'image/jpeg',
       });
 
-      // 上传到 Supabase
-      const { path, url } = await uploadAvatar(file, String(userId));
+    const publicUrl = await uploadAvatar(file);
 
-      // 如果有旧头像，删除它
-      if (userAvatar && userAvatar.includes('/avatar/')) {
-        const oldPath = userAvatar.split('/').pop() || '';
-        if (oldPath) {
-          await deleteAvatar(oldPath);
-        }
-      }
 
-      // 更新 Supabase 用户信息
+    // 更新 Supabase 用户信息
       const { data: { user: supabaseUser } } = await supabase.auth.getUser();
       if (supabaseUser) {
         await supabase.auth.updateUser({
-          data: { avatar_url: url }
+          data: { avatar_url: publicUrl }
         });
       }
 
@@ -219,8 +212,8 @@ export default function BlogPage() {
       if (localUser) {
         localStorage.setItem('userInfo', JSON.stringify({
           ...localUser,
-          avatarUrl: url,
-          avatarName: path,
+          avatarUrl: publicUrl,
+          avatarName: publicUrl,
         }));
       }
 

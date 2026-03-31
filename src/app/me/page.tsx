@@ -54,7 +54,7 @@ const skills = [
 
 const experiences = [
   {
-    company: "大型电商集团",
+    company: "大型零售电商集团",
     period: "2025.07 ~ 至今",
     role: "IT 研发总部 · 商品研发中心 · 全栈开发工程师",
     descriptions: [
@@ -67,12 +67,12 @@ const experiences = [
     tagColors: ["tag-blue", "tag-green", "tag-purple"],
   },
   {
-    company: "AI 科技企业",
+    company: "互联网科技企业",
     period: "2024.05 ~ 2024.11",
     role: "创新产品部 · Java 开发工程师",
     descriptions: [
       "负责高校教育平台、教考分离平台等 3 个核心系统的后端研发",
-      "运用 EazyExcel + MinIO 处理文件导出 5000+ 次，导出效率提升 40%",
+      "运用 EasyExcel + MinIO 处理文件导出 5000+ 次，导出效率提升 40%",
       "重构核心模块，响应速度提升 20%，代码可读性提升 50%",
       "交付健壮接口 80+ 个，接口调用成功率 99.9%，项目按期交付率 100%",
     ],
@@ -334,7 +334,7 @@ export default function MePage() {
           <div className="bg-[#141414] border border-[#222] rounded-[12px] p-6 flex justify-between items-center flex-wrap gap-4">
             <div>
               <div className="text-[20px] font-bold text-white">
-                河南工业大学
+                xx工业大学
               </div>
               <div className="text-[14px] text-[#999]">
                 数据科学与大数据技术 · 本科 · 2021.09 ~ 2025.06

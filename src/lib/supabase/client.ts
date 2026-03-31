@@ -54,14 +54,12 @@ export const isAuthenticated = async (): Promise<boolean> => {
  */
 export function getAvatarUrl(avatarName: string | null): string | null {
  if (!avatarName) return null
- return `${supabaseUrl}/storage/v1/object/public/avatar/${avatarName}`
+ return `${supabaseUrl}/storage/v1/object/public/nebula-hub-avatars/${avatarName}`
 }
 
 /**
  * 上传头像到 Supabase Storage
- * @param file 图片文件
- * @param userId 用户 ID
- * @returns 上传后的文件路径
+ * @deprecated 已废弃，请使用 src/lib/api/modules/file.ts 中的 uploadAvatar 函数
  */
 export async function uploadAvatar(file: File, userId: string): Promise<{ path: string; url: string }> {
  const fileExt = file.name.split('.').pop() || 'jpg'
@@ -69,7 +67,7 @@ export async function uploadAvatar(file: File, userId: string): Promise<{ path: 
  const filePath = `${fileName}`
 
  const { data, error } = await supabase.storage
-  .from('avatar')
+  .from('nebula-hub-avatars')
   .upload(filePath, file, {
    upsert: true,
   })
@@ -80,7 +78,7 @@ export async function uploadAvatar(file: File, userId: string): Promise<{ path: 
 
  // 获取公开 URL
  const { data: urlData } = supabase.storage
-  .from('avatar')
+  .from('nebula-hub-avatars')
   .getPublicUrl(filePath)
 
  return {
@@ -91,11 +89,11 @@ export async function uploadAvatar(file: File, userId: string): Promise<{ path: 
 
 /**
  * 删除旧头像
- * @param filePath 文件路径
+ * @deprecated 已废弃，不再需要手动删除头像
  */
 export async function deleteAvatar(filePath: string): Promise<void> {
  const { error } = await supabase.storage
-  .from('avatar')
+  .from('nebula-hub-avatars')
   .remove([filePath])
 
  if (error) {

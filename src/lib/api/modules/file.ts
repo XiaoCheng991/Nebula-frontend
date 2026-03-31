@@ -14,6 +14,7 @@ export interface FileUploadResponse {
 
 /**
  * 上传单个文件到 Supabase Storage
+ * 使用最新的 Supabase SDK v2 模式
  */
 export async function uploadSingleFile(
   file: File,
@@ -33,6 +34,7 @@ export async function uploadSingleFile(
     .from('nebula-hub-files')
     .upload(filePath, file, {
       upsert: false,
+      cacheControl: '3600',
     })
 
   if (error) {
@@ -51,6 +53,7 @@ export async function uploadSingleFile(
 
 /**
  * 上传头像到 Supabase Storage
+ * 使用最新的 Supabase SDK v2 模式
  */
 export async function uploadAvatar(
   file: File,
@@ -70,6 +73,7 @@ export async function uploadAvatar(
     .from('nebula-hub-avatars')
     .upload(filePath, file, {
       upsert: true,
+      cacheControl: '31536000', // 1 年缓存
     })
 
   if (error) {

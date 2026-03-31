@@ -32,6 +32,7 @@ export interface UpdateProfileRequest {
 
 /**
  * 获取当前用户信息（从 Supabase）
+ * 使用最新的 Supabase SDK v2 模式
  */
 export async function getUserProfile(): Promise<UserProfile> {
   const { data: { session }, error: sessionError } = await supabase.auth.getSession()
@@ -61,6 +62,7 @@ export async function getUserProfile(): Promise<UserProfile> {
 
 /**
  * 更新用户资料（更新到 Supabase）
+ * 使用最新的 Supabase SDK v2 模式
  */
 export async function updateUserProfile(data: UpdateProfileRequest): Promise<UserProfile> {
   const { data: { session }, error: sessionError } = await supabase.auth.getSession()

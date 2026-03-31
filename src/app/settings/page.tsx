@@ -14,7 +14,8 @@ import { AvatarCropDialog } from "@/components/ui/avatar-crop-dialog"
 import LayoutWithFullWidth from "@/components/LayoutWithFullWidth"
 import { useUser } from "@/lib/user-context"
 import { ProtectedRoute } from "@/components/auth/AuthGuard"
-import { supabase, uploadAvatar, deleteAvatar } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabase/client"
+import { uploadAvatar } from "@/lib/api/modules/file"
 import { getLocalUserInfo } from "@/lib/api"
 
 export default function SettingsPage() {
@@ -105,37 +106,30 @@ export default function SettingsPage() {
    const file = new File([croppedImageBlob], `avatar_${Date.now()}.jpg`, {
     type: 'image/jpeg',
    })
-
+    const publicUrl = await uploadAvatar(file)
    // 上传到 Supabase
-   const { path, url } = await uploadAvatar(file, String(userId))
-
-   // 如果有旧头像，删除它
-   if (profile.avatarName) {
-    await deleteAvatar(profile.avatarName)
-   }
-
    // 更新 Supabase 用户信息
    const { data: { user: supabaseUser } } = await supabase.auth.getUser()
    if (supabaseUser) {
     await supabase.auth.updateUser({
-     data: { avatar_url: url }
+     data: { avatar_url: publicUrl }
     })
    }
 
    // 更新本地状态
-   setProfile(prev => ({ ...prev, avatarUrl: url, avatarName: path }))
+   setProfile(prev => ({ ...prev, avatarUrl: publicUrl, avatarName: publicUrl }))
 
    // 更新本地存储
    if (localUser) {
     localStorage.setItem('userInfo', JSON.stringify({
      ...localUser,
-     avatar: url,
-     avatar_name: path,
+     avatar: publicUrl,
+     avatar_name: publicUrl,
     }))
    }
 
    // 更新全局用户状态
-   updateUser({ avatarUrl: url })
+   updateUser({ avatarUrl: publicUrl })
 
    toast({
     title: "上传成功",

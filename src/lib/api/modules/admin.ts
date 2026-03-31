@@ -2,6 +2,7 @@
  * 后台管理 API 模块（Supabase 模式）
  *
  * 所有 API 都直接查询 Supabase 数据库，不再经过 Java 后端
+ * 使用最新的 Supabase SDK v2 模式
  */
 
 import { supabase } from '@/lib/supabase/client'

@@ -24,6 +24,7 @@ export interface LoginResponse {
 
 /**
  * 登录
+ * 使用最新的 Supabase SDK v2 模式
  */
 export async function login(
   email: string,
@@ -50,16 +51,12 @@ async function buildLoginResponse(user: any): Promise<LoginResponse> {
 
   let userInfoData: any = null
   if (user.email) {
-    try {
-      const { data: userData } = await supabase
-        .from('sys_users')
-        .select('*')
-        .eq('email', user.email)
-        .single()
-      userInfoData = userData
-    } catch {
-      // 用户可能还没有在 sys_users 中创建记录
-    }
+    const { data: userData } = await supabase
+      .from('sys_users')
+      .select('*')
+      .eq('email', user.email)
+      .maybeSingle()
+    userInfoData = userData
   }
 
   const userInfo = {
@@ -125,6 +122,7 @@ export async function loginWithGithub(): Promise<void> {
 
 /**
  * 注册
+ * 使用最新的 Supabase SDK v2 模式
  */
 export async function register(
   username: string,
@@ -179,6 +177,7 @@ export async function register(
 
 /**
  * 登出
+ * 使用最新的 Supabase SDK v2 模式
  */
 export async function logout(): Promise<void> {
   await supabase.auth.signOut()
@@ -199,16 +198,12 @@ export async function getUserInfo(): Promise<LoginResponse['userInfo']> {
 
   let userInfoData: any = null
   if (user.email) {
-    try {
-      const { data: userData } = await supabase
-        .from('sys_users')
-        .select('*')
-        .eq('email', user.email)
-        .single()
-      userInfoData = userData
-    } catch {
-      // 用户可能还没有在 sys_users 中创建记录
-    }
+    const { data: userData } = await supabase
+      .from('sys_users')
+      .select('*')
+      .eq('email', user.email)
+      .maybeSingle()
+    userInfoData = userData
   }
 
   return {

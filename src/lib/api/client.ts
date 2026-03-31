@@ -1,10 +1,15 @@
 /**
- * 核心 HTTP 客户端（已废弃 - 迁移到 Supabase）
+ * @deprecated 已废弃 - 迁移到 Supabase
  *
  * 注意：此文件已废弃，所有 API 调用现在都直接通过 Supabase
  * 保留此文件仅用于向后兼容，新的 API 模块应该直接使用 supabase 客户端
  *
- * 特性：
+ * 迁移指南：
+ * - 不要使用此文件中的 get/post/put/delete 等方法
+ * - 请使用 src/lib/api/modules/ 中的专用模块（auth.ts, user.ts, file.ts, admin.ts）
+ * - 这些模块直接使用 Supabase SDK，提供更类型安全的 API
+ *
+ * 特性（已废弃）：
  * - 所有请求默认携带 Cookie（credentials: include）
  * - 不再在前端注入/刷新 Bearer Token
  * - 统一登录过期处理
