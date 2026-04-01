@@ -583,6 +583,8 @@ export async function getRoleList(
 export async function getRolesByUserId(userId: number | string): Promise<ApiResponse<SysRole[]>> {
   const numericUserId = await getNumericUserId(userId)
 
+  console.log('[getRolesByUserId] 输入 userId:', userId, '解析后的 numericUserId:', numericUserId)
+
   if (!numericUserId) {
     return buildResponse([], 404, '用户不存在')
   }
@@ -592,13 +594,17 @@ export async function getRolesByUserId(userId: number | string): Promise<ApiResp
     .select('role_id')
     .eq('user_id', numericUserId)
 
+  console.log('[getRolesByUserId] sys_user_role 查询结果:', { userRoles, error: userRoleError })
+
   if (userRoleError) {
     return buildResponse([], 500, '获取用户角色失败')
   }
 
   const roleIds = userRoles?.map(ur => ur.role_id) || []
+  console.log('[getRolesByUserId] 提取的 roleIds:', roleIds)
 
   if (roleIds.length === 0) {
+    console.warn('[getRolesByUserId] roleIds 为空，用户可能没有分配任何角色')
     return buildResponse([])
   }
 
