@@ -79,7 +79,7 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
         href="/admin"
         className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group"
       >
-        <Shield className="h-5 w-5 text-[var(--accent)] group-hover:scale-110 transition-transform" />
+        <Shield className="h-5 w-5 text-orange-500 group-hover:scale-110 transition-transform" />
         <span className="text-sm font-medium hidden sm:block">管理后台</span>
       </Link>
     );
@@ -115,7 +115,7 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
       <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-[var(--accent)]/3 rounded-full blur-3xl translate-y-32 pointer-events-none" />
 
       {/* 头部内容 */}
-      <div className="relative z-10 px-6 py-3 grid grid-cols-3 items-center bg-white/70 dark:bg-gray-900/80 backdrop-blur-xl border-b border-[var(--glass-border)]">
+      <div className="relative z-10 px-6 py-3 grid grid-cols-3 items-center">
         {/* 左侧 - Logo */}
         <div className="flex items-center justify-start">
           <Link href="/home" className="flex items-center gap-3 group">
@@ -128,14 +128,14 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
             />
             <div className="flex flex-col">
               <span className="text-lg font-bold tracking-tight">
-                <span className="text-slate-800 dark:text-white">Nebula</span>
-                <span className="font-semibold text-[var(--accent)]">Hub</span>
+                <span className="text-slate-900 dark:text-white">Nebula</span>
+                <span className="font-semibold text-orange-500">Hub</span>
               </span>
               <span className="text-[11px] font-medium tracking-wide leading-tight flex items-center gap-1">
                 <Zap className="h-3 w-3 text-orange-500" />
                 <span className="text-orange-500">橙光</span>
-                <span className="text-slate-400 mx-1">|</span>
-                <span className="text-slate-500">Pro</span>
+                <span className="text-slate-500 dark:text-slate-400 mx-1">|</span>
+                <span className="text-slate-600 dark:text-slate-500">Pro</span>
               </span>
             </div>
           </Link>
@@ -144,33 +144,60 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
         {/* 中间 - 导航 */}
         <div className="flex items-center justify-center">
           <nav className="hidden md:flex items-center space-x-1">
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group"
-            >
-              <Sparkles className="h-5 w-5 text-[var(--accent)] group-hover:scale-110 transition-transform" />
-              <span className="text-sm font-medium hidden sm:block">仪表盘</span>
-            </Link>
-            <Link
-              href="/drive"
-              className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group"
-            >
-              <FolderUp className="h-5 w-5 text-green-500 group-hover:scale-110 transition-transform" />
-              <span className="text-sm font-medium hidden sm:block">文件</span>
-            </Link>
+            {/* 仪表盘 - 需要登录 */}
+            {user ? (
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group"
+              >
+                <Sparkles className="h-5 w-5 text-orange-500 group-hover:scale-110 transition-transform" />
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300 hidden sm:block">仪表盘</span>
+              </Link>
+            ) : (
+              <button
+                onClick={() => window.location.href = '/login'}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group"
+              >
+                <Sparkles className="h-5 w-5 text-orange-500 group-hover:scale-110 transition-transform" />
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300 hidden sm:block">仪表盘</span>
+              </button>
+            )}
+
+            {/* 文件 - 需要登录 */}
+            {user ? (
+              <Link
+                href="/drive"
+                className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group"
+              >
+                <FolderUp className="h-5 w-5 text-green-500 group-hover:scale-110 transition-transform" />
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300 hidden sm:block">文件</span>
+              </Link>
+            ) : (
+              <button
+                onClick={() => window.location.href = '/login'}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group"
+              >
+                <FolderUp className="h-5 w-5 text-green-500 group-hover:scale-110 transition-transform" />
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300 hidden sm:block">文件</span>
+              </button>
+            )}
+
+            {/* 博客 - 公开页面，无需登录 */}
             <Link
               href="/blog"
               className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group"
             >
               <BookOpen className="h-5 w-5 text-orange-500 group-hover:scale-110 transition-transform" />
-              <span className="text-sm font-medium hidden sm:block">博客</span>
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300 hidden sm:block">博客</span>
             </Link>
+
+            {/* 我 - 公开页面，无需登录 */}
             <Link
               href="/me"
               className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group"
             >
               <User className="h-5 w-5 text-purple-500 group-hover:scale-110 transition-transform" />
-              <span className="text-sm font-medium hidden sm:block">我</span>
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300 hidden sm:block">我</span>
             </Link>
           </nav>
         </div>
@@ -231,7 +258,7 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
             <>
               <Link
                 href="/login"
-                className="px-4 py-2 rounded-xl text-sm font-medium bg-white/50 dark:bg-white/10 hover:bg-white/70 dark:hover:bg-white/20 border border-[var(--glass-border)] transition-all duration-300 backdrop-blur-sm"
+                className="px-4 py-2 rounded-xl text-sm font-medium bg-white/90 dark:bg-slate-800/90 hover:bg-white dark:hover:bg-slate-700 border border-slate-200/50 dark:border-slate-700/50 text-slate-700 dark:text-slate-200 transition-all duration-300 backdrop-blur-sm shadow-sm"
               >
                 登录
               </Link>

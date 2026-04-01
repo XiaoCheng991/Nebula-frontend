@@ -5,15 +5,13 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { toast } from "@/components/ui/use-toast"
 import { register, loginWithGithub } from "@/lib/api/adapters"
-import { Github, ArrowRight, Check, Sparkles } from "lucide-react"
+import { Github, ArrowRight, Check, Mail, Lock, User as UserIcon } from "lucide-react"
 import { PublicRoute } from "@/components/auth/AuthGuard"
 import { useLanguage } from "@/hooks/useLanguage"
 import { useThemeEffect } from "@/hooks/useTheme"
 
 export default function RegisterPage() {
   const { t } = useLanguage()
-
-  // 应用主题效果（跟随系统或用户选择的主题）
   useThemeEffect()
 
   const [username, setUsername] = useState("")
@@ -21,36 +19,23 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [loading, setLoading] = useState(false)
-  const [focusedField, setFocusedField] = useState<string | null>(null)
   const router = useRouter()
 
   const handleEmailRegister = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (password !== confirmPassword) {
-      toast({
-        title: t("register.passwordMismatch"),
-        description: t("register.passwordMismatch"),
-        variant: "destructive",
-      })
+      toast({ title: "密码不匹配", description: "请确保两次输入的密码一致", variant: "destructive" })
       return
     }
 
     if (password.length < 6) {
-      toast({
-        title: t("register.passwordTooShort"),
-        description: t("register.passwordMin6"),
-        variant: "destructive",
-      })
+      toast({ title: "密码太短", description: "密码至少需要 6 个字符", variant: "destructive" })
       return
     }
 
     if (username.length < 3) {
-      toast({
-        title: t("register.usernameTooShort"),
-        description: t("register.usernameMin3"),
-        variant: "destructive",
-      })
+      toast({ title: "用户名太短", description: "用户名至少需要 3 个字符", variant: "destructive" })
       return
     }
 
@@ -58,21 +43,10 @@ export default function RegisterPage() {
 
     try {
       await register(username, email, password, username)
-
-      toast({
-        title: t("register.successRegister"),
-        description: t("register.welcomeToNebulaHub"),
-      })
-
-      setTimeout(() => {
-        router.push("/dashboard")
-      }, 500)
+      toast({ title: "注册成功", description: "欢迎加入 NebulaHub" })
+      setTimeout(() => router.push("/dashboard"), 500)
     } catch (error: any) {
-      toast({
-        title: t("register.registerFailed"),
-        description: error.message || t("register.networkError"),
-        variant: "destructive",
-      })
+      toast({ title: "注册失败", description: error.message || "网络错误", variant: "destructive" })
     } finally {
       setLoading(false)
     }
@@ -83,195 +57,149 @@ export default function RegisterPage() {
       setLoading(true)
       await loginWithGithub()
     } catch (error: any) {
-      toast({
-        title: t("register.githubRegisterFailed"),
-        description: error?.message || t("register.networkError"),
-        variant: "destructive",
-      })
+      toast({ title: "GitHub 注册失败", description: error?.message || "网络错误", variant: "destructive" })
       setLoading(false)
     }
   }
 
   const passwordRequirements = [
-    { met: username.length >= 3, text: t("register.usernameMin3") },
-    { met: password.length >= 6, text: t("register.passwordMin6") },
-    { met: password === confirmPassword && password.length > 0, text: t("register.passwordMatch") },
+    { met: username.length >= 3, text: "用户名至少 3 个字符" },
+    { met: password.length >= 6, text: "密码至少 6 个字符" },
+    { met: password === confirmPassword && password.length > 0, text: "密码一致" },
   ]
 
   return (
     <PublicRoute>
-      <div className="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-[#030407] dark:to-[#0a0a0f]">
-        {/* 网格背景装饰 */}
-        <div className="fixed inset-0 -z-10 opacity-5 pointer-events-none">
-          <div
-            className="w-full h-full"
-            style={{
-              backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.1) 1px, transparent 1px),
-              linear-gradient(to bottom, rgba(0,0,0,0.1) 1px, transparent 1px)`,
-              backgroundSize: '50px 50px'
-            }}
-          />
-        </div>
-
-        {/* 技术装饰标签 */}
-        <div className="fixed top-8 left-8 z-10">
-          <div className="flex items-center gap-2 text-[10px] font-mono text-slate-500 dark:text-white/30 tracking-widest uppercase">
-            <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
-            {t("register.systemLabel")}
+      <div className="min-h-screen w-full flex">
+        {/* 左侧 - 简约品牌展示 */}
+        <div className="hidden lg:flex w-1/2 relative overflow-hidden bg-gradient-to-br from-[#0a0a0a] via-[#111111] to-[#0a0a0a]">
+          {/* 动态光晕背景 */}
+          <div className="absolute inset-0">
+            <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-[#3b82f6]/10 rounded-full blur-[120px]" />
+            <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#60a5fa]/8 rounded-full blur-[100px]" />
           </div>
-        </div>
 
-        <div className="fixed bottom-8 left-8 z-10">
-          <div className="text-[10px] font-mono text-slate-400 dark:text-white/20 tracking-widest">
-            {t("register.uplinkEstablished")}
-          </div>
-        </div>
-
-        <div className="fixed top-1/2 right-8 z-10 -translate-y-1/2">
-          <div className="text-[10px] font-mono text-slate-400 dark:text-white/20 tracking-widest writing-vertical-rl">
-            {t("register.nebulaId")}
-          </div>
-        </div>
-
-        <div className="w-full max-w-[440px] px-4">
-          {/* 头部区域 */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full bg-white/5 dark:bg-white/5 border border-slate-200 dark:border-white/10">
-              <Sparkles className="h-3 w-3 text-amber-400" />
-              <span className="text-[10px] font-mono text-slate-500 dark:text-white/60 tracking-wider">NEBULA.ID</span>
+          {/* 中心品牌内容 */}
+          <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-12">
+            <div className="mb-8">
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-[#3b82f6]/20 to-[#60a5fa]/20 backdrop-blur-sm border border-[#3b82f6]/20">
+                <UserIcon className="h-10 w-10 text-[#60a5fa]" />
+              </div>
             </div>
-            <h1 className="text-3xl font-medium text-slate-800 dark:text-white tracking-tight">
-              {t("register.title")}
+            <h1 className="text-5xl font-bold tracking-tight mb-4">
+              <span className="text-white">加入 </span>
+              <span className="text-[#3b82f6]">NebulaHub</span>
             </h1>
-            <p className="mt-2 text-sm text-slate-500 dark:text-white/40">
-              {t("register.subtitle")}
+            <p className="text-lg text-[#999] font-light max-w-md mx-auto leading-relaxed">
+              创建账户，开启智能协作之旅
             </p>
+
+            {/* 装饰性网格 */}
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.03)_1px,transparent_1px)] bg-[size:60px_60px]" />
           </div>
 
-          {/* 主卡片 */}
-          <div className="relative bg-white/80 dark:bg-white/5 backdrop-blur-xl rounded-[32px] border border-slate-200 dark:border-white/10 overflow-hidden">
-            {/* 卡片顶部光效 */}
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/30 to-transparent" />
+          {/* 底部版权 */}
+          <div className="absolute bottom-8 left-8 text-[#666] text-xs">
+            © 2026 NebulaHub. All rights reserved.
+          </div>
+        </div>
 
-            <div className="p-8 space-y-6">
-              {/* GitHub 注册按钮 */}
+        {/* 右侧 - 极简表单区域 */}
+        <div className="w-full lg:w-1/2 flex items-center justify-center bg-[#0a0a0a]">
+          <div className="w-full max-w-md px-8">
+            {/* 标题区域 */}
+            <div className="mb-10">
+              <h1 className="text-3xl font-bold text-white mb-2">创建账户</h1>
+              <p className="text-[#999] text-sm">加入 NebulaHub 社区</p>
+            </div>
+
+            {/* 表单区域 */}
+            <div className="space-y-5">
+              {/* GitHub 登录按钮 */}
               <button
                 onClick={handleGithubLogin}
                 disabled={loading}
-                className="w-full h-14 flex items-center justify-center gap-3 rounded-full bg-white text-slate-800 text-sm font-semibold transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                className="w-full h-12 flex items-center justify-center gap-3 rounded-xl bg-[#141414] hover:bg-[#1a1a1a] text-[#e5e5e5] text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed border border-[#222] hover:border-[#3b82f6]/50"
               >
-                <Github className="h-5 w-5" />
-                <span>{t("common.continueWithGithub")}</span>
+                <Github className="h-4 w-4" />
+                <span>继续使用 GitHub</span>
               </button>
 
-              {/* 分割线 */}
-              <div className="relative flex items-center justify-center">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-slate-200 dark:border-white/5" />
-                </div>
-                <span className="relative bg-white/80 dark:bg-[#030407]/80 px-4 text-[10px] text-slate-400 dark:text-white/30 font-mono tracking-wider uppercase">
-                  {t("register.orContinueWithEmail")}
+              {/* 分隔线 */}
+              <div className="relative flex items-center">
+                <div className="w-full border-t border-[#222]" />
+                <span className="absolute left-1/2 -translate-x-1/2 bg-[#0a0a0a] px-4 text-xs text-[#666]">
+                  或使用邮箱注册
                 </span>
               </div>
 
-              {/* 注册表单 */}
+              {/* 邮箱表单 */}
               <form onSubmit={handleEmailRegister} className="space-y-4">
-                {/* 用户名 */}
+                {/* 用户名输入 */}
                 <div className="relative">
+                  <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#666]" />
                   <input
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    onFocus={() => setFocusedField('username')}
-                    onBlur={() => setFocusedField(null)}
-                    className="w-full h-14 px-6 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white text-sm focus:outline-none focus:border-amber-500/50 focus:ring-[3px] focus:ring-amber-500/10 transition-all duration-300"
+                    placeholder="用户名"
+                    className="w-full h-12 pl-11 pr-4 rounded-xl bg-[#141414] border border-[#222] text-[#e5e5e5] text-sm placeholder-[#666] focus:outline-none focus:border-[#3b82f6]/50 focus:ring-1 focus:ring-[#3b82f6]/50 transition-all"
                     required
-                    minLength={3}
-                    maxLength={50}
                   />
-                  <label className={`absolute left-6 top-1/2 -translate-y-1/2 text-xs font-medium transition-all duration-300 pointer-events-none ${
-                    focusedField === 'username' || username
-                      ? '-top-8 text-amber-600/80 dark:text-amber-400/80'
-                      : 'text-slate-400 dark:text-white/30'
-                  }`}>
-                    {t("register.username")}
-                  </label>
                 </div>
 
-                {/* 邮箱 */}
+                {/* 邮箱输入 */}
                 <div className="relative">
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#666]" />
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    onFocus={() => setFocusedField('email')}
-                    onBlur={() => setFocusedField(null)}
-                    className="w-full h-14 px-6 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white text-sm focus:outline-none focus:border-amber-500/50 focus:ring-[3px] focus:ring-amber-500/10 transition-all duration-300"
+                    placeholder="邮箱地址"
+                    className="w-full h-12 pl-11 pr-4 rounded-xl bg-[#141414] border border-[#222] text-[#e5e5e5] text-sm placeholder-[#666] focus:outline-none focus:border-[#3b82f6]/50 focus:ring-1 focus:ring-[#3b82f6]/50 transition-all"
                     required
                   />
-                  <label className={`absolute left-6 top-1/2 -translate-y-1/2 text-xs font-medium transition-all duration-300 pointer-events-none ${
-                    focusedField === 'email' || email
-                      ? '-top-8 text-amber-600/80 dark:text-amber-400/80'
-                      : 'text-slate-400 dark:text-white/30'
-                  }`}>
-                    {t("register.email")}
-                  </label>
                 </div>
 
-                {/* 密码 */}
+                {/* 密码输入 */}
                 <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#666]" />
                   <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    onFocus={() => setFocusedField('password')}
-                    onBlur={() => setFocusedField(null)}
-                    className="w-full h-14 px-6 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white text-sm focus:outline-none focus:border-amber-500/50 focus:ring-[3px] focus:ring-amber-500/10 transition-all duration-300"
+                    placeholder="密码"
+                    className="w-full h-12 pl-11 pr-4 rounded-xl bg-[#141414] border border-[#222] text-[#e5e5e5] text-sm placeholder-[#666] focus:outline-none focus:border-[#3b82f6]/50 focus:ring-1 focus:ring-[#3b82f6]/50 transition-all"
                     required
-                    minLength={6}
                   />
-                  <label className={`absolute left-6 top-1/2 -translate-y-1/2 text-xs font-medium transition-all duration-300 pointer-events-none ${
-                    focusedField === 'password' || password
-                      ? '-top-8 text-amber-600/80 dark:text-amber-400/80'
-                      : 'text-slate-400 dark:text-white/30'
-                  }`}>
-                    {t("register.password")}
-                  </label>
                 </div>
 
-                {/* 确认密码 */}
+                {/* 确认密码输入 */}
                 <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#666]" />
                   <input
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    onFocus={() => setFocusedField('confirmPassword')}
-                    onBlur={() => setFocusedField(null)}
-                    className="w-full h-14 px-6 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white text-sm focus:outline-none focus:border-amber-500/50 focus:ring-[3px] focus:ring-amber-500/10 transition-all duration-300"
+                    placeholder="确认密码"
+                    className="w-full h-12 pl-11 pr-4 rounded-xl bg-[#141414] border border-[#222] text-[#e5e5e5] text-sm placeholder-[#666] focus:outline-none focus:border-[#3b82f6]/50 focus:ring-1 focus:ring-[#3b82f6]/50 transition-all"
                     required
                   />
-                  <label className={`absolute left-6 top-1/2 -translate-y-1/2 text-xs font-medium transition-all duration-300 pointer-events-none ${
-                    focusedField === 'confirmPassword' || confirmPassword
-                      ? '-top-8 text-amber-600/80 dark:text-amber-400/80'
-                      : 'text-slate-400 dark:text-white/30'
-                  }`}>
-                    {t("register.confirmPassword")}
-                  </label>
                 </div>
 
-                {/* 密码要求检查 */}
-                {password.length > 0 && (
-                  <div className="space-y-2 px-1 py-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5">
+                {/* 密码要求 */}
+                {(password.length > 0 || username.length > 0) && (
+                  <div className="space-y-2 px-4 py-3 rounded-xl bg-[#141414] border border-[#222]">
                     {passwordRequirements.map((req, index) => (
-                      <div key={index} className="flex items-center gap-3 text-[10px] font-mono">
-                        <div className={`w-4 h-4 rounded-full flex items-center justify-center transition-all duration-300 ${
-                          req.met ? 'bg-green-100 dark:bg-green-500/20' : 'bg-slate-100 dark:bg-white/5'
+                      <div key={index} className="flex items-center gap-3 text-xs">
+                        <div className={`w-5 h-5 rounded-lg flex items-center justify-center transition-all duration-200 ${
+                          req.met ? 'bg-[#22c55e]/20' : 'bg-[#1a1a1a]'
                         }`}>
-                          <Check className={`h-3 w-3 transition-all duration-300 ${
-                            req.met ? 'text-green-600 dark:text-green-400 scale-100' : 'text-slate-400 dark:text-white/20 scale-75'
+                          <Check className={`h-3.5 w-3.5 transition-all duration-200 ${
+                            req.met ? 'text-[#22c55e] scale-100' : 'text-[#666] scale-75'
                           }`} />
                         </div>
-                        <span className={req.met ? 'text-green-600/80 dark:text-green-400/80' : 'text-slate-400 dark:text-white/20'}>
+                        <span className={req.met ? 'text-[#22c55e]' : 'text-[#666]'}>
                           {req.text}
                         </span>
                       </div>
@@ -279,47 +207,37 @@ export default function RegisterPage() {
                   </div>
                 )}
 
-                {/* 注册按钮 */}
+                {/* 提交按钮 */}
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full h-16 mt-4 rounded-full bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white text-base font-semibold transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-amber-500/30 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+                  className="w-full h-12 rounded-xl bg-gradient-to-r from-[#3b82f6] to-[#60a5fa] hover:from-[#2563eb] hover:to-[#3b82f6] text-white text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {loading ? (
                     <>
-                      <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      <span>Provisioning...</span>
+                      <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>创建账户中...</span>
                     </>
                   ) : (
                     <>
-                      <span>{t("register.registerButton")}</span>
-                      <ArrowRight className="h-5 w-5" />
+                      <span>创建账户</span>
+                      <ArrowRight className="h-4 w-4" />
                     </>
                   )}
                 </button>
               </form>
             </div>
 
-            {/* 卡片底部光效 */}
-            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
-          </div>
-
-          {/* 登录链接 */}
-          <p className="text-center mt-8 text-sm text-slate-400 dark:text-white/20">
-            {t("register.alreadyHaveAccount")}{" "}
-            <Link
-              href="/login"
-              className="font-medium transition-colors text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300"
-            >
-              {t("register.signIn")}
-            </Link>
-          </p>
-        </div>
-
-        {/* 底部版本信息 */}
-        <div className="fixed bottom-4 right-4 z-10">
-          <div className="text-[10px] font-mono text-slate-400 dark:text-white/20">
-            {t("register.version")}
+            {/* 登录链接 */}
+            <p className="text-center mt-8 text-xs text-[#666]">
+              已经有账户？{" "}
+              <Link
+                href="/login"
+                className="font-medium text-[#60a5fa] hover:text-[#3b82f6] transition-colors"
+              >
+                立即登录
+              </Link>
+            </p>
           </div>
         </div>
       </div>

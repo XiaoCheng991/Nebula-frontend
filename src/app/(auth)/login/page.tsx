@@ -5,22 +5,19 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { toast } from "@/components/ui/use-toast"
 import { login, loginWithGithub } from "@/lib/api/adapters"
-import { Github, ArrowRight, Sparkles } from "lucide-react"
+import { Github, ArrowRight, Mail, Lock, Eye, EyeOff } from "lucide-react"
 import { PublicRoute } from "@/components/auth/AuthGuard"
 import { useLanguage } from "@/hooks/useLanguage"
 import { useThemeEffect } from "@/hooks/useTheme"
 
 export default function LoginPage() {
   const { t } = useLanguage()
-
-  // 应用主题效果（跟随系统或用户选择的主题）
   useThemeEffect()
 
   const [account, setAccount] = useState("")
   const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [focusedField, setFocusedField] = useState<string | null>(null)
-  const [mousePosition, setMousePosition] = useState({ x: 0.5, y: 0.5 })
   const router = useRouter()
 
   const handleEmailLogin = async (e: React.FormEvent) => {
@@ -29,23 +26,11 @@ export default function LoginPage() {
 
     try {
       await login(account, password)
-
-      toast({
-        title: t("login.successLogin"),
-        description: t("login.welcomeBack"),
-      })
-
-      setTimeout(() => {
-        router.push("/dashboard")
-      }, 500)
+      toast({ title: t("login.successLogin"), description: t("login.welcomeBack") })
+      setTimeout(() => router.push("/dashboard"), 500)
     } catch (error: any) {
       const errorMessage = error?.message || t("login.errorLoginFailed")
-
-      toast({
-        title: t("login.errorLoginFailed"),
-        description: errorMessage,
-        variant: "destructive",
-      })
+      toast({ title: t("login.errorLoginFailed"), description: errorMessage, variant: "destructive" })
     } finally {
       setLoading(false)
     }
@@ -56,181 +41,152 @@ export default function LoginPage() {
       setLoading(true)
       await loginWithGithub()
     } catch (error: any) {
-      toast({
-        title: t("login.githubLoginFailed"),
-        description: error?.message || t("login.errorNetworkError"),
-        variant: "destructive",
-      })
+      toast({ title: t("login.githubLoginFailed"), description: error?.message || t("login.errorNetworkError"), variant: "destructive" })
       setLoading(false)
     }
   }
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    setMousePosition({
-      x: (e.clientX - rect.left) / rect.width,
-      y: (e.clientY - rect.top) / rect.height,
-    })
-  }
-
   return (
     <PublicRoute>
-      <div
-        className="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-[#030407] dark:to-[#0a0a0f]"
-        onMouseMove={handleMouseMove}
-      >
-        {/* 动态光晕效果 */}
-        <div
-          className="fixed inset-0 -z-10 opacity-30 pointer-events-none"
-          style={{
-            background: `radial-gradient(600px circle at ${mousePosition.x * 100}% ${mousePosition.y * 100}%, rgba(79, 120, 255, 0.15), transparent 40%)`,
-          }}
-        />
-
-        {/* 技术装饰标签 */}
-        <div className="fixed top-8 left-8 z-10">
-          <div className="flex items-center gap-2 text-[10px] font-mono text-slate-500 dark:text-white/30 tracking-widest uppercase">
-            <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-            {t("login.systemLabel")}
+      <div className="min-h-screen w-full flex">
+        {/* 左侧 - 简约品牌展示 */}
+        <div className="hidden lg:flex w-1/2 relative overflow-hidden bg-gradient-to-br from-[#0a0a0a] via-[#111111] to-[#0a0a0a]">
+          {/* 动态光晕背景 */}
+          <div className="absolute inset-0">
+            <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-[#3b82f6]/10 rounded-full blur-[120px]" />
+            <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#60a5fa]/8 rounded-full blur-[100px]" />
           </div>
-        </div>
 
-        <div className="fixed bottom-8 left-8 z-10">
-          <div className="text-[10px] font-mono text-slate-400 dark:text-white/20 tracking-widest">
-            {t("login.uplinkEstablished")}
-          </div>
-        </div>
-
-        <div className="fixed top-1/2 right-8 z-10 -translate-y-1/2">
-          <div className="text-[10px] font-mono text-slate-400 dark:text-white/20 tracking-widest writing-vertical-rl">
-            {t("login.nebulaHubSSO")}
-          </div>
-        </div>
-
-        <div className="w-full max-w-[440px] px-4">
-          {/* 头部区域 */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full bg-white/5 dark:bg-white/5 border border-slate-200 dark:border-white/10">
-              <Sparkles className="h-3 w-3 text-amber-400" />
-              <span className="text-[10px] font-mono text-slate-500 dark:text-white/60 tracking-wider">NEBULA.ID</span>
+          {/* 中心品牌内容 */}
+          <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-12">
+            <div className="mb-8">
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-[#3b82f6]/20 to-[#60a5fa]/20 backdrop-blur-sm border border-[#3b82f6]/20">
+                <Mail className="h-10 w-10 text-[#60a5fa]" />
+              </div>
             </div>
-            <h1 className="text-3xl font-medium text-slate-800 dark:text-white tracking-tight">
-              {t("login.title")}
+            <h1 className="text-5xl font-bold tracking-tight mb-4">
+              <span className="text-white">Nebula</span>
+              <span className="text-[#3b82f6]">Hub</span>
             </h1>
-            <p className="mt-2 text-sm text-slate-500 dark:text-white/40">
-              {t("login.subtitle")}
+            <p className="text-lg text-[#999] font-light max-w-md mx-auto leading-relaxed">
+              高雅黑设计，极致简约体验
             </p>
+
+            {/* 装饰性网格 */}
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.03)_1px,transparent_1px)] bg-[size:60px_60px]" />
           </div>
 
-          {/* 主卡片 */}
-          <div className="relative bg-white/80 dark:bg-white/5 backdrop-blur-xl rounded-[32px] border border-slate-200 dark:border-white/10 overflow-hidden">
-            {/* 卡片顶部光效 */}
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+          {/* 底部版权 */}
+          <div className="absolute bottom-8 left-8 text-[#666] text-xs">
+            © 2026 NebulaHub. All rights reserved.
+          </div>
+        </div>
 
-            <div className="p-8 space-y-6">
-              {/* GitHub 登录按钮 */}
+        {/* 右侧 - 极简表单区域 */}
+        <div className="w-full lg:w-1/2 flex items-center justify-center bg-[#0a0a0a]">
+          <div className="w-full max-w-md px-8">
+            {/* 标题区域 */}
+            <div className="mb-10">
+              <h1 className="text-3xl font-bold text-white mb-2">欢迎回来</h1>
+              <p className="text-[#999] text-sm">登录到你的账户</p>
+            </div>
+
+            {/* 表单区域 */}
+            <div className="space-y-5">
+              {/* Github 登录按钮 */}
               <button
                 onClick={handleGithubLogin}
                 disabled={loading}
-                className="w-full h-14 flex items-center justify-center gap-3 rounded-full bg-white text-slate-800 text-sm font-semibold transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                className="w-full h-12 flex items-center justify-center gap-3 rounded-xl bg-[#141414] hover:bg-[#1a1a1a] text-[#e5e5e5] text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed border border-[#222] hover:border-[#3b82f6]/50"
               >
-                <Github className="h-5 w-5" />
-                <span>{t("common.continueWithGithub")}</span>
+                <Github className="h-4 w-4" />
+                <span>继续使用 GitHub</span>
               </button>
 
-              {/* 分割线 */}
-              <div className="relative flex items-center justify-center">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-slate-200 dark:border-white/5" />
-                </div>
-                <span className="relative bg-white/80 dark:bg-[#030407]/80 px-4 text-[10px] text-slate-400 dark:text-white/30 font-mono tracking-wider uppercase">
-                  {t("common.orContinueWithEmail")}
+              {/* 分隔线 */}
+              <div className="relative flex items-center">
+                <div className="w-full border-t border-[#222]" />
+                <span className="absolute left-1/2 -translate-x-1/2 bg-[#0a0a0a] px-4 text-xs text-[#666]">
+                  或使用邮箱登录
                 </span>
               </div>
 
-              {/* 邮箱登录表单 */}
-              <form onSubmit={handleEmailLogin} className="space-y-5">
-                <div className="space-y-3">
-                  <div className="relative">
-                    <input
-                      type="email"
-                      value={account}
-                      onChange={(e) => setAccount(e.target.value)}
-                      onFocus={() => setFocusedField('account')}
-                      onBlur={() => setFocusedField(null)}
-                      className="w-full h-14 px-6 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white text-sm focus:outline-none focus:border-amber-500/50 focus:ring-[3px] focus:ring-amber-500/10 transition-all duration-300"
-                      required
-                    />
-                    <label className={`absolute left-6 top-1/2 -translate-y-1/2 text-xs font-medium transition-all duration-300 pointer-events-none ${
-                      focusedField === 'account' || account
-                        ? '-top-8 text-amber-600/80 dark:text-amber-400/80'
-                        : 'text-slate-400 dark:text-white/30'
-                    }`}>
-                      {t("login.email")}
-                    </label>
-                  </div>
-
-                  <div className="relative">
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      onFocus={() => setFocusedField('password')}
-                      onBlur={() => setFocusedField(null)}
-                      className="w-full h-14 px-6 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white text-sm focus:outline-none focus:border-amber-500/50 focus:ring-[3px] focus:ring-amber-500/10 transition-all duration-300"
-                      required
-                    />
-                    <label className={`absolute left-6 top-1/2 -translate-y-1/2 text-xs font-medium transition-all duration-300 pointer-events-none ${
-                      focusedField === 'password' || password
-                        ? '-top-8 text-amber-600/80 dark:text-amber-400/80'
-                        : 'text-slate-400 dark:text-white/30'
-                    }`}>
-                      {t("login.password")}
-                    </label>
-                  </div>
+              {/* 邮箱密码表单 */}
+              <form onSubmit={handleEmailLogin} className="space-y-4">
+                {/* 邮箱输入 */}
+                <div className="relative">
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#666]" />
+                  <input
+                    type="email"
+                    value={account}
+                    onChange={(e) => setAccount(e.target.value)}
+                    placeholder="邮箱地址"
+                    className="w-full h-12 pl-11 pr-4 rounded-xl bg-[#141414] border border-[#222] text-[#e5e5e5] text-sm placeholder-[#666] focus:outline-none focus:border-[#3b82f6]/50 focus:ring-1 focus:ring-[#3b82f6]/50 transition-all"
+                    required
+                  />
                 </div>
 
-                {/* 登录按钮 */}
+                {/* 密码输入 */}
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#666]" />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="密码"
+                    className="w-full h-12 pl-11 pr-12 rounded-xl bg-[#141414] border border-[#222] text-[#e5e5e5] text-sm placeholder-[#666] focus:outline-none focus:border-[#3b82f6]/50 focus:ring-1 focus:ring-[#3b82f6]/50 transition-all"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[#666] hover:text-[#999] transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+
+                {/* 忘记密码链接 */}
+                <div className="flex justify-end">
+                  <Link
+                    href="/forgot-password"
+                    className="text-xs text-[#666] hover:text-[#999] transition-colors"
+                  >
+                    忘记密码？
+                  </Link>
+                </div>
+
+                {/* 提交按钮 */}
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full h-16 mt-4 rounded-full bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white text-base font-semibold transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-amber-500/30 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+                  className="w-full h-12 rounded-xl bg-gradient-to-r from-[#3b82f6] to-[#60a5fa] hover:from-[#2563eb] hover:to-[#3b82f6] text-white text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {loading ? (
                     <>
-                      <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      <span>Initializing...</span>
+                      <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>登录中...</span>
                     </>
                   ) : (
                     <>
-                      <span>{t("login.loginButton")}</span>
-                      <ArrowRight className="h-5 w-5" />
+                      <span>登录</span>
+                      <ArrowRight className="h-4 w-4" />
                     </>
                   )}
                 </button>
               </form>
             </div>
 
-            {/* 卡片底部光效 */}
-            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
-          </div>
-
-          {/* 注册链接 */}
-          <p className="text-center mt-8 text-sm text-slate-400 dark:text-white/20">
-            {t("login.newToNebulaHub")}{" "}
-            <Link
-              href="/register"
-              className="font-medium transition-colors text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300"
-            >
-              {t("login.createAccount")}
-            </Link>
-          </p>
-        </div>
-
-        {/* 底部版本信息 */}
-        <div className="fixed bottom-4 right-4 z-10">
-          <div className="text-[10px] font-mono text-slate-400 dark:text-white/20">
-            {t("login.version")}
+            {/* 注册链接 */}
+            <p className="text-center mt-8 text-xs text-[#666]">
+              还没有账户？{" "}
+              <Link
+                href="/register"
+                className="font-medium text-[#60a5fa] hover:text-[#3b82f6] transition-colors"
+              >
+                立即注册
+              </Link>
+            </p>
           </div>
         </div>
       </div>
