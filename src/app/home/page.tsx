@@ -7,7 +7,7 @@ import { AuthRequiredToast } from "@/components/auth/AuthRequiredToast";
 
 export default function Home() {
  return (
-  <div className="min-h-screen bg-gradient-to-br from-[var(--accent)]/5 via-transparent to-[var(--accent)]/3">
+  <div className="min-h-screen">
    {/* 认证提示 */}
    <Suspense fallback={null}>
     <AuthRequiredToast />

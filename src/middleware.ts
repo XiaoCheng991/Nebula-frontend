@@ -24,11 +24,12 @@ const publicPaths = ['/', '/login', '/register', '/forgot-password', '/home']
 const oauthCallbackPaths = ['/auth/github/callback', '/auth/callback']
 
 // 检查是否已登录
-// 注意：由于 supabase-js 默认使用 localStorage 存储 session，
-// 中间件无法直接读取 localStorage，所以这里暂时返回 true
-// 实际的认证检查由客户端的 AuthGuard 处理
+// 通过检查 Supabase auth token cookie 来判断
 function isAuthenticated(req: NextRequest): boolean {
-  return true
+  // Supabase 会将 auth token 存储在 cookie 中，格式为：sb-{project-ref}-auth-token
+  // 检查是否存在 Supabase auth cookie（根据项目配置）
+  const authCookie = req.cookies.get('sb-nebulahub-auth-token')?.value
+  return !!authCookie
 }
 
 export async function middleware(req: NextRequest) {
@@ -66,12 +67,13 @@ export async function middleware(req: NextRequest) {
     pathname === path || pathname.startsWith(path + '/')
   )
 
-  if (isProtectedPath && !isLoggedIn) {
-    const url = req.nextUrl.clone()
-    url.pathname = '/'
-    url.searchParams.set('auth', 'required')
-    return NextResponse.redirect(url)
-  }
+if (isProtectedPath && !isLoggedIn) {
+  const url = req.nextUrl.clone()
+  url.pathname = '/login'
+  // 添加 redirect 参数，登录后自动跳回原页面
+  url.searchParams.set('redirect', encodeURIComponent(pathname))
+  return NextResponse.redirect(url)
+}
 
   // 情况4：后台管理路径 - 需要登录（后续会完善角色检查）
   const isAdminPath = adminPaths.some(path =>

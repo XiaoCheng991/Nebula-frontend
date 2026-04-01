@@ -8,32 +8,44 @@ import ThemeProvider from '@/components/ThemeProvider';
 import { usePathname } from 'next/navigation';
 
 interface ClientLayoutProps {
-  children: React.ReactNode;
-  interClassName: string;
+    children: React.ReactNode;
+    interClassName: string;
 }
 
 export function ClientLayout({ children, interClassName }: ClientLayoutProps) {
-  const pathname = usePathname()
-  const isAdminRoute = pathname?.startsWith('/admin')
+    const pathname = usePathname()
+    const isAdminRoute = pathname?.startsWith('/admin')
 
-  return (
-    <ThemeProvider>
-      <UserProvider>
-        {isAdminRoute ? (
-          <div className="min-h-screen">
-            {children}
-          </div>
-        ) : (
-          <div className={`min-h-screen flex flex-col bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950 ${interClassName}`}>
-            <GlobalHeader />
-            <main className="flex-1 w-full">
-              {children}
-            </main>
-          </div>
-        )}
-        <ScrollTopOnMount />
-        <Toaster />
-      </UserProvider>
-    </ThemeProvider>
-  )
+    // 排除 auth 页面，这些页面自己定义背景
+    const isAuthPage = pathname?.startsWith('/login') || pathname?.startsWith('/register') || pathname?.startsWith('/forgot-password')
+
+    return (
+        <ThemeProvider>
+            <UserProvider>
+                {isAdminRoute ? (
+                    <div className="min-h-screen">
+                        {children}
+                    </div>
+                ) : isAuthPage ? (
+                    // Auth 页面：显示导航栏
+                    <div className={`min-h-screen flex flex-col bg-gradient-to-br from-slate-100 via-white to-amber-50/50 dark:from-[#0a0a0a] dark:via-[#0f0f0f] dark:to-orange-950/5 ${interClassName}`}>
+    <GlobalHeader />
+    <main className="flex-1 w-full">
+      {children}
+    </main>
+  </div>
+                ) : (
+                    // 其他页面：添加统一的渐变背景，确保导航栏透明时背景连续
+                    <div className={`min-h-screen flex flex-col bg-gradient-to-br from-slate-100 via-white to-amber-50/50 dark:from-[#0a0a0a] dark:via-[#0f0f0f] dark:to-orange-950/5 ${interClassName}`}>
+                        <GlobalHeader />
+                        <main className="flex-1 w-full">
+                            {children}
+                        </main>
+                    </div>
+                )}
+                <ScrollTopOnMount />
+                <Toaster />
+            </UserProvider>
+        </ThemeProvider>
+    )
 }

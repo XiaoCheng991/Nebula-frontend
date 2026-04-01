@@ -125,6 +125,22 @@ export default function MePage() {
     <div className="min-h-screen bg-[--bg]">
       <style jsx global>{`
         :root {
+          --bg: #f8fafc;
+          --bg2: #f1f5f9;
+          --bg3: #e2e8f0;
+          --card: #ffffff;
+          --border: #e2e8f0;
+          --text: #1e293b;
+          --text2: #64748b;
+          --text3: #94a3b8;
+          --accent: #3b82f6;
+          --accent2: #60a5fa;
+          --green: #22c55e;
+          --orange: #f59e0b;
+          --purple: #a855f7;
+          --radius: 12px;
+        }
+        .dark {
           --bg: #0a0a0a;
           --bg2: #111111;
           --bg3: #1a1a1a;
@@ -179,19 +195,19 @@ export default function MePage() {
             <img
               src="https://avatars.githubusercontent.com/XiaoCheng991"
               alt="程永强"
-              className="w-24 h-24 rounded-full border-4 border-[#3b82f6] shadow-lg shadow-[rgba(59,130,246,0.3)]"
+              className="w-24 h-24 rounded-full border-4 border-[--accent] shadow-lg shadow-[rgba(59,130,246,0.3)]"
             />
           </div>
-          <div className="text-[#3b82f6] font-medium tracking-[2px] text-sm uppercase mb-2">
+          <div className="text-[--accent] font-medium tracking-[2px] text-sm uppercase mb-2">
             Hello, I'm
           </div>
-          <h1 className="text-[clamp(40px,7vw,72px)] font-bold leading-tight mb-2 bg-gradient-to-r from-white to-[#999] bg-clip-text text-transparent">
+          <h1 className="text-[clamp(40px,7vw,72px)] font-bold leading-tight mb-2 bg-gradient-to-r from-[--text] to-[--text2] bg-clip-text text-transparent">
             程永强
           </h1>
-          <p className="text-[clamp(20px,3vw,28px)] text-[#999] font-light mb-4">
-            <span className="text-[#60a5fa] font-medium">全栈 + AI</span> 开发
+          <p className="text-[clamp(20px,3vw,28px)] text-[--text2] font-light mb-4">
+            <span className="text-[--accent2] font-medium">全栈 + AI</span> 开发
           </p>
-          <p className="text-[16px] text-[#666] max-w-[560px] leading-relaxed mb-6">
+          <p className="text-[16px] text-[--text3] max-w-[560px] leading-relaxed mb-6">
             河南工业大学 · 数据科学与大数据技术<br />
             曾就职于 AI 科技企业，目前在大型零售业集团做全栈开发<br />
             正在从 Java 向 AI 迈进，目标：让代码不只是代码
@@ -203,7 +219,7 @@ export default function MePage() {
                 href={link.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all border border-[#222] bg-[#111111] text-[#e5e5e5] hover:border-[#3b82f6] hover:text-[#60a5fa]"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all border border-[--border] bg-[--bg2] text-[--text] hover:border-[--accent] hover:text-[--accent2]"
               >
                 <link.icon className="w-4 h-4" />
                 {link.label}
@@ -211,7 +227,7 @@ export default function MePage() {
             ))}
             <a
               href="tel:17516476723"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all bg-[#3b82f6] border border-[#3b82f6] text-white hover:bg-[#2563eb]"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all bg-[--accent] border border-[--accent] text-[--text] hover:bg-[#2563eb]"
             >
               <Phone className="w-4 h-4" />
               17516476723
@@ -221,9 +237,9 @@ export default function MePage() {
 
         {/* Experience Section */}
         <section className="py-20">
-          <h2 className="text-[13px] font-semibold tracking-[3px] text-[#3b82f6] uppercase mb-10 flex items-center gap-3">
+          <h2 className="text-[13px] font-semibold tracking-[3px] text-[--accent] uppercase mb-10 flex items-center gap-3">
             工作经历
-            <span className="flex-1 h-[1px] bg-[#222]" />
+            <span className="flex-1 h-[1px] bg-[--border]" />
           </h2>
           <div className="relative">
             <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-gradient-to-b from-[#3b82f6] to-[#a855f7] to-transparent" />
@@ -231,18 +247,18 @@ export default function MePage() {
               <div key={idx} className="pl-8 mb-12 relative">
                 <div className="absolute left-[-5px] top-3 w-3 h-3 rounded-full bg-[#3b82f6] border-[3px] border-[#0a0a0a]" />
                 <div className="flex justify-between items-start flex-wrap gap-2 mb-2">
-                  <span className="text-[20px] font-bold text-white">
+                  <span className="text-[20px] font-bold text-[--text]">
                     {exp.company}
                   </span>
-                  <span className="text-[13px] text-[#666] font-mono px-2.5 py-1 bg-[#1a1a1a] rounded">
+                  <span className="text-[13px] text-[--text3] font-mono px-2.5 py-1 bg-[--bg3] rounded">
                     {exp.period}
                   </span>
                 </div>
-                <div className="text-[14px] text-[#60a5fa] mb-3">{exp.role}</div>
-                <ul className="text-[14px] text-[#999] space-y-2">
+                <div className="text-[14px] text-[--accent2] mb-3">{exp.role}</div>
+                <ul className="text-[14px] text-[--text2] space-y-2">
                   {exp.descriptions.map((desc, i) => (
                     <li key={i} className="relative pl-4">
-                      <span className="absolute left-0 text-[#3b82f6]">→</span>
+                      <span className="absolute left-0 text-[--accent]">→</span>
                       <span dangerouslySetInnerHTML={{ __html: desc }} />
                     </li>
                   ))}
@@ -264,16 +280,16 @@ export default function MePage() {
 
         {/* Projects Section */}
         <section className="py-20">
-          <h2 className="text-[13px] font-semibold tracking-[3px] text-[#3b82f6] uppercase mb-10 flex items-center gap-3">
+          <h2 className="text-[13px] font-semibold tracking-[3px] text-[--accent] uppercase mb-10 flex items-center gap-3">
             项目经历
-            <span className="flex-1 h-[1px] bg-[#222]" />
+            <span className="flex-1 h-[1px] bg-[--border]" />
           </h2>
           {projects.map((project, idx) => (
             <div
               key={idx}
-              className="bg-[#141414] border border-[#222] rounded-[12px] p-7 mb-4 transition-all hover:border-[#3b82f6]"
+              className="bg-[--card] border border-[--border] rounded-[12px] p-7 mb-4 transition-all hover:border-[--accent]"
             >
-              <div className="text-[18px] font-bold text-white mb-1">
+              <div className="text-[18px] font-bold text-[--text] mb-1">
                 {project.name}
               </div>
               <span
@@ -285,7 +301,7 @@ export default function MePage() {
               >
                 {project.status}
               </span>
-              <p className="text-[14px] text-[#999] mb-3">{project.description}</p>
+              <p className="text-[14px] text-[--text2] mb-3">{project.description}</p>
               <div className="flex gap-1.5 flex-wrap">
                 {project.tags.map((tag, i) => (
                   <span
@@ -302,20 +318,20 @@ export default function MePage() {
 
         {/* Skills Section */}
         <section className="py-20">
-          <h2 className="text-[13px] font-semibold tracking-[3px] text-[#3b82f6] uppercase mb-10 flex items-center gap-3">
+          <h2 className="text-[13px] font-semibold tracking-[3px] text-[--accent] uppercase mb-10 flex items-center gap-3">
             技术栈
-            <span className="flex-1 h-[1px] bg-[#222]" />
+            <span className="flex-1 h-[1px] bg-[--border]" />
           </h2>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
             {skills.map((skill, idx) => (
               <div
                 key={idx}
-                className="bg-[#141414] border border-[#222] rounded-[12px] p-5 transition-all hover:border-[#3b82f6] hover:-translate-y-0.5"
+                className="bg-[--card] border border-[--border] rounded-[12px] p-5 transition-all hover:border-[--accent] hover:-translate-y-0.5"
               >
-                <h3 className="text-[13px] text-[#3b82f6] uppercase tracking-wide mb-3">
+                <h3 className="text-[13px] text-[--accent] uppercase tracking-wide mb-3">
                   {skill.category}
                 </h3>
-                <div className="text-[14px] text-[#999] leading-7">
+                <div className="text-[14px] text-[--text2] leading-7">
                   {skill.items.map((item, i) => (
                     <div key={i}>{item}</div>
                   ))}
@@ -327,28 +343,28 @@ export default function MePage() {
 
         {/* Education Section */}
         <section className="py-20">
-          <h2 className="text-[13px] font-semibold tracking-[3px] text-[#3b82f6] uppercase mb-10 flex items-center gap-3">
+          <h2 className="text-[13px] font-semibold tracking-[3px] text-[--accent] uppercase mb-10 flex items-center gap-3">
             教育经历
-            <span className="flex-1 h-[1px] bg-[#222]" />
+            <span className="flex-1 h-[1px] bg-[--border]" />
           </h2>
-          <div className="bg-[#141414] border border-[#222] rounded-[12px] p-6 flex justify-between items-center flex-wrap gap-4">
+          <div className="bg-[--card] border border-[--border] rounded-[12px] p-6 flex justify-between items-center flex-wrap gap-4">
             <div>
-              <div className="text-[20px] font-bold text-white">
+              <div className="text-[20px] font-bold text-[--text]">
                 xx工业大学
               </div>
-              <div className="text-[14px] text-[#999]">
+              <div className="text-[14px] text-[--text2]">
                 数据科学与大数据技术 · 本科 · 2021.09 ~ 2025.06
               </div>
             </div>
-            <div className="flex gap-5 text-[13px] text-[#666]">
+            <div className="flex gap-5 text-[13px] text-[--text3]">
               <span>
-                绩点排名 <strong className="text-[#60a5fa]">前 15%</strong>
+                绩点排名 <strong className="text-[--accent2]">前 15%</strong>
               </span>
               <span>
-                CET-4 <strong className="text-[#60a5fa]">488</strong>
+                CET-4 <strong className="text-[--accent2]">488</strong>
               </span>
               <span>
-                CET-6 <strong className="text-[#60a5fa]">455</strong>
+                CET-6 <strong className="text-[--accent2]">455</strong>
               </span>
             </div>
           </div>
@@ -356,22 +372,22 @@ export default function MePage() {
 
         {/* Contact Section */}
         <section className="py-20">
-          <h2 className="text-[13px] font-semibold tracking-[3px] text-[#3b82f6] uppercase mb-10 flex items-center gap-3">
+          <h2 className="text-[13px] font-semibold tracking-[3px] text-[--accent] uppercase mb-10 flex items-center gap-3">
             联系方式
-            <span className="flex-1 h-[1px] bg-[#222]" />
+            <span className="flex-1 h-[1px] bg-[--border]" />
           </h2>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
             <a
               href="https://github.com/XiaoCheng991"
               target="_blank"
-              className="flex items-center gap-3 px-4 py-4 bg-[#141414] border border-[#222] rounded-[12px] text-[14px] transition-all hover:border-[#3b82f6]"
+              className="flex items-center gap-3 px-4 py-4 bg-[--card] border border-[--border] rounded-[12px] text-[14px] transition-all hover:border-[--accent]"
             >
               <Github className="w-5 h-5" />
               <span>GitHub</span>
             </a>
             <a
               href="mailto:17516476723@163.com"
-              className="flex items-center gap-3 px-4 py-4 bg-[#141414] border border-[#222] rounded-[12px] text-[14px] transition-all hover:border-[#3b82f6]"
+              className="flex items-center gap-3 px-4 py-4 bg-[--card] border border-[--border] rounded-[12px] text-[14px] transition-all hover:border-[--accent]"
             >
               <Mail className="w-5 h-5 flex-shrink-0" />
               <span className="truncate flex-1" title="17516476723@163.com">
@@ -381,7 +397,7 @@ export default function MePage() {
             <a
               href="https://gitee.com/XiaoCheng991"
               target="_blank"
-              className="flex items-center gap-3 px-4 py-4 bg-[#141414] border border-[#222] rounded-[12px] text-[14px] transition-all hover:border-[#3b82f6]"
+              className="flex items-center gap-3 px-4 py-4 bg-[--card] border border-[--border] rounded-[12px] text-[14px] transition-all hover:border-[--accent]"
             >
               <ExternalLink className="w-5 h-5" />
               <span>Gitee</span>
@@ -389,16 +405,16 @@ export default function MePage() {
             <a
               href="https://blog.csdn.net/qq_60985619"
               target="_blank"
-              className="flex items-center gap-3 px-4 py-4 bg-[#141414] border border-[#222] rounded-[12px] text-[14px] transition-all hover:border-[#3b82f6]"
+              className="flex items-center gap-3 px-4 py-4 bg-[--card] border border-[--border] rounded-[12px] text-[14px] transition-all hover:border-[--accent]"
             >
               <ExternalLink className="w-5 h-5" />
               <span>CSDN 博客</span>
             </a>
-            <div className="flex items-center gap-3 px-4 py-4 bg-[#141414] border border-[#222] rounded-[12px] text-[14px]">
+            <div className="flex items-center gap-3 px-4 py-4 bg-[--card] border border-[--border] rounded-[12px] text-[14px]">
               <Phone className="w-5 h-5" />
               <span>17516476723</span>
             </div>
-            <div className="flex items-center gap-3 px-4 py-4 bg-[#141414] border border-[#222] rounded-[12px] text-[14px]">
+            <div className="flex items-center gap-3 px-4 py-4 bg-[--card] border border-[--border] rounded-[12px] text-[14px]">
               <MapPin className="w-5 h-5" />
               <span>江苏南京</span>
             </div>
@@ -406,9 +422,9 @@ export default function MePage() {
         </section>
 
         {/* Footer */}
-        <footer className="py-16 border-t border-[#222] text-center">
-          <p className="text-[13px] text-[#666]">
-            © 2026 程永强。Powered by <span className="text-[#3b82f6]">NebulaHub</span>
+        <footer className="py-16 border-t border-[--border] text-center">
+          <p className="text-[13px] text-[--text3]">
+            © 2026 程永强。Powered by <span className="text-[--accent]">NebulaHub</span>
           </p>
         </footer>
       </div>
