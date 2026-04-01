@@ -7,8 +7,15 @@ import { toast } from "@/components/ui/use-toast"
 import { login, loginWithGithub } from "@/lib/api/adapters"
 import { Github, ArrowRight, Sparkles } from "lucide-react"
 import { PublicRoute } from "@/components/auth/AuthGuard"
+import { useLanguage } from "@/hooks/useLanguage"
+import { useThemeEffect } from "@/hooks/useTheme"
 
 export default function LoginPage() {
+  const { t } = useLanguage()
+
+  // 应用主题效果（跟随系统或用户选择的主题）
+  useThemeEffect()
+
   const [account, setAccount] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
@@ -24,18 +31,18 @@ export default function LoginPage() {
       await login(account, password)
 
       toast({
-        title: "登录成功",
-        description: "欢迎回来！正在跳转...",
+        title: t("login.successLogin"),
+        description: t("login.welcomeBack"),
       })
 
       setTimeout(() => {
         router.push("/dashboard")
       }, 500)
     } catch (error: any) {
-      const errorMessage = error?.message || "登录失败，请检查账号和密码"
+      const errorMessage = error?.message || t("login.errorLoginFailed")
 
       toast({
-        title: "登录失败",
+        title: t("login.errorLoginFailed"),
         description: errorMessage,
         variant: "destructive",
       })
@@ -50,8 +57,8 @@ export default function LoginPage() {
       await loginWithGithub()
     } catch (error: any) {
       toast({
-        title: "GitHub 登录失败",
-        description: error?.message || "网络错误，请稍后重试",
+        title: t("login.githubLoginFailed"),
+        description: error?.message || t("login.errorNetworkError"),
         variant: "destructive",
       })
       setLoading(false)
@@ -69,15 +76,12 @@ export default function LoginPage() {
   return (
     <PublicRoute>
       <div
-        className="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden"
+        className="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-[#030407] dark:to-[#0a0a0f]"
         onMouseMove={handleMouseMove}
       >
-        {/* 动态渐变背景 */}
-        <div className="fixed inset-0 -z-20 bg-[#030407]" />
-
         {/* 动态光晕效果 */}
         <div
-          className="fixed inset-0 -z-10 opacity-30"
+          className="fixed inset-0 -z-10 opacity-30 pointer-events-none"
           style={{
             background: `radial-gradient(600px circle at ${mousePosition.x * 100}% ${mousePosition.y * 100}%, rgba(79, 120, 255, 0.15), transparent 40%)`,
           }}
@@ -85,41 +89,41 @@ export default function LoginPage() {
 
         {/* 技术装饰标签 */}
         <div className="fixed top-8 left-8 z-10">
-          <div className="flex items-center gap-2 text-[10px] font-mono text-white/30 tracking-widest uppercase">
+          <div className="flex items-center gap-2 text-[10px] font-mono text-slate-500 dark:text-white/30 tracking-widest uppercase">
             <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-            SYS.AUTH // ONLINE
+            {t("login.systemLabel")}
           </div>
         </div>
 
         <div className="fixed bottom-8 left-8 z-10">
-          <div className="text-[10px] font-mono text-white/20 tracking-widest">
-            UPLINK_ESTABLISHED_
+          <div className="text-[10px] font-mono text-slate-400 dark:text-white/20 tracking-widest">
+            {t("login.uplinkEstablished")}
           </div>
         </div>
 
         <div className="fixed top-1/2 right-8 z-10 -translate-y-1/2">
-          <div className="text-[10px] font-mono text-white/20 tracking-widest writing-vertical-rl">
-            [ NebulaHub SSO ]
+          <div className="text-[10px] font-mono text-slate-400 dark:text-white/20 tracking-widest writing-vertical-rl">
+            {t("login.nebulaHubSSO")}
           </div>
         </div>
 
         <div className="w-full max-w-[440px] px-4">
           {/* 头部区域 */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full bg-white/5 border border-white/10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full bg-white/5 dark:bg-white/5 border border-slate-200 dark:border-white/10">
               <Sparkles className="h-3 w-3 text-amber-400" />
-              <span className="text-[10px] font-mono text-white/60 tracking-wider">NEBULA.ID</span>
+              <span className="text-[10px] font-mono text-slate-500 dark:text-white/60 tracking-wider">NEBULA.ID</span>
             </div>
-            <h1 className="text-3xl font-medium text-white tracking-tight">
-              Authenticate
+            <h1 className="text-3xl font-medium text-slate-800 dark:text-white tracking-tight">
+              {t("login.title")}
             </h1>
-            <p className="mt-2 text-sm text-white/40">
-              Secure access to your NebulaHub workspace
+            <p className="mt-2 text-sm text-slate-500 dark:text-white/40">
+              {t("login.subtitle")}
             </p>
           </div>
 
           {/* 主卡片 */}
-          <div className="relative bg-white/5 backdrop-blur-xl rounded-[32px] border border-white/10 overflow-hidden">
+          <div className="relative bg-white/80 dark:bg-white/5 backdrop-blur-xl rounded-[32px] border border-slate-200 dark:border-white/10 overflow-hidden">
             {/* 卡片顶部光效 */}
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
@@ -128,19 +132,19 @@ export default function LoginPage() {
               <button
                 onClick={handleGithubLogin}
                 disabled={loading}
-                className="w-full h-14 flex items-center justify-center gap-3 rounded-full bg-white text-black text-sm font-semibold transition-all duration-300 hover:bg-white/90 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-white/10"
+                className="w-full h-14 flex items-center justify-center gap-3 rounded-full bg-white text-slate-800 text-sm font-semibold transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
               >
                 <Github className="h-5 w-5" />
-                <span>Continue with GitHub</span>
+                <span>{t("common.continueWithGithub")}</span>
               </button>
 
               {/* 分割线 */}
               <div className="relative flex items-center justify-center">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-white/5" />
+                  <div className="w-full border-t border-slate-200 dark:border-white/5" />
                 </div>
-                <span className="relative bg-[#030407]/80 px-4 text-[10px] text-white/30 font-mono tracking-wider uppercase">
-                  Or continue with email
+                <span className="relative bg-white/80 dark:bg-[#030407]/80 px-4 text-[10px] text-slate-400 dark:text-white/30 font-mono tracking-wider uppercase">
+                  {t("common.orContinueWithEmail")}
                 </span>
               </div>
 
@@ -154,16 +158,15 @@ export default function LoginPage() {
                       onChange={(e) => setAccount(e.target.value)}
                       onFocus={() => setFocusedField('account')}
                       onBlur={() => setFocusedField(null)}
-                      className="w-full h-14 px-6 rounded-full bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/30 focus:ring-[3px] focus:ring-white/5 transition-all duration-300"
-                      placeholder="user@domain.net"
+                      className="w-full h-14 px-6 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white text-sm focus:outline-none focus:border-amber-500/50 focus:ring-[3px] focus:ring-amber-500/10 transition-all duration-300"
                       required
                     />
                     <label className={`absolute left-6 top-1/2 -translate-y-1/2 text-xs font-medium transition-all duration-300 pointer-events-none ${
                       focusedField === 'account' || account
-                        ? '-top-8 text-white/60'
-                        : 'text-white/30'
+                        ? '-top-8 text-amber-600/80 dark:text-amber-400/80'
+                        : 'text-slate-400 dark:text-white/30'
                     }`}>
-                      IDENTIFIER
+                      {t("login.email")}
                     </label>
                   </div>
 
@@ -174,16 +177,15 @@ export default function LoginPage() {
                       onChange={(e) => setPassword(e.target.value)}
                       onFocus={() => setFocusedField('password')}
                       onBlur={() => setFocusedField(null)}
-                      className="w-full h-14 px-6 rounded-full bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/30 focus:ring-[3px] focus:ring-white/5 transition-all duration-300"
-                      placeholder="••••••••••••"
+                      className="w-full h-14 px-6 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white text-sm focus:outline-none focus:border-amber-500/50 focus:ring-[3px] focus:ring-amber-500/10 transition-all duration-300"
                       required
                     />
                     <label className={`absolute left-6 top-1/2 -translate-y-1/2 text-xs font-medium transition-all duration-300 pointer-events-none ${
                       focusedField === 'password' || password
-                        ? '-top-8 text-white/60'
-                        : 'text-white/30'
+                        ? '-top-8 text-amber-600/80 dark:text-amber-400/80'
+                        : 'text-slate-400 dark:text-white/30'
                     }`}>
-                      PASSCODE
+                      {t("login.password")}
                     </label>
                   </div>
                 </div>
@@ -192,7 +194,7 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full h-16 mt-4 rounded-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white text-base font-semibold transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-amber-500/30 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+                  className="w-full h-16 mt-4 rounded-full bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white text-base font-semibold transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-amber-500/30 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
                 >
                   {loading ? (
                     <>
@@ -201,7 +203,7 @@ export default function LoginPage() {
                     </>
                   ) : (
                     <>
-                      <span>Initialize Uplink</span>
+                      <span>{t("login.loginButton")}</span>
                       <ArrowRight className="h-5 w-5" />
                     </>
                   )}
@@ -214,21 +216,21 @@ export default function LoginPage() {
           </div>
 
           {/* 注册链接 */}
-          <p className="text-center mt-8 text-sm text-white/30">
-            New to NebulaHub?{" "}
+          <p className="text-center mt-8 text-sm text-slate-400 dark:text-white/20">
+            {t("login.newToNebulaHub")}{" "}
             <Link
               href="/register"
-              className="text-amber-400 hover:text-amber-300 font-medium transition-colors"
+              className="font-medium transition-colors text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300"
             >
-              Create account
+              {t("login.createAccount")}
             </Link>
           </p>
         </div>
 
         {/* 底部版本信息 */}
         <div className="fixed bottom-4 right-4 z-10">
-          <div className="text-[10px] font-mono text-white/20">
-            V03.01 // BUILD_2026
+          <div className="text-[10px] font-mono text-slate-400 dark:text-white/20">
+            {t("login.version")}
           </div>
         </div>
       </div>

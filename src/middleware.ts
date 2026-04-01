@@ -28,8 +28,6 @@ const oauthCallbackPaths = ['/auth/github/callback', '/auth/callback']
 // 中间件无法直接读取 localStorage，所以这里暂时返回 true
 // 实际的认证检查由客户端的 AuthGuard 处理
 function isAuthenticated(req: NextRequest): boolean {
-  // 对于开发环境，暂时允许所有请求通过
-  // 生产环境需要配置 @supabase/ssr 来处理 cookie
   return true
 }
 
@@ -47,14 +45,14 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next()
   }
 
+  // 登录/注册页不在此处拦截，由客户端的 PublicRoute 组件处理
+  if (pathname === '/login' || pathname === '/register') {
+    return NextResponse.next()
+  }
+
   const isLoggedIn = isAuthenticated(req)
 
-  // 情况1：已登录用户访问登录/注册页 -> 重定向到 dashboard
-  if ((pathname === '/login' || pathname === '/register') && isLoggedIn) {
-    const url = req.nextUrl.clone()
-    url.pathname = '/dashboard'
-    return NextResponse.redirect(url)
-  }
+  // 情况1：已登录用户访问登录/注册页已被上面放行，不会执行到这里
 
   // 情况2：已登录用户访问首页 -> 重定向到 dashboard
   if (pathname === '/' && isLoggedIn) {

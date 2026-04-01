@@ -8,7 +8,8 @@ import { useUser } from '@/lib/user-context';
 import { MessageCircle, Settings, Sparkles, FolderUp, LogOut, Loader2, Moon, Sun, Shield, Zap, BookOpen, User, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useThemeStore } from '@/hooks/useTheme';
-import { useAdminStore } from '@/hooks/useAdminStore';
+import { useAdminStore } from '@/hooks/useAdminStore'
+import { LanguageSwitcher } from '@/components/auth/LanguageSwitcher';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -178,6 +179,7 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
         <div className="flex items-center justify-end gap-2">
           <AdminEntrance />
           <ThemeSwitcher />
+          <LanguageSwitcher />
           {userLoading ? (
             <div className="flex items-center gap-2 px-3">
               <Loader2 className="h-4 w-4 animate-spin text-slate-400" />

@@ -180,12 +180,14 @@ export async function register(
  * 使用最新的 Supabase SDK v2 模式
  */
 export async function logout(): Promise<void> {
-  await supabase.auth.signOut()
-
   if (typeof window !== 'undefined') {
+    // 先清除本地存储，再调用 Supabase 登出
     localStorage.removeItem('userInfo')
     window.dispatchEvent(new Event('auth-change'))
   }
+
+  // 调用 Supabase 登出
+  await supabase.auth.signOut()
 }
 
 /**
