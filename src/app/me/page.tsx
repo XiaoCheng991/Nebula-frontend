@@ -376,49 +376,91 @@ export default function MePage() {
             联系方式
             <span className="flex-1 h-[1px] bg-[--border]" />
           </h2>
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
-            <a
-              href="https://github.com/XiaoCheng991"
-              target="_blank"
-              className="flex items-center gap-3 px-4 py-4 bg-[--card] border border-[--border] rounded-[12px] text-[14px] transition-all hover:border-[--accent]"
-            >
-              <Github className="w-5 h-5" />
-              <span>GitHub</span>
-            </a>
-            <a
-              href="mailto:17516476723@163.com"
-              className="flex items-center gap-3 px-4 py-4 bg-[--card] border border-[--border] rounded-[12px] text-[14px] transition-all hover:border-[--accent]"
-            >
-              <Mail className="w-5 h-5 flex-shrink-0" />
-              <span className="truncate flex-1" title="17516476723@163.com">
-                17516476723@163.com
-              </span>
-            </a>
-            <a
-              href="https://gitee.com/XiaoCheng991"
-              target="_blank"
-              className="flex items-center gap-3 px-4 py-4 bg-[--card] border border-[--border] rounded-[12px] text-[14px] transition-all hover:border-[--accent]"
-            >
-              <ExternalLink className="w-5 h-5" />
-              <span>Gitee</span>
-            </a>
-            <a
-              href="https://blog.csdn.net/qq_60985619"
-              target="_blank"
-              className="flex items-center gap-3 px-4 py-4 bg-[--card] border border-[--border] rounded-[12px] text-[14px] transition-all hover:border-[--accent]"
-            >
-              <ExternalLink className="w-5 h-5" />
-              <span>CSDN 博客</span>
-            </a>
-            <div className="flex items-center gap-3 px-4 py-4 bg-[--card] border border-[--border] rounded-[12px] text-[14px]">
-              <Phone className="w-5 h-5" />
-              <span>17516476723</span>
-            </div>
-            <div className="flex items-center gap-3 px-4 py-4 bg-[--card] border border-[--border] rounded-[12px] text-[14px]">
-              <MapPin className="w-5 h-5" />
-              <span>江苏南京</span>
-            </div>
+          <div className="grid grid-cols-[1fr,1fr] gap-8">
+{/* 直接联系 - 主要信息 */}
+    <div>
+      <h3 className="text-[12px] text-[--text3] uppercase tracking-wide mb-4">直接联系</h3>
+      <div className="space-y-3">
+        <a
+          href="tel:17516476723"
+          className="group flex items-center gap-4 p-3 rounded-lg transition-all hover:bg-[--bg2]"
+        >
+          <div className="w-10 h-10 rounded-full bg-[--accent] flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+            <Phone className="w-4 h-4" />
           </div>
+          <div>
+            <div className="text-[12px] text-[--text3] uppercase">手机</div>
+            <div className="text-[15px] text-[--text] font-medium">17516476723</div>
+          </div>
+        </a>
+        <a
+          href="mailto:17516476723@163.com"
+          className="group flex items-center gap-4 p-3 rounded-lg transition-all hover:bg-[--bg2]"
+        >
+          <div className="w-10 h-10 rounded-full bg-[--accent] flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+            <Mail className="w-4 h-4" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-[12px] text-[--text3] uppercase">邮箱</div>
+            <div className="text-[15px] text-[--text] font-medium truncate">17516476723@163.com</div>
+          </div>
+        </a>
+        <div className="flex items-center gap-4 p-3">
+          <div className="w-10 h-10 rounded-full bg-[--bg2] flex items-center justify-center text-[--text3]">
+            <MapPin className="w-4 h-4" />
+          </div>
+          <div>
+            <div className="text-[12px] text-[--text3] uppercase">位置</div>
+            <div className="text-[15px] text-[--text] font-medium">江苏南京</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* 社交链接 - 次要信息 */}
+    <div>
+      <h3 className="text-[12px] text-[--text3] uppercase tracking-wide mb-4">社交链接</h3>
+      <div className="grid grid-cols-2 gap-3">
+        <a
+          href="https://github.com/XiaoCheng991"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex flex-col items-center justify-center gap-2 p-4 rounded-lg border border-[--border] transition-all hover:border-[--accent] hover:bg-[--bg2]"
+        >
+          <Github className="w-6 h-6 text-[--text2] transition-colors" />
+          <span className="text-[13px] text-[--text]">GitHub</span>
+        </a>
+        <a
+          href="https://gitee.com/XiaoCheng991"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex flex-col items-center justify-center gap-2 p-4 rounded-lg border border-[--border] transition-all hover:border-[--accent] hover:bg-[--bg2]"
+        >
+          <ExternalLink className="w-6 h-6 text-[--text2] transition-colors" />
+          <span className="text-[13px] text-[--text]">Gitee</span>
+        </a>
+        <a
+          href="https://blog.csdn.net/qq_60985619"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex flex-col items-center justify-center gap-2 p-4 rounded-lg border border-[--border] transition-all hover:border-[--accent] hover:bg-[--bg2]"
+        >
+          <ExternalLink className="w-6 h-6 text-[--text2] transition-colors" />
+          <span className="text-[13px] text-[--text]">CSDN</span>
+        </a>
+        <div className="flex flex-col items-center justify-center gap-2 p-4 rounded-lg border border-[--border] bg-[--bg2]">
+          <img
+            src="/logo_icon.svg"
+            alt="NebulaHub Logo"
+            className="w-8 h-8 rounded transition-transform hover:scale-110"
+            onError={(e) => {
+              e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%233b82f6'/%3E%3Cstop offset='100%25' style='stop-color:%23a855f7'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23grad)'/%3E%3Ctext x='16' y='22' font-family='Arial' font-size='16' font-weight='bold' fill='white' text-anchor='middle'%3EN%3C/text%3E%3C/svg%3E";
+            }}
+          />
+          <span className="text-[13px] text-[--text]">NebulaHub</span>
+        </div>
+      </div>
+    </div>          </div>
         </section>
 
         {/* Footer */}
