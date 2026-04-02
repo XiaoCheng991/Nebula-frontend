@@ -6,21 +6,17 @@ import { toast } from "@/components/ui/use-toast"
 import { CheckCircle, XCircle } from "lucide-react"
 import { supabase } from "@/lib/supabase/client"
 
-// Loading 状态组件
 function GitHubCallbackLoading() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 p-4">
       <div className="text-center">
-        <div className="flex justify-center mb-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4" />
         <p className="text-muted-foreground">正在处理 GitHub 登录...</p>
       </div>
     </div>
   )
 }
 
-// 实际的回调页面内容
 function GitHubCallbackContent() {
   const router = useRouter()
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading")
@@ -28,15 +24,13 @@ function GitHubCallbackContent() {
 
   useEffect(() => {
     handleGithubCallback()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleGithubCallback = async () => {
     try {
-      // Supabase 会自动从 URL hash 中解析 OAuth token
-      // 等待一下让 Supabase 客户端处理
       await new Promise(resolve => setTimeout(resolve, 500))
 
-      // 获取会话
       const { data: { session }, error: sessionError } = await supabase.auth.getSession()
 
       if (sessionError) {
@@ -47,36 +41,11 @@ function GitHubCallbackContent() {
       }
 
       if (!session) {
-        console.error("No session found")
-        // 检查 URL 中是否有错误信息
-        const hash = window.location.hash
-        if (hash.includes('error=')) {
-          const params = new URLSearchParams(hash.substring(1))
-          const errorDesc = params.get('error_description') || '未知错误'
-          setError("GitHub 登录失败：" + decodeURIComponent(errorDesc))
-          setStatus("error")
-          return
-        }
-
-        // 等待 onAuthStateChange 事件
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, newSession) => {
-          console.log("Auth event:", event, newSession)
-          if (event === 'SIGNED_IN' && newSession) {
-            await processSession(newSession)
-            subscription.unsubscribe()
-          }
-        })
-
-        // 超时保护
-        setTimeout(() => {
-          subscription.unsubscribe()
-          setError("登录超时，请重试")
-          setStatus("error")
-        }, 10000)
+        setError("未获取到会话，请重试")
+        setStatus("error")
         return
       }
 
-      // 有 session，直接处理
       await processSession(session)
     } catch (err: any) {
       console.error("GitHub callback error:", err)
@@ -87,9 +56,6 @@ function GitHubCallbackContent() {
 
   const processSession = async (session: any) => {
     const user = session.user
-    console.log("Processing session for user:", user.email)
-
-    // 构建用户信息（与 login/register 保持一致）
     const userInfo = {
       id: user.id,
       username: user.user_metadata?.login || user.user_metadata?.username || user.email?.split('@')[0] || '',
@@ -100,38 +66,23 @@ function GitHubCallbackContent() {
       avatarSize: user.user_metadata?.avatar_size || null,
     }
 
-    // 保存到 localStorage
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('userInfo', JSON.stringify(userInfo))
-      // 触发自定义事件通知其他组件
-      window.dispatchEvent(new Event('auth-change'))
-    }
+    localStorage.setItem('userInfo', JSON.stringify(userInfo))
+    window.dispatchEvent(new Event('auth-change'))
 
-    // 触发 toast 通知
     setStatus("success")
     toast({
       title: "登录成功",
-      description: "欢迎回来！",
+      description: `欢迎回来，${user.user_metadata?.name || userInfo.nickname}！`,
     })
 
-    console.log("Login successful, redirecting to dashboard")
-    console.log("User info:", userInfo)
+    // 从 URL query string 获取 redirect 参数（不是 hash）
+    const params = new URLSearchParams(window.location.search)
+    const redirect = params.get('redirect')
+    const redirectPath = redirect ? decodeURIComponent(redirect) : '/dashboard'
 
-    // 获取 redirect 参数
-    let redirectPath = "/dashboard"
-    const hash = window.location.hash
-    if (hash.includes('redirect=')) {
-      const params = new URLSearchParams(hash.substring(1))
-      const redirect = params.get('redirect')
-      if (redirect) {
-        redirectPath = decodeURIComponent(redirect)
-      }
-    }
-
-    // 使用 replace 而不是 push，避免回退到回调页面
     setTimeout(() => {
       router.replace(redirectPath)
-    }, 1000)
+    }, 800)
   }
 
   return (
@@ -140,7 +91,7 @@ function GitHubCallbackContent() {
         {status === "loading" && (
           <>
             <div className="flex justify-center mb-4">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
             </div>
             <p className="text-muted-foreground">正在处理 GitHub 登录...</p>
             <p className="text-xs text-slate-400 mt-2">如果长时间未响应，请检查是否已授权</p>
@@ -179,7 +130,6 @@ function GitHubCallbackContent() {
   )
 }
 
-// 使用 Suspense 包装
 export default function GitHubCallbackPage() {
   return (
     <Suspense fallback={<GitHubCallbackLoading />}>

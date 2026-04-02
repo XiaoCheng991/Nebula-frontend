@@ -186,37 +186,65 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
             {/* 仪表盘 */}
             <Link
               href="/dashboard"
-              className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group ${navTextClasses}`}
+              className={`relative flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group ${
+                pathname === "/dashboard" ? "bg-white/[0.06]" : ""
+              } ${navTextClasses}`}
             >
               <Sparkles className="h-5 w-5 text-orange-500 group-hover:scale-110 transition-transform" />
-              <span className="text-sm font-medium hidden sm:block">仪表盘</span>
+              <span className={`text-sm hidden sm:block transition-all duration-300 ${pathname === "/dashboard" ? "font-semibold" : "font-medium"}`}>仪表盘</span>
+              {pathname === "/dashboard" && (
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-[2px] rounded-full bg-gradient-to-r from-transparent via-orange-500 to-transparent">
+                  <span className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-orange-500 to-transparent blur-[4px] opacity-60" />
+                </span>
+              )}
             </Link>
 
             {/* 文件 */}
             <Link
               href="/drive"
-              className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group ${navTextClasses}`}
+              className={`relative flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group ${
+                pathname === "/drive" ? "bg-white/[0.06]" : ""
+              } ${navTextClasses}`}
             >
               <FolderUp className="h-5 w-5 text-green-500 group-hover:scale-110 transition-transform" />
-              <span className="text-sm font-medium hidden sm:block">文件</span>
+              <span className={`text-sm hidden sm:block transition-all duration-300 ${pathname === "/drive" ? "font-semibold" : "font-medium"}`}>文件</span>
+              {pathname === "/drive" && (
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-[2px] rounded-full bg-gradient-to-r from-transparent via-orange-500 to-transparent">
+                  <span className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-orange-500 to-transparent blur-[4px] opacity-60" />
+                </span>
+              )}
             </Link>
 
             {/* 博客 - 公开页面 */}
             <Link
               href="/blog"
-              className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group ${navTextClasses}`}
+              className={`relative flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group ${
+                pathname === "/blog" ? "bg-white/[0.06]" : ""
+              } ${navTextClasses}`}
             >
               <BookOpen className="h-5 w-5 text-blue-500 group-hover:scale-110 transition-transform" />
-              <span className="text-sm font-medium hidden sm:block">博客</span>
+              <span className={`text-sm hidden sm:block transition-all duration-300 ${pathname === "/blog" ? "font-semibold" : "font-medium"}`}>博客</span>
+              {pathname === "/blog" && (
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-[2px] rounded-full bg-gradient-to-r from-transparent via-orange-500 to-transparent">
+                  <span className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-orange-500 to-transparent blur-[4px] opacity-60" />
+                </span>
+              )}
             </Link>
 
             {/* 我 - 公开页面 */}
             <Link
               href="/me"
-              className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group ${navTextClasses}`}
+              className={`relative flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group ${
+                pathname === "/me" ? "bg-white/[0.06]" : ""
+              } ${navTextClasses}`}
             >
               <User className="h-5 w-5 text-purple-500 group-hover:scale-110 transition-transform" />
-              <span className="text-sm font-medium hidden sm:block">我</span>
+              <span className={`text-sm hidden sm:block transition-all duration-300 ${pathname === "/me" ? "font-semibold" : "font-medium"}`}>我</span>
+              {pathname === "/me" && (
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-[2px] rounded-full bg-gradient-to-r from-transparent via-orange-500 to-transparent">
+                  <span className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-orange-500 to-transparent blur-[4px] opacity-60" />
+                </span>
+              )}
             </Link>
           </nav>
         </div>
