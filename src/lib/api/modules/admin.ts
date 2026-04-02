@@ -14,7 +14,7 @@ import type { ApiResponse } from '../types'
  * 后端系统用户
  */
 export interface SysUser {
-  id: number | string
+  id: string // UUID 类型
   username: string
   email?: string
   phone?: string
@@ -35,7 +35,7 @@ export interface SysUser {
  * 后端系统角色
  */
 export interface SysRole {
-  id: number
+  id: string // UUID 类型
   roleName: string
   roleCode: string
   dataScope?: string
@@ -51,8 +51,8 @@ export interface SysRole {
  * 后端系统菜单
  */
 export interface SysMenu {
-  id: number
-  parentId?: number
+  id: string // UUID 类型
+  parentId?: string | null // UUID 类型
   menuType: string // directory-目录，menu-菜单，button-按钮
   menuName: string
   path?: string
@@ -181,98 +181,87 @@ export async function getUserList(
 
 /**
  * 获取用户详情
- * 支持传入：number 类型 user_id、字符串 user_id、或 email
+ * 支持传入：UUID 类型 user_id、字符串 user_id、或 email
  */
-export async function getUserById(userId: number | string): Promise<ApiResponse<SysUser>> {
-  // 如果传入的是 number 类型，直接使用
-  if (typeof userId === 'number') {
-    const { data: user, error } = await supabase
-      .from('sys_users')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle()
-
-    if (error || !user) {
-      return buildResponse(null as any, 404, '用户不存在')
-    }
-
-    return buildResponse(user as SysUser)
-  }
-
-  // 如果是字符串，先尝试作为 number 解析
-  const numericId = parseInt(userId, 10)
-  if (!isNaN(numericId)) {
-    const { data: user, error } = await supabase
-      .from('sys_users')
-      .select('*')
-      .eq('id', numericId)
-      .maybeSingle()
-
-    if (error || !user) {
-      return buildResponse(null as any, 404, '用户不存在')
-    }
-
-    return buildResponse(user as SysUser)
-  }
-
-  // 否则作为邮箱查询
+export async function getUserById(userId: string): Promise<ApiResponse<SysUser>> {
+  // 先尝试作为 UUID 查询
   const { data: user, error } = await supabase
     .from('sys_users')
     .select('*')
-    .eq('email', userId)
+    .eq('id', userId)
     .maybeSingle()
 
-  if (error || !user) {
-    return buildResponse(null as any, 404, '用户不存在')
+  if (error) {
+    console.error('获取用户失败:', error)
+    return buildResponse(null as any, 500, '获取用户失败')
   }
 
-  return buildResponse(user as SysUser)
+  if (user) {
+    return buildResponse(user as SysUser)
+  }
+
+  // 如果 UUID 查询失败，尝试作为邮箱查询
+  if (userId.includes('@')) {
+    const { data: userByEmail, error: emailError } = await supabase
+      .from('sys_users')
+      .select('*')
+      .eq('email', userId)
+      .maybeSingle()
+
+    if (emailError || !userByEmail) {
+      return buildResponse(null as any, 404, '用户不存在')
+    }
+
+    return buildResponse(userByEmail as SysUser)
+  }
+
+  return buildResponse(null as any, 404, '用户不存在')
 }
 
 /**
- * 辅助函数：通过 user_id (number) 或 email 获取 number 类型的 user_id
+ * 辅助函数：通过 UUID 或 email 获取用户的 UUID
  */
-async function getNumericUserId(userId: number | string): Promise<number | null> {
-  // 如果已经是 number 类型，直接返回
-  if (typeof userId === 'number') {
-    return userId
-  }
-
-  // 如果是字符串，尝试转换为 number
-  const numericId = parseInt(userId, 10)
-  if (!isNaN(numericId)) {
-    return numericId
-  }
-
-  // 如果转换失败，可能是 UUID 或邮箱，尝试通过邮箱查询
-  // 先尝试作为邮箱查询
+async function getUserIdAsUuid(userId: string): Promise<string | null> {
+  // 先尝试直接作为 UUID 查询
   const { data: user } = await supabase
     .from('sys_users')
     .select('id')
-    .eq('email', userId)
+    .eq('id', userId)
     .maybeSingle()
 
-  return user?.id || null
+  if (user) {
+    return user.id
+  }
+
+  // 否则尝试作为邮箱查询
+  if (userId.includes('@')) {
+    const { data: userByEmail } = await supabase
+      .from('sys_users')
+      .select('id')
+      .eq('email', userId)
+      .maybeSingle()
+
+    return userByEmail?.id || null
+  }
+
+  return null
 }
 
 /**
  * 获取用户的角色 ID 列表
- * 支持传入：number 类型 user_id、字符串 user_id、或 email
+ * 支持传入：UUID 类型 user_id、字符串 user_id、或 email
  */
-export async function getUserRoleIds(userId: number | string): Promise<ApiResponse<number[]>> {
-  const numericUserId = await getNumericUserId(userId)
-
-  if (!numericUserId) {
-    return buildResponse([], 404, '用户不存在')
-  }
+export async function getUserRoleIds(userId: string): Promise<ApiResponse<string[]>> {
+  // 直接作为 UUID 使用
+  const userUuid = userId
 
   const { data: userRoles, error } = await supabase
     .from('sys_user_role')
     .select('role_id')
-    .eq('user_id', numericUserId)
+    .eq('user_id', userUuid)
 
   if (error) {
-    return buildResponse(null as any, 500, '获取用户角色失败')
+    return buildResponse([], 500, '获取用户角色失败')
   }
 
   const roleIds = userRoles?.map(ur => ur.role_id) || []
@@ -286,13 +275,6 @@ export async function updateUser(user: Partial<SysUser>): Promise<ApiResponse<vo
   // 检查 user.id 是否存在
   if (!user.id) {
     return buildResponse(undefined, 400, '用户 ID 不能为空')
-  }
-
-  // 确保 user.id 是 number 类型
-  const numericUserId = typeof user.id === 'string' ? parseInt(user.id, 10) : user.id
-
-  if (isNaN(numericUserId)) {
-    return buildResponse(undefined, 400, '无效的用户 ID')
   }
 
   // 构建更新数据
@@ -313,7 +295,7 @@ export async function updateUser(user: Partial<SysUser>): Promise<ApiResponse<vo
   const { error } = await supabase
     .from('sys_users')
     .update(updateData)
-    .eq('id', numericUserId)
+    .eq('id', user.id)
 
   if (error) {
     return buildResponse(undefined, 500, '更新用户失败')
@@ -324,19 +306,19 @@ export async function updateUser(user: Partial<SysUser>): Promise<ApiResponse<vo
 
 /**
  * 修改用户状态
- * 支持传入：number 类型 user_id、字符串 user_id、或 email
+ * 支持传入：UUID 类型 user_id、字符串 user_id、或 email
  */
-export async function updateUserStatus(userId: number | string, status: number): Promise<ApiResponse<void>> {
-  const numericUserId = await getNumericUserId(userId)
+export async function updateUserStatus(userId: string, status: number): Promise<ApiResponse<void>> {
+  const userUuid = await getUserIdAsUuid(userId)
 
-  if (!numericUserId) {
+  if (!userUuid) {
     return buildResponse(undefined, 404, '用户不存在')
   }
 
   const { error } = await supabase
     .from('sys_users')
     .update({ account_status: status })
-    .eq('id', numericUserId)
+    .eq('id', userUuid)
 
   if (error) {
     return buildResponse(undefined, 500, '更新用户状态失败')
@@ -347,25 +329,21 @@ export async function updateUserStatus(userId: number | string, status: number):
 
 /**
  * 分配角色给用户
- * 支持传入：number 类型 user_id、字符串 user_id、或 email
+ * 支持传入：UUID 类型 user_id、字符串 user_id、或 email
  */
-export async function assignRolesToUser(userId: number | string, roleIds: number[]): Promise<ApiResponse<void>> {
-  const numericUserId = await getNumericUserId(userId)
-
-  if (!numericUserId) {
-    return buildResponse(undefined, 404, '用户不存在')
-  }
+export async function assignRolesToUser(userId: string, roleIds: string[]): Promise<ApiResponse<void>> {
+  const userUuid = userId
 
   // 先删除原有角色
   await supabase
     .from('sys_user_role')
     .delete()
-    .eq('user_id', numericUserId)
+    .eq('user_id', userUuid)
 
   // 插入新角色
   if (roleIds.length > 0) {
     const userRoles = roleIds.map(roleId => ({
-      user_id: numericUserId,
+      user_id: userUuid,
       role_id: roleId,
       created_at: new Date().toISOString(),
     }))
@@ -384,18 +362,19 @@ export async function assignRolesToUser(userId: number | string, roleIds: number
 
 /**
  * 删除用户
- * 支持传入：number 类型 user_id、字符串 user_id、或 email
+ * 支持传入：UUID 类型 user_id、字符串 user_id、或 email
  */
-export async function deleteUser(userId: number | string): Promise<ApiResponse<void>> {
-  const numericUserId = await getNumericUserId(userId)
+export async function deleteUser(userId: string): Promise<ApiResponse<void>> {
+  const userUuid = await getUserIdAsUuid(userId)
 
-  if (!numericUserId) {
+  if (!userUuid) {
     return buildResponse(undefined, 404, '用户不存在')
   }
+
   const { error } = await supabase
     .from('sys_users')
     .delete()
-    .eq('id', numericUserId)
+    .eq('id', userUuid)
 
   if (error) {
     return buildResponse(undefined, 500, '删除用户失败')
@@ -422,7 +401,7 @@ export async function getCurrentUserMenus(): Promise<ApiResponse<SysMenu[]>> {
     return buildResponse([], 400, '用户邮箱不存在')
   }
 
-  // 2. 获取用户的 number 类型 ID
+  // 2. 获取用户的 UUID
   const { data: sysUser } = await supabase
     .from('sys_users')
     .select('id')
@@ -430,10 +409,12 @@ export async function getCurrentUserMenus(): Promise<ApiResponse<SysMenu[]>> {
     .maybeSingle()
 
   if (!sysUser) {
+    console.log('用户不存在，email:', userEmail)
     return buildResponse([], 404, '用户不存在')
   }
 
   const userId = sysUser.id
+  console.log('当前用户 ID:', userId)
 
   // 3. 获取用户的所有角色 ID（通过 sys_user_role 表）
   const { data: userRoles } = await supabase
@@ -441,11 +422,15 @@ export async function getCurrentUserMenus(): Promise<ApiResponse<SysMenu[]>> {
     .select('role_id')
     .eq('user_id', userId)
 
+  console.log('用户角色关联数据:', userRoles)
+
   if (!userRoles || userRoles.length === 0) {
+    console.log('用户没有角色关联')
     return buildResponse([], 200) // 用户没有角色，返回空菜单
   }
 
   const roleIds = userRoles.map(ur => ur.role_id)
+  console.log('角色 ID 列表:', roleIds)
 
   // 4. 获取角色关联的所有菜单 ID（通过 sys_role_menu 表）
   const { data: roleMenus } = await supabase
@@ -453,19 +438,25 @@ export async function getCurrentUserMenus(): Promise<ApiResponse<SysMenu[]>> {
     .select('menu_id')
     .in('role_id', roleIds)
 
+  console.log('角色菜单关联数据:', roleMenus)
+
   if (!roleMenus || roleMenus.length === 0) {
+    console.log('角色没有关联菜单')
     return buildResponse([], 200) // 角色没有关联菜单，返回空菜单
   }
 
   const menuIds = [...new Set(roleMenus.map(rm => rm.menu_id))] // 去重
+  console.log('菜单 ID 列表:', menuIds)
 
   // 5. 获取所有菜单详情
   const { data: allMenus, error: menusError } = await supabase
-    .from('sys_menus')
+    .from('sys_menu')
     .select('*')
     .in('id', menuIds)
     .eq('is_visible', true)
     .order('sort_order', { ascending: true })
+
+  console.log('获取到的菜单数据:', allMenus, '错误:', menusError)
 
   if (menusError) {
     console.error('获取菜单失败:', menusError)
@@ -475,9 +466,9 @@ export async function getCurrentUserMenus(): Promise<ApiResponse<SysMenu[]>> {
   const menuList = (allMenus || []) as SysMenu[]
 
   // 6. 构建树形结构
-  function buildTree(parentId: number | null): SysMenu[] {
+  function buildTree(parentId: string | null): SysMenu[] {
     return menuList
-      .filter(m => m.parentId === parentId || (parentId === null && (m.parentId === 0 || !m.parentId)))
+      .filter(m => m.parentId === parentId || (parentId === null && (m.parentId === null || !m.parentId)))
       .map(m => ({
         ...m,
         children: buildTree(m.id),
@@ -492,14 +483,16 @@ export async function getCurrentUserMenus(): Promise<ApiResponse<SysMenu[]>> {
  */
 export async function getMenuList(): Promise<ApiResponse<SysMenu[]>> {
   const { data: menus, error } = await supabase
-    .from('sys_menus')
+    .from('sys_menu')
     .select('*')
     .order('sort_order', { ascending: true })
 
   if (error) {
+    console.error('获取菜单列表失败:', error)
     return buildResponse([], 500, '获取菜单列表失败')
   }
 
+  console.log('获取到的菜单数据:', menus)
   return buildResponse((menus || []) as SysMenu[])
 }
 
@@ -508,19 +501,22 @@ export async function getMenuList(): Promise<ApiResponse<SysMenu[]>> {
  */
 export async function getMenuTree(): Promise<ApiResponse<SysMenu[]>> {
   const { data: menus, error } = await supabase
-    .from('sys_menus')
+    .from('sys_menu')
     .select('*')
     .order('sort_order', { ascending: true })
 
   if (error) {
+    console.error('获取菜单树失败:', error)
     return buildResponse([], 500, '获取菜单树失败')
   }
 
+  console.log('获取到的菜单数据:', menus)
+
   const menuList = (menus || []) as SysMenu[]
 
-  function buildTree(parentId: number | null): SysMenu[] {
+  function buildTree(parentId: string | null): SysMenu[] {
     return menuList
-      .filter(m => m.parentId === parentId || (parentId === null && (m.parentId === 0 || !m.parentId)))
+      .filter(m => m.parentId === parentId || (parentId === null && (m.parentId === null || !m.parentId)))
       .map(m => ({
         ...m,
         children: buildTree(m.id),
@@ -543,9 +539,11 @@ export async function getAllRoles(): Promise<ApiResponse<SysRole[]>> {
     .order('sort_order', { ascending: true })
 
   if (error) {
+    console.error('获取角色列表失败:', error)
     return buildResponse([], 500, '获取角色列表失败')
   }
 
+  console.log('获取到的角色数据:', roles)
   return buildResponse((roles || []) as SysRole[])
 }
 
@@ -560,7 +558,7 @@ export async function getRoleList(
   let query = supabase
     .from('sys_role')
     .select('*', { count: 'exact' })
-    .order('created_at', { ascending: false })
+    .order('create_time', { ascending: false })
 
   // 关键词搜索
   if (keyword) {
@@ -578,29 +576,68 @@ export async function getRoleList(
 
 /**
  * 获取用户的角色列表
- * 支持传入：number 类型 user_id、字符串 user_id、或 email
+ * 支持传入：UUID 类型 user_id、字符串 user_id、或 email
  */
-export async function getRolesByUserId(userId: number | string): Promise<ApiResponse<SysRole[]>> {
-  const numericUserId = await getNumericUserId(userId)
+export async function getRolesByUserId(userId: string | number): Promise<ApiResponse<SysRole[]>> {
+  // 先尝试从 sys_users 表获取用户的 UUID
+  let userUuid: string | null = null
 
-  if (!numericUserId) {
+  if (typeof userId === 'string') {
+    // 如果是字符串，先检查是否是 UUID 格式
+    userUuid = userId
+  } else {
+    // 如果是 number，先尝试作为 id 查询
+    const { data: sysUser } = await supabase
+      .from('sys_users')
+      .select('id')
+      .eq('id', userId)
+      .maybeSingle()
+
+    if (sysUser) {
+      userUuid = sysUser.id
+    }
+  }
+
+  // 如果还是没找到，尝试通过邮箱查询
+  if (!userUuid && typeof userId === 'string' && userId.includes('@')) {
+    const { data: sysUser } = await supabase
+      .from('sys_users')
+      .select('id')
+      .eq('email', userId)
+      .maybeSingle()
+
+    if (sysUser) {
+      userUuid = sysUser.id
+    }
+  }
+
+  if (!userUuid) {
+    console.log('用户不存在，userUuid:', userUuid)
     return buildResponse([], 404, '用户不存在')
   }
+
+  console.log('查询用户角色，userUuid:', userUuid)
 
   const { data: userRoles, error: userRoleError } = await supabase
     .from('sys_user_role')
     .select('role_id')
-    .eq('user_id', numericUserId)
+    .eq('user_id', userUuid)
 
   if (userRoleError) {
+    console.error('获取用户角色失败:', userRoleError)
     return buildResponse([], 500, '获取用户角色失败')
   }
+
+  console.log('用户角色关联数据:', userRoles)
 
   const roleIds = userRoles?.map(ur => ur.role_id) || []
 
   if (roleIds.length === 0) {
+    console.log('用户没有角色关联')
     return buildResponse([])
   }
+
+  console.log('角色 ID 列表:', roleIds)
 
   const { data: roles, error: roleError } = await supabase
     .from('sys_role')
@@ -608,9 +645,11 @@ export async function getRolesByUserId(userId: number | string): Promise<ApiResp
     .in('id', roleIds)
 
   if (roleError) {
+    console.error('获取角色详情失败:', roleError)
     return buildResponse([], 500, '获取角色详情失败')
   }
 
+  console.log('获取到的角色数据:', roles)
   return buildResponse((roles || []) as SysRole[])
 }
 

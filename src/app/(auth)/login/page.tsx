@@ -17,6 +17,16 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
+  // 获取 redirect 参数
+  const [redirectUrl, setRedirectUrl] = useState<string>("/dashboard")
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const redirect = params.get("redirect")
+    if (redirect) {
+      setRedirectUrl(decodeURIComponent(redirect))
+    }
+  }, [])
   
 
   const handleEmailLogin = async (e: React.FormEvent) => {
@@ -26,7 +36,15 @@ export default function LoginPage() {
     try {
       await login(account, password)
       toast({ title: t("login.successLogin"), description: t("login.welcomeBack") })
-      setTimeout(() => router.push("/dashboard"), 500)
+
+      // 登录成功后，重新获取 redirect 参数并跳转
+      const params = new URLSearchParams(window.location.search)
+      const redirect = params.get("redirect")
+      const targetPath = redirect ? decodeURIComponent(redirect) : "/dashboard"
+
+      // 清除 redirect 参数并跳转
+      window.history.replaceState({}, '', window.location.pathname)
+      setTimeout(() => router.push(targetPath), 500)
     } catch (error: any) {
       const errorMessage = error?.message || t("login.errorLoginFailed")
       toast({ title: t("login.errorLoginFailed"), description: errorMessage, variant: "destructive" })
@@ -38,7 +56,13 @@ export default function LoginPage() {
   const handleGithubLogin = async () => {
     try {
       setLoading(true)
-      await loginWithGithub()
+      // 获取 redirect 参数
+      const params = new URLSearchParams(window.location.search)
+      const redirect = params.get("redirect")
+      const targetPath = redirect ? decodeURIComponent(redirect) : "/dashboard"
+
+      // Github 登录后会由回调处理 redirect
+      await loginWithGithub(targetPath)
     } catch (error: any) {
       toast({ title: t("login.githubLoginFailed"), description: error?.message || t("login.errorNetworkError"), variant: "destructive" })
       setLoading(false)

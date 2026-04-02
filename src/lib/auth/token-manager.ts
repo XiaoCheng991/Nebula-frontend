@@ -91,10 +91,10 @@ export function clearTokens(): void {
 export function getTokenFromCookie(cookieHeader: string | null): string | null {
   if (!cookieHeader) return null
 
-  // Supabase cookie 格式: sb-[project-ref]-auth-token
+  // Supabase auth token cookie（默认格式：sb-{project-ref}-auth-token）
   const cookies = cookieHeader.split(';').map(c => c.trim())
   const tokenCookie = cookies.find(c =>
-    c.startsWith('sb-') && c.includes('auth-token')
+    c.match(/^sb-.+-auth-token=/)
   )
 
   if (!tokenCookie) return null

@@ -3,10 +3,6 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import {
-  Github,
-  Twitter,
-  Mail,
-  Link as LinkIcon,
   Calendar,
   Hash,
   Clock,
@@ -16,7 +12,18 @@ import {
   MessageSquare,
   Camera,
   Loader2,
+  Mail,
+  Link as LinkIcon,
 } from "lucide-react";
+import {
+  SiGithub,
+  SiXiaohongshu,
+  SiBilibili,
+  SiTiktok,
+  SiX,
+  SiDiscord,
+  SiInstagram,
+} from "react-icons/si";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -31,18 +38,20 @@ import { toast } from "@/components/ui/use-toast";
 import { useAdminStore } from "@/hooks/useAdminStore";
 
 const socialLinks = [
-  { icon: Github, href: "https://github.com", label: "GitHub" },
-  { icon: Twitter, href: "https://twitter.com", label: "Twitter" },
-  { icon: Mail, href: "mailto:orange@nebulahub.app", label: "Email" },
-  { icon: LinkIcon, href: "https://orange.dev", label: "Website" },
+  { icon: SiGithub, href: "https://github.com/XiaoCheng991", label: "GitHub" },
+  { icon: SiBilibili, href: "https://space.bilibili.com/3546566354798756", label: "Bilibili" },
+  { icon: SiXiaohongshu, href: "https://www.xiaohongshu.com/user/profile/61e822e9000000001000a517", label: "小红书" },
+  { icon: SiTiktok, href: "https://www.douyin.com/user/self?from_tab_name=main&showSubTab=compilation&showTab=favorite_collection", label: "抖音" },
+  { icon: Mail, href: "mailto:17516476723@163.com", label: "Email" },
+  { icon: LinkIcon, href: "https://www.xiaocheng991.site/me", label: "Website" },
 ];
 
 const tags = [
-  { name: "前端开发", count: 12 },
+  { name: "全栈开发", count: 12 },
   { name: "AI/ML", count: 8 },
-  { name: "系统设计", count: 6 },
+  { name: "极客", count: 6 },
   { name: "生活随笔", count: 15 },
-  { name: "技术分享", count: 10 },
+  { name: "碎碎念", count: 10 },
 ];
 
 const memos = [
@@ -114,6 +123,21 @@ const articles = [
     views: 987,
   },
 ];
+
+// 固定的超级管理员信息
+const ADMIN_INFO = {
+  username: "XiaoCheng991",
+  nickname: "XiaoCheng991",
+  role: "全栈+AI",
+  avatarUrl: "/avatars/xiaocheng991.jpeg",
+};
+
+// 固定的 AI 助手信息
+const AI_ASSISTANT_INFO = {
+  name: "小薇",
+  poweredBy: "powered by OpenClaw",
+  avatarUrl: "/avatars/xiaowei.jpg",
+};
 
 export default function BlogPage() {
   const [activeTab, setActiveTab] = useState<"memos" | "articles">("articles");
@@ -249,110 +273,100 @@ export default function BlogPage() {
         <section className="mb-8">
           <Card className="border-0 bg-white/90 dark:bg-zinc-900/60 backdrop-blur-xl shadow-lg">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-4 min-w-0 flex-1">
-                  {/* 用户头像（仅超级管理员可上传） */}
-                  <div className="relative">
-                    <UserAvatar
-                      avatarUrl={userAvatar}
-                      nickname={userNickname}
-                      size="lg"
-                      className={`w-10 h-10 border-2 border-orange-200 dark:border-orange-800 transition-transform duration-300 ${hasAdminAccess ? 'hover:scale-110 cursor-pointer' : ''}`}
-                    />
-                    {hasAdminAccess && (
-                      <>
-                        <label htmlFor="me-avatar-upload" className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 hover:opacity-100 transition-opacity cursor-pointer">
-                          <Camera className="w-4 h-4 text-white" />
-                        </label>
-                        <input
-                          id="me-avatar-upload"
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={handleAvatarUpload}
-                          disabled={uploading}
-                        />
-                      </>
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="font-bold text-sm text-zinc-900 dark:text-zinc-100">
-                      {userNickname}
-                    </div>
-                    <div className="text-xs text-zinc-400 dark:text-zinc-500">
-                      全栈开发者
-                    </div>
-                  </div>
-                </div>
-
-                {/* 分隔线 */}
-                <div className="h-8 w-px bg-zinc-200 dark:bg-zinc-700" />
-
-                {/* Nebula */}
-                <div className="flex items-center gap-3">
-                  <img
-                    src="https://api.dicebear.com/7.x/avataaars/svg?seed=Nebula"
-                    alt="Nebula"
-                    className="w-10 h-10 rounded-full border-2 border-indigo-200 dark:border-indigo-800 transition-transform duration-300 hover:scale-110"
+          <div className="flex items-center justify-between gap-6">
+            {/* 左侧：用户信息 */}
+            <div className="flex items-center gap-6">
+              {/* 超级管理员 XiaoCheng991 */}
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <UserAvatar
+                    avatarUrl={ADMIN_INFO.avatarUrl}
+                    nickname={ADMIN_INFO.nickname}
+                    size="lg"
+                    className={`w-10 h-10 border-2 border-orange-300 dark:border-orange-700 transition-transform duration-300 ${hasAdminAccess ? 'hover:scale-110 cursor-pointer' : ''}`}
                   />
-                  <div>
-                    <div className="font-bold text-sm text-indigo-600">
-                      Nebula
-                    </div>
-                    <div className="text-xs text-zinc-400 dark:text-zinc-500">
-                      powered by AI
-                    </div>
-                    {/* 统计数据 */}
-                    <div className="flex items-center gap-2.5 mt-0.5">
-                      <span className="text-xs text-zinc-500 dark:text-zinc-400">
-                        <span className="font-semibold">57</span> 技能
-                      </span>
-                      <span className="text-xs text-zinc-500 dark:text-zinc-400">
-                        <span className="font-semibold">23</span> 项目
-                      </span>
-                    </div>
+                  {hasAdminAccess && (
+                    <>
+                      <label htmlFor="me-avatar-upload" className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 hover:opacity-100 transition-opacity cursor-pointer">
+                        <Camera className="w-4 h-4 text-white" />
+                      </label>
+                      <input
+                        id="me-avatar-upload"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleAvatarUpload}
+                        disabled={uploading}
+                      />
+                    </>
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <div className="font-bold text-sm text-zinc-900 dark:text-zinc-100">
+                    {ADMIN_INFO.username}
+                  </div>
+                  <div className="text-xs text-zinc-500 dark:text-zinc-400">
+                    {ADMIN_INFO.role}
                   </div>
                 </div>
               </div>
 
-              {/* 社交链接 */}
-              <div className="flex items-center gap-1 flex-shrink-0 mt-4">
-                {socialLinks.map((social, index) => (
-                  <a
-                    key={index}
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-8 h-8 flex items-center justify-center rounded-md text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                    title={social.label}
-                  >
-                    <social.icon className="h-4 w-4" />
-                  </a>
-                ))}
+              {/* 分隔竖线 */}
+              <div className="h-10 w-px bg-zinc-200 dark:bg-zinc-700" />
+
+              {/* AI 助手 小薇 */}
+              <div className="flex items-center gap-3">
+                <UserAvatar
+                  avatarUrl={AI_ASSISTANT_INFO.avatarUrl}
+                  nickname={AI_ASSISTANT_INFO.name}
+                  size="lg"
+                  className="w-10 h-10 border-2 border-purple-300 dark:border-purple-700 transition-transform duration-300 hover:scale-110"
+                />
+                <div>
+                  <div className="font-bold text-sm text-purple-600 dark:text-purple-400">
+                    {AI_ASSISTANT_INFO.name}
+                  </div>
+                  <div className="text-xs text-zinc-500 dark:text-zinc-400">
+                    {AI_ASSISTANT_INFO.poweredBy}
+                  </div>
+                </div>
               </div>
+            </div>
+
+            {/* 右侧：社交链接 */}
+            <div className="flex items-center gap-1">
+              {socialLinks.map((social, index) => (
+                <a
+                  key={index}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-8 h-8 flex items-center justify-center rounded-md text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                  title={social.label}
+                >
+                  <social.icon size={18} />
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* 标签：放在用户信息下方 */}
+          <div className="flex items-center gap-1.5 mt-4">
+            <span className="text-[14px] font-medium text-zinc-500 dark:text-zinc-400">标签</span>
+            {tags.slice(0, 4).map((tag, index) => (
+              <Badge
+                key={index}
+                variant="secondary"
+                className="px-2.5 py-1 text-xs font-medium cursor-pointer hover:opacity-80 transition-opacity bg-zinc-200/80 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 border-0"
+              >
+                {tag.name}
+              </Badge>
+            ))}
+          </div>
             </CardContent>
           </Card>
         </section>
 
-        {/* 标签区 */}
-        <section className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <Hash className="h-4 w-4 text-zinc-400" />
-            <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">标签</span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {tags.map((tag, index) => (
-              <Badge
-                key={index}
-                variant="secondary"
-                className="px-3 py-1.5 text-xs font-medium cursor-pointer hover:opacity-80 transition-opacity bg-zinc-200 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200"
-              >
-                {tag.name}
-                <span className="ml-1 opacity-60">({tag.count})</span>
-              </Badge>
-            ))}
-          </div>
-        </section>
 
         {/* Memo 横向滚动区 */}
         <section className="mb-8">

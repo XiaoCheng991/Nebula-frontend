@@ -17,12 +17,11 @@ export interface ServerUserInfo {
  */
 export function getServerToken(): string | null {
   const cookieStore = cookies()
-  // Supabase cookie 格式: sb-[project-ref]-auth-token
-  const supabaseToken = cookieStore.getAll().find(cookie =>
-    cookie.name.startsWith('sb-') && cookie.name.includes('auth-token')
+  // Supabase 默认 cookie 名称: sb-{project-ref}-auth-token
+  const token = cookieStore.getAll().find(c =>
+    c.name.startsWith('sb-') && c.name.endsWith('-auth-token')
   )?.value || null
-
-  return supabaseToken
+  return token
 }
 
 /**

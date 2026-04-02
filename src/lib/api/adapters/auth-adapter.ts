@@ -87,13 +87,16 @@ async function buildLoginResponse(user: any): Promise<LoginResponse> {
 /**
  * GitHub 登录
  */
-export async function loginWithGithub(): Promise<void> {
+export async function loginWithGithub(redirectUrl?: string): Promise<void> {
   // 重要：回调 URL 必须与 Supabase 配置中的 Site URL 一致
   // 统一使用生产域名，确保本地开发和生产环境都能正常工作
   const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-  const redirectTo = isDev
+  const baseUrl = isDev
     ? 'http://localhost:3000/auth/github/callback'
     : 'https://www.xiaocheng991.site/auth/github/callback'
+
+  // 如果有 redirectUrl，添加到回调 URL 的查询参数中
+  const redirectTo = redirectUrl ? `${baseUrl}?redirect=${encodeURIComponent(redirectUrl)}` : baseUrl
 
   console.log('Starting GitHub OAuth, redirect to:', redirectTo)
 

@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { useThemeStore } from '@/hooks/useTheme';
 import { useAdminStore } from '@/hooks/useAdminStore'
 import { LanguageSwitcher } from '@/components/auth/LanguageSwitcher';
-import { toast } from '@/components/ui/use-toast';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -184,49 +183,23 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
         {/* 中间 - 导航 */}
         <div className="flex items-center justify-center">
           <nav className="hidden md:flex items-center space-x-1">
-            {/* 仪表盘 - 需要登录 */}
-            {user ? (
-              <Link
-                href="/dashboard"
-                className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group ${navTextClasses}`}
-              >
-                <Sparkles className="h-5 w-5 text-orange-500 group-hover:scale-110 transition-transform" />
-                <span className="text-sm font-medium hidden sm:block">仪表盘</span>
-              </Link>
-            ) : (
-              <button
-                onClick={() => {
-                  toast({ title: '⚠️ 需要登录', description: '该页面需要登录后才能访问，请先登录', variant: 'destructive' })
-                  window.location.href = '/login'
-                }}
-                className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group ${navTextClasses}`}
-              >
-                <Sparkles className="h-5 w-5 text-orange-500 group-hover:scale-110 transition-transform" />
-                <span className="text-sm font-medium hidden sm:block">仪表盘</span>
-              </button>
-            )}
+            {/* 仪表盘 */}
+            <Link
+              href="/dashboard"
+              className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group ${navTextClasses}`}
+            >
+              <Sparkles className="h-5 w-5 text-orange-500 group-hover:scale-110 transition-transform" />
+              <span className="text-sm font-medium hidden sm:block">仪表盘</span>
+            </Link>
 
-            {/* 文件 - 需要登录 */}
-            {user ? (
-              <Link
-                href="/drive"
-                className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group ${navTextClasses}`}
-              >
-                <FolderUp className="h-5 w-5 text-green-500 group-hover:scale-110 transition-transform" />
-                <span className="text-sm font-medium hidden sm:block">文件</span>
-              </Link>
-            ) : (
-              <button
-                onClick={() => {
-                  toast({ title: '⚠️ 需要登录', description: '该页面需要登录后才能访问，请先登录', variant: 'destructive' })
-                  window.location.href = '/login'
-                }}
-                className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group ${navTextClasses}`}
-              >
-                <FolderUp className="h-5 w-5 text-green-500 group-hover:scale-110 transition-transform" />
-                <span className="text-sm font-medium hidden sm:block">文件</span>
-              </button>
-            )}
+            {/* 文件 */}
+            <Link
+              href="/drive"
+              className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group ${navTextClasses}`}
+            >
+              <FolderUp className="h-5 w-5 text-green-500 group-hover:scale-110 transition-transform" />
+              <span className="text-sm font-medium hidden sm:block">文件</span>
+            </Link>
 
             {/* 博客 - 公开页面 */}
             <Link

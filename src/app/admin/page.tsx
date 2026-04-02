@@ -5,6 +5,7 @@
 import React from 'react'
 import { Users, FileText, MessageCircle, Activity, Sparkles, TrendingUp, ArrowUpRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { ProtectedRoute } from '@/components/auth/AuthGuard'
 
 interface StatCardProps {
   title: string
@@ -45,6 +46,14 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, change, icon: Icon, i
 )
 
 export default function AdminDashboardPage() {
+  return (
+    <ProtectedRoute>
+      <AdminDashboardContent />
+    </ProtectedRoute>
+  )
+}
+
+function AdminDashboardContent() {
   const stats = [
     {
       title: '用户总数',

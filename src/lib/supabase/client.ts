@@ -1,60 +1,88 @@
 /**
- * Supabase 客户端配置
+ * Supabase 客户端配置（浏览器端）
  *
- * 仅在 Supabase 模式下使用
+ * 使用 @supabase/ssr 的 createBrowserClient
+ * 浏览器端手动实现 getAll/setAll，用 document.cookie 读写
+ * 这样中间件的 createServerClient 才能读到 cookie
  */
 
-import { createClient } from '@supabase/supabase-js'
+import { createBrowserClient } from '@supabase/ssr'
 import type { Database } from './types'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 if (!supabaseUrl || !supabaseAnonKey) {
- console.warn('[Supabase] 环境变量未配置，Supabase 功能将不可用')
+	console.warn('[Supabase] 环境变量未配置，Supabase 功能将不可用')
 }
 
-export const supabase = createClient<Database>(
- supabaseUrl || '',
- supabaseAnonKey || '',
- {
-  auth: {
-   autoRefreshToken: true,
-   persistSession: true,
-   detectSessionInUrl: true,
-  },
- }
+/**
+ * 从 document.cookie 解析所有 cookie
+ */
+function parseCookies() {
+	if (typeof window === 'undefined') return []
+	return document.cookie
+		.split(';')
+		.map(c => c.trim())
+		.filter(c => c.includes('='))
+		.map(c => {
+			const [name, ...valueParts] = c.split('=')
+			return { name: name.trim(), value: valueParts.join('=').trim() }
+		})
+}
+
+export const supabase = createBrowserClient<Database>(
+	supabaseUrl || '',
+	supabaseAnonKey || '',
+	{
+		cookies: {
+			getAll() {
+				return parseCookies()
+			},
+			setAll(cookiesToSet) {
+				if (typeof window === 'undefined') return
+				cookiesToSet.forEach(({ name, value, options }) => {
+					let cookieString = `${name}=${value}`
+					if (options?.path) cookieString += `; path=${options.path}`
+					if (options?.maxAge) cookieString += `; max-age=${options.maxAge}`
+					if (options?.sameSite) cookieString += `; SameSite=${options.sameSite}`
+					if (options?.secure) cookieString += '; secure'
+					document.cookie = cookieString
+				})
+			},
+		},
+	}
 )
 
 /**
  * 检查 Supabase 是否可用
  */
 export const isSupabaseAvailable = (): boolean => {
- return !!(supabaseUrl && supabaseAnonKey)
+	return !!(supabaseUrl && supabaseAnonKey)
 }
 
 /**
  * 获取当前用户
  */
 export const getCurrentUser = async () => {
- const { data: { user } } = await supabase.auth.getUser()
- return user
+	const { data: { user } } = await supabase.auth.getUser()
+	return user
 }
 
 /**
  * 检查是否已登录
  */
 export const isAuthenticated = async (): Promise<boolean> => {
- const { data: { session } } = await supabase.auth.getSession()
- return !!session
+	const { data: { session } } = await supabase.auth.getSession()
+	return !!session
 }
 
 /**
  * 获取头像的公开 URL
  */
 export function getAvatarUrl(avatarName: string | null): string | null {
- if (!avatarName) return null
- return `${supabaseUrl}/storage/v1/object/public/nebula-hub-avatars/${avatarName}`
+	if (!avatarName) return null
+	return `${supabaseUrl}/storage/v1/object/public/nebula-hub-avatars/${avatarName}`
 }
 
 /**
@@ -62,29 +90,28 @@ export function getAvatarUrl(avatarName: string | null): string | null {
  * @deprecated 已废弃，请使用 src/lib/api/modules/file.ts 中的 uploadAvatar 函数
  */
 export async function uploadAvatar(file: File, userId: string): Promise<{ path: string; url: string }> {
- const fileExt = file.name.split('.').pop() || 'jpg'
- const fileName = `${userId}_${Date.now()}.${fileExt}`
- const filePath = `${fileName}`
+	const fileExt = file.name.split('.').pop() || 'jpg'
+	const fileName = `${userId}_${Date.now()}.${fileExt}`
+	const filePath = `${fileName}`
 
- const { data, error } = await supabase.storage
-  .from('nebula-hub-avatars')
-  .upload(filePath, file, {
-   upsert: true,
-  })
+	const { data, error } = await supabase.storage
+		.from('nebula-hub-avatars')
+		.upload(filePath, file, {
+			upsert: true,
+		})
 
- if (error) {
-  throw new Error(`上传失败：${error.message}`)
- }
+	if (error) {
+		throw new Error(`上传失败：${error.message}`)
+	}
 
- // 获取公开 URL
- const { data: urlData } = supabase.storage
-  .from('nebula-hub-avatars')
-  .getPublicUrl(filePath)
+	const { data: urlData } = supabase.storage
+		.from('nebula-hub-avatars')
+		.getPublicUrl(filePath)
 
- return {
-  path: filePath,
-  url: urlData.publicUrl,
- }
+	return {
+		path: filePath,
+		url: urlData.publicUrl,
+	}
 }
 
 /**
@@ -92,11 +119,11 @@ export async function uploadAvatar(file: File, userId: string): Promise<{ path: 
  * @deprecated 已废弃，不再需要手动删除头像
  */
 export async function deleteAvatar(filePath: string): Promise<void> {
- const { error } = await supabase.storage
-  .from('nebula-hub-avatars')
-  .remove([filePath])
+	const { error } = await supabase.storage
+		.from('nebula-hub-avatars')
+		.remove([filePath])
 
- if (error) {
-  console.warn('删除头像失败:', error.message)
- }
+	if (error) {
+		console.warn('删除头像失败:', error.message)
+	}
 }

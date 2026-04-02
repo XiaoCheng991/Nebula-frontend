@@ -41,7 +41,7 @@ function GitHubCallbackContent() {
 
       if (sessionError) {
         console.error("Session error:", sessionError)
-        setError("获取会话失败: " + sessionError.message)
+        setError("获取会话失败：" + sessionError.message)
         setStatus("error")
         return
       }
@@ -53,7 +53,7 @@ function GitHubCallbackContent() {
         if (hash.includes('error=')) {
           const params = new URLSearchParams(hash.substring(1))
           const errorDesc = params.get('error_description') || '未知错误'
-          setError("GitHub 登录失败: " + decodeURIComponent(errorDesc))
+          setError("GitHub 登录失败：" + decodeURIComponent(errorDesc))
           setStatus("error")
           return
         }
@@ -117,9 +117,20 @@ function GitHubCallbackContent() {
     console.log("Login successful, redirecting to dashboard")
     console.log("User info:", userInfo)
 
+    // 获取 redirect 参数
+    let redirectPath = "/dashboard"
+    const hash = window.location.hash
+    if (hash.includes('redirect=')) {
+      const params = new URLSearchParams(hash.substring(1))
+      const redirect = params.get('redirect')
+      if (redirect) {
+        redirectPath = decodeURIComponent(redirect)
+      }
+    }
+
     // 使用 replace 而不是 push，避免回退到回调页面
     setTimeout(() => {
-      router.replace("/dashboard")
+      router.replace(redirectPath)
     }, 1000)
   }
 
