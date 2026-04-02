@@ -184,11 +184,11 @@ export async function getUserList(
  * 支持传入：UUID 类型 user_id、字符串 user_id、或 email
  */
 export async function getUserById(userId: string): Promise<ApiResponse<SysUser>> {
-  // 先尝试作为 UUID 查询
+  // 先尝试作为 number id 查询
   const { data: user, error } = await supabase
     .from('sys_users')
     .select('*')
-    .eq('id', userId)
+    .eq('id', parseInt(userId, 10))
     .maybeSingle()
 
   if (error) {
@@ -197,7 +197,7 @@ export async function getUserById(userId: string): Promise<ApiResponse<SysUser>>
   }
 
   if (user) {
-    return buildResponse(user as SysUser)
+    return buildResponse(user as unknown as SysUser)
   }
 
   // 如果 UUID 查询失败，尝试作为邮箱查询
@@ -212,21 +212,22 @@ export async function getUserById(userId: string): Promise<ApiResponse<SysUser>>
       return buildResponse(null as any, 404, '用户不存在')
     }
 
-    return buildResponse(userByEmail as SysUser)
+    return buildResponse(userByEmail as unknown as SysUser)
   }
 
   return buildResponse(null as any, 404, '用户不存在')
 }
 
 /**
- * 辅助函数：通过 UUID 或 email 获取用户的 UUID
+ * 辅助函数：通过 id 或 email 获取用户的 id（返回 number）
  */
-async function getUserIdAsUuid(userId: string): Promise<string | null> {
-  // 先尝试直接作为 UUID 查询
+async function getUserIdAsNumber(userId: string): Promise<number | null> {
+  // 先尝试直接作为 number id 查询
+  const numId = parseInt(userId, 10)
   const { data: user } = await supabase
     .from('sys_users')
     .select('id')
-    .eq('id', userId)
+    .eq('id', numId)
     .maybeSingle()
 
   if (user) {
@@ -251,14 +252,17 @@ async function getUserIdAsUuid(userId: string): Promise<string | null> {
  * 获取用户的角色 ID 列表
  * 支持传入：UUID 类型 user_id、字符串 user_id、或 email
  */
-export async function getUserRoleIds(userId: string): Promise<ApiResponse<string[]>> {
-  // 直接作为 UUID 使用
-  const userUuid = userId
+export async function getUserRoleIds(userId: string): Promise<ApiResponse<number[]>> {
+  const userNumId = await getUserIdAsNumber(userId)
+
+  if (!userNumId) {
+    return buildResponse([], 404, '用户不存在')
+  }
 
   const { data: userRoles, error } = await supabase
     .from('sys_user_role')
     .select('role_id')
-    .eq('user_id', userUuid)
+    .eq('user_id', userNumId)
 
   if (error) {
     return buildResponse([], 500, '获取用户角色失败')
@@ -295,7 +299,7 @@ export async function updateUser(user: Partial<SysUser>): Promise<ApiResponse<vo
   const { error } = await supabase
     .from('sys_users')
     .update(updateData)
-    .eq('id', user.id)
+    .eq('id', parseInt(user.id, 10))
 
   if (error) {
     return buildResponse(undefined, 500, '更新用户失败')
@@ -309,16 +313,16 @@ export async function updateUser(user: Partial<SysUser>): Promise<ApiResponse<vo
  * 支持传入：UUID 类型 user_id、字符串 user_id、或 email
  */
 export async function updateUserStatus(userId: string, status: number): Promise<ApiResponse<void>> {
-  const userUuid = await getUserIdAsUuid(userId)
+  const userIdNum = await getUserIdAsNumber(userId)
 
-  if (!userUuid) {
+  if (!userIdNum) {
     return buildResponse(undefined, 404, '用户不存在')
   }
 
   const { error } = await supabase
     .from('sys_users')
     .update({ account_status: status })
-    .eq('id', userUuid)
+    .eq('id', userIdNum)
 
   if (error) {
     return buildResponse(undefined, 500, '更新用户状态失败')
@@ -331,21 +335,24 @@ export async function updateUserStatus(userId: string, status: number): Promise<
  * 分配角色给用户
  * 支持传入：UUID 类型 user_id、字符串 user_id、或 email
  */
-export async function assignRolesToUser(userId: string, roleIds: string[]): Promise<ApiResponse<void>> {
-  const userUuid = userId
+export async function assignRolesToUser(userId: string, roleIds: number[]): Promise<ApiResponse<void>> {
+  const userIdNum = await getUserIdAsNumber(userId)
+
+  if (!userIdNum) {
+    return buildResponse(undefined, 404, '用户不存在')
+  }
 
   // 先删除原有角色
   await supabase
     .from('sys_user_role')
     .delete()
-    .eq('user_id', userUuid)
+    .eq('user_id', userIdNum)
 
   // 插入新角色
   if (roleIds.length > 0) {
     const userRoles = roleIds.map(roleId => ({
-      user_id: userUuid,
+      user_id: userIdNum,
       role_id: roleId,
-      created_at: new Date().toISOString(),
     }))
 
     const { error } = await supabase
@@ -365,16 +372,16 @@ export async function assignRolesToUser(userId: string, roleIds: string[]): Prom
  * 支持传入：UUID 类型 user_id、字符串 user_id、或 email
  */
 export async function deleteUser(userId: string): Promise<ApiResponse<void>> {
-  const userUuid = await getUserIdAsUuid(userId)
+  const userIdNum = await getUserIdAsNumber(userId)
 
-  if (!userUuid) {
+  if (!userIdNum) {
     return buildResponse(undefined, 404, '用户不存在')
   }
 
   const { error } = await supabase
     .from('sys_users')
     .delete()
-    .eq('id', userUuid)
+    .eq('id', userIdNum)
 
   if (error) {
     return buildResponse(undefined, 500, '删除用户失败')
@@ -463,10 +470,10 @@ export async function getCurrentUserMenus(): Promise<ApiResponse<SysMenu[]>> {
     return buildResponse([], 500, '获取菜单失败')
   }
 
-  const menuList = (allMenus || []) as SysMenu[]
+  const menuList = (allMenus || []) as unknown as { id: number; parentId: number | null; menuName: string; menuType: string; path?: string; component?: string; permission?: string; icon?: string; sortOrder?: number; isVisible?: boolean; isSystem?: boolean; parentName?: string; children?: any[]; createTime?: string; updateTime?: string }[]
 
   // 6. 构建树形结构
-  function buildTree(parentId: string | null): SysMenu[] {
+  function buildTree(parentId: number | null): typeof menuList {
     return menuList
       .filter(m => m.parentId === parentId || (parentId === null && (m.parentId === null || !m.parentId)))
       .map(m => ({
@@ -475,7 +482,7 @@ export async function getCurrentUserMenus(): Promise<ApiResponse<SysMenu[]>> {
       }))
   }
 
-  return buildResponse(buildTree(null))
+  return buildResponse(buildTree(null) as unknown as SysMenu[])
 }
 
 /**
@@ -493,7 +500,7 @@ export async function getMenuList(): Promise<ApiResponse<SysMenu[]>> {
   }
 
   console.log('获取到的菜单数据:', menus)
-  return buildResponse((menus || []) as SysMenu[])
+  return buildResponse((menus || []) as unknown as SysMenu[])
 }
 
 /**
@@ -512,9 +519,9 @@ export async function getMenuTree(): Promise<ApiResponse<SysMenu[]>> {
 
   console.log('获取到的菜单数据:', menus)
 
-  const menuList = (menus || []) as SysMenu[]
+  const menuList = (menus || []) as unknown as { id: number; parentId: number | null; menuName: string; menuType: string; path?: string; component?: string; permission?: string; icon?: string; sortOrder?: number; isVisible?: boolean; isSystem?: boolean; parentName?: string; children?: any[]; createTime?: string; updateTime?: string }[]
 
-  function buildTree(parentId: string | null): SysMenu[] {
+  function buildTree(parentId: number | null): typeof menuList {
     return menuList
       .filter(m => m.parentId === parentId || (parentId === null && (m.parentId === null || !m.parentId)))
       .map(m => ({
@@ -523,7 +530,7 @@ export async function getMenuTree(): Promise<ApiResponse<SysMenu[]>> {
       }))
   }
 
-  return buildResponse(buildTree(null))
+  return buildResponse(buildTree(null) as unknown as SysMenu[])
 }
 
 // ======== 角色管理 API ========
@@ -544,7 +551,7 @@ export async function getAllRoles(): Promise<ApiResponse<SysRole[]>> {
   }
 
   console.log('获取到的角色数据:', roles)
-  return buildResponse((roles || []) as SysRole[])
+  return buildResponse((roles || []) as unknown as SysRole[])
 }
 
 /**
@@ -571,7 +578,7 @@ export async function getRoleList(
     return buildResponse(null as any, 500, '获取角色列表失败')
   }
 
-  return buildPageResponse((roles || []) as SysRole[], count || 0)
+  return buildPageResponse((roles || []) as unknown as SysRole[], count || 0)
 }
 
 /**
@@ -579,56 +586,28 @@ export async function getRoleList(
  * 支持传入：UUID 类型 user_id、字符串 user_id、或 email
  */
 export async function getRolesByUserId(userId: string | number): Promise<ApiResponse<SysRole[]>> {
-  // 先尝试从 sys_users 表获取用户的 UUID
-  let userUuid: string | null = null
+  let userIdNum: number | null = null
 
-  if (typeof userId === 'string') {
-    // 如果是字符串，先检查是否是 UUID 格式
-    userUuid = userId
+  if (typeof userId === 'number') {
+    userIdNum = userId
   } else {
-    // 如果是 number，先尝试作为 id 查询
-    const { data: sysUser } = await supabase
-      .from('sys_users')
-      .select('id')
-      .eq('id', userId)
-      .maybeSingle()
-
-    if (sysUser) {
-      userUuid = sysUser.id
-    }
+    userIdNum = await getUserIdAsNumber(userId)
   }
 
-  // 如果还是没找到，尝试通过邮箱查询
-  if (!userUuid && typeof userId === 'string' && userId.includes('@')) {
-    const { data: sysUser } = await supabase
-      .from('sys_users')
-      .select('id')
-      .eq('email', userId)
-      .maybeSingle()
-
-    if (sysUser) {
-      userUuid = sysUser.id
-    }
-  }
-
-  if (!userUuid) {
-    console.log('用户不存在，userUuid:', userUuid)
+  if (!userIdNum) {
+    console.log('用户不存在，userIdNum:', userIdNum)
     return buildResponse([], 404, '用户不存在')
   }
-
-  console.log('查询用户角色，userUuid:', userUuid)
 
   const { data: userRoles, error: userRoleError } = await supabase
     .from('sys_user_role')
     .select('role_id')
-    .eq('user_id', userUuid)
+    .eq('user_id', userIdNum)
 
   if (userRoleError) {
     console.error('获取用户角色失败:', userRoleError)
     return buildResponse([], 500, '获取用户角色失败')
   }
-
-  console.log('用户角色关联数据:', userRoles)
 
   const roleIds = userRoles?.map(ur => ur.role_id) || []
 
@@ -636,8 +615,6 @@ export async function getRolesByUserId(userId: string | number): Promise<ApiResp
     console.log('用户没有角色关联')
     return buildResponse([])
   }
-
-  console.log('角色 ID 列表:', roleIds)
 
   const { data: roles, error: roleError } = await supabase
     .from('sys_role')
@@ -649,8 +626,7 @@ export async function getRolesByUserId(userId: string | number): Promise<ApiResp
     return buildResponse([], 500, '获取角色详情失败')
   }
 
-  console.log('获取到的角色数据:', roles)
-  return buildResponse((roles || []) as SysRole[])
+  return buildResponse((roles || []) as unknown as SysRole[])
 }
 
 // ======== 字典类型管理 API ========
@@ -693,7 +669,7 @@ export async function getDictTypeList(
     return buildResponse(null as any, 500, '获取字典类型列表失败')
   }
 
-  return buildPageResponse((dictTypes || []) as SysDictType[], count || 0)
+  return buildPageResponse((dictTypes || []) as unknown as SysDictType[], count || 0)
 }
 
 /**
@@ -710,7 +686,7 @@ export async function getAllDictTypes(): Promise<ApiResponse<SysDictType[]>> {
     return buildResponse([], 500, '获取字典类型失败')
   }
 
-  return buildResponse((dictTypes || []) as SysDictType[])
+  return buildResponse((dictTypes || []) as unknown as SysDictType[])
 }
 
 /**
@@ -727,7 +703,7 @@ export async function getDictTypeById(dictId: number): Promise<ApiResponse<SysDi
     return buildResponse(null as any, 404, '字典类型不存在')
   }
 
-  return buildResponse(dictType as SysDictType)
+  return buildResponse(dictType as unknown as SysDictType)
 }
 
 /**
@@ -838,7 +814,7 @@ export async function getDictDataList(
     return buildResponse(null as any, 500, '获取字典数据失败')
   }
 
-  return buildPageResponse((dictData || []) as SysDictData[], count || 0)
+  return buildPageResponse((dictData || []) as unknown as SysDictData[], count || 0)
 }
 
 /**
