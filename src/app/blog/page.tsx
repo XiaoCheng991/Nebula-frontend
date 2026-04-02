@@ -14,6 +14,7 @@ import {
   Loader2,
   Mail,
   Link as LinkIcon,
+  Star,
 } from "lucide-react";
 import {
   SiGithub,
@@ -52,6 +53,15 @@ const tags = [
   { name: "极客", count: 6 },
   { name: "生活随笔", count: 15 },
   { name: "碎碎念", count: 10 },
+];
+
+const githubProjects = [
+  { name: "NebulaHub", url: "https://github.com/XiaoCheng991/Nebula-frontend", stars: 1 },
+  { name: "DocsifyBlog", url: "https://github.com/XiaoCheng991/Docsify-blog", stars: 1 },
+  { name: "TinyURL", url: "https://github.com/XiaoCheng991/TinyURL", stars: 0 },
+  { name: "OrangeChain", url: "https://github.com/XiaoCheng991/OrangeChain", stars: 0 },
+  { name: "AgentDashboard", url: "https://github.com/XiaoCheng991/AgentDashboard", stars: 0 },
+  { name: "OrangeClaw", url: "https://github.com/XiaoCheng991/OrangeClaw", stars: 0 }
 ];
 
 const memos = [
@@ -362,6 +372,28 @@ export default function BlogPage() {
                 {tag.name}
               </Badge>
             ))}
+          </div>
+
+          {/* Github 项目链接 */}
+          <div className="flex items-center gap-2 mt-3">
+            <SiGithub size={16} className="text-zinc-500 dark:text-zinc-400 flex-shrink-0" />
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {githubProjects.map((project) => (
+                <a
+                  key={project.name}
+                  href={project.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors border border-zinc-200 dark:border-zinc-700"
+                >
+                  <span>{project.name}</span>
+                  <span className="flex items-center gap-0.5 text-zinc-400">
+                    <Star size={10} />
+                    {project.stars}
+                  </span>
+                </a>
+              ))}
+            </div>
           </div>
             </CardContent>
           </Card>

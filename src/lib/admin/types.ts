@@ -156,7 +156,7 @@ export function transformSysUserToAdminUser(backendUser: BackendSysUser): AdminU
  */
 export function transformSysRoleToAdminRole(backendRole: BackendSysRole): AdminRole {
   return {
-    id: backendRole.id,
+    id: typeof backendRole.id === 'string' ? parseInt(backendRole.id, 10) : backendRole.id,
     name: backendRole.roleName,
     code: backendRole.roleCode,
     description: backendRole.description,

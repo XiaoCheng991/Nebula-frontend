@@ -11,10 +11,10 @@ export default function DashboardPage() {
   const { user } = useUser()
 
   const stats = [
-    { title: "总用户数", value: "1,234", change: "+12%", icon: Users, color: "orange" },
-    { title: "活跃会话", value: "56", change: "+5%", icon: Activity, color: "amber" },
-    { title: "消息总数", value: "2,458", change: "+18%", icon: MessageCircle, color: "yellow" },
-    { title: "文件数量", value: "342", change: "+8%", icon: FileText, color: "orange" },
+    { title: "总用户数", value: "1,234", change: "+12%", icon: Users },
+    { title: "活跃会话", value: "56", change: "+5%", icon: Activity },
+    { title: "消息总数", value: "2,458", change: "+18%", icon: MessageCircle },
+    { title: "文件数量", value: "342", change: "+8%", icon: FileText },
   ]
 
   const recentActivity = [
@@ -25,41 +25,28 @@ export default function DashboardPage() {
   ]
 
   const quickActions = [
-    { icon: MessageCircle, label: "消息", color: "orange" },
-    { icon: FileText, label: "文件", color: "amber" },
-    { icon: Users, label: "团队", color: "yellow" },
-    { icon: CheckCircle, label: "任务", color: "orange" },
+    { icon: MessageCircle, label: "消息" },
+    { icon: FileText, label: "文件" },
+    { icon: Users, label: "团队" },
+    { icon: CheckCircle, label: "任务" },
   ]
 
   return (
     <ProtectedRoute>
       <LayoutWithFullWidth>
-        <div className="min-h-screen bg-[#0a0a0a]">
-          <style jsx global>{`
-            :root {
-              --bg: #0a0a0a;
-              --card: #141414;
-              --border: #222;
-              --text: #e5e5e5;
-              --text2: #999;
-              --text3: #666;
-              --accent: #3b82f6;
-              --accent2: #60a5fa;
-            }
-          `}</style>
-
+        <div className="min-h-screen bg-background">
           <div className="max-w-[1400px] mx-auto px-6 py-12 space-y-12">
             {/* Page Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <h1 className="text-[32px] font-bold text-white tracking-tight mb-2">仪表盘</h1>
-                <p className="text-[#999] text-[15px]">
+                <h1 className="text-[32px] font-bold text-foreground tracking-tight mb-2">仪表盘</h1>
+                <p className="text-muted-foreground text-[15px]">
                   欢迎回来，{user?.nickname || user?.username}
                 </p>
               </div>
-              <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-[#222] bg-[#141414]">
+              <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg border bg-card">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                <span className="text-[13px] text-[#999] font-medium">系统运行正常</span>
+                <span className="text-[13px] text-muted-foreground font-medium">系统运行正常</span>
               </div>
             </div>
 
@@ -68,19 +55,19 @@ export default function DashboardPage() {
               {stats.map((stat, index) => (
                 <div
                   key={index}
-                  className="group relative bg-[#141414] border border-[#222] rounded-2xl p-6 transition-all duration-300 hover:border-[#3b82f6]/50"
+                  className="group relative bg-card border rounded-2xl p-6 transition-all duration-300 hover:border-primary/50"
                 >
                   <div className="flex items-start justify-between mb-4">
-                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br from-${stat.color}-500/10 to-${stat.color}-600/10 flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                      <stat.icon className={`h-5 w-5 text-${stat.color}-500`} />
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <stat.icon className="h-5 w-5 text-primary" />
                     </div>
-                    <div className="flex items-center gap-1 text-green-400">
+                    <div className="flex items-center gap-1 text-green-500">
                       <TrendingUp className="h-3 w-3" />
                       <span className="text-[12px] font-medium">{stat.change}</span>
                     </div>
                   </div>
-                  <p className="text-[13px] text-[#666] mb-1">{stat.title}</p>
-                  <p className="text-[28px] font-bold text-white">{stat.value}</p>
+                  <p className="text-[13px] text-muted-foreground mb-1">{stat.title}</p>
+                  <p className="text-[28px] font-bold text-foreground">{stat.value}</p>
                 </div>
               ))}
             </div>
@@ -88,44 +75,44 @@ export default function DashboardPage() {
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Recent Activity */}
-              <div className="bg-[#141414] border border-[#222] rounded-2xl p-6">
+              <div className="bg-card border rounded-2xl p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-[15px] font-semibold text-white">最近活动</h3>
-                  <span className="text-[11px] px-2 py-1 rounded-full bg-[#3b82f6]/10 text-[#3b82f6]">实时</span>
+                  <h3 className="text-[15px] font-semibold text-foreground">最近活动</h3>
+                  <span className="text-[11px] px-2 py-1 rounded-full bg-primary/10 text-primary">实时</span>
                 </div>
                 <div className="space-y-3">
                   {recentActivity.map((activity) => (
                     <div
                       key={activity.id}
-                      className="flex items-center gap-4 p-3.5 rounded-xl hover:bg-[#1a1a1a] transition-colors cursor-pointer"
+                      className="flex items-center gap-4 p-3.5 rounded-xl hover:bg-accent transition-colors cursor-pointer"
                     >
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#3b82f6]/20 to-[#60a5fa]/20 flex items-center justify-center">
-                        <span className="text-[13px] font-medium text-[#60a5fa]">{activity.initial}</span>
+                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                        <span className="text-[13px] font-medium text-primary">{activity.initial}</span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[14px] text-[#e5e5e5] font-medium">{activity.user}</p>
-                        <p className="text-[13px] text-[#666]">{activity.action}</p>
+                        <p className="text-[14px] text-foreground font-medium">{activity.user}</p>
+                        <p className="text-[13px] text-muted-foreground">{activity.action}</p>
                       </div>
-                      <span className="text-[12px] text-[#666]">{activity.time}</span>
+                      <span className="text-[12px] text-muted-foreground">{activity.time}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Quick Actions */}
-              <div className="bg-[#141414] border border-[#222] rounded-2xl p-6">
-                <h3 className="text-[15px] font-semibold text-white mb-6">快捷操作</h3>
+              <div className="bg-card border rounded-2xl p-6">
+                <h3 className="text-[15px] font-semibold text-foreground mb-6">快捷操作</h3>
                 <div className="grid grid-cols-2 gap-3">
                   {quickActions.map((action, index) => (
                     <Button
                       key={index}
                       variant="outline"
-                      className="h-20 flex-col items-center justify-center gap-2.5 rounded-xl border-[#222] bg-[#0a0a0a] hover:bg-[#1a1a1a] hover:border-[#3b82f6]/50 transition-all group"
+                      className="h-20 flex-col items-center justify-center gap-2.5 rounded-xl hover:border-primary/50 hover:bg-accent transition-all group"
                     >
-                      <div className={`w-9 h-9 rounded-lg bg-${action.color}-500/10 flex items-center justify-center group-hover:bg-[#3b82f6] transition-colors`}>
-                        <action.icon className={`h-4 w-4 text-${action.color}-500 group-hover:text-white transition-colors`} />
+                      <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary transition-colors">
+                        <action.icon className="h-4 w-4 text-primary group-hover:text-primary-foreground transition-colors" />
                       </div>
-                      <span className="text-[13px] text-[#999] group-hover:text-[#e5e5e5] transition-colors">{action.label}</span>
+                      <span className="text-[13px] text-muted-foreground group-hover:text-foreground transition-colors">{action.label}</span>
                     </Button>
                   ))}
                 </div>
@@ -133,19 +120,19 @@ export default function DashboardPage() {
             </div>
 
             {/* Welcome Card */}
-            <div className="relative bg-gradient-to-r from-[#141414] to-[#1a1a1a] border border-[#222] rounded-2xl p-8 overflow-hidden">
-              <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-gradient-to-br from-[#3b82f6]/5 to-transparent rounded-full pointer-events-none" />
+            <div className="relative bg-gradient-to-r from-primary/5 to-accent border rounded-2xl p-8 overflow-hidden">
+              <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/5 rounded-full pointer-events-none" />
               <div className="relative flex flex-col md:flex-row items-start md:items-center gap-6">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#3b82f6]/20 to-[#60a5fa]/20 flex items-center justify-center flex-shrink-0">
-                  <Sparkles className="h-7 w-7 text-[#3b82f6]" />
+                <div className="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center flex-shrink-0">
+                  <Sparkles className="h-7 w-7 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-[18px] font-semibold text-white mb-2">欢迎来到 NebulaHub</h3>
-                  <p className="text-[14px] text-[#999] max-w-[500px]">
+                  <h3 className="text-[18px] font-semibold text-foreground mb-2">欢迎来到 NebulaHub</h3>
+                  <p className="text-[14px] text-muted-foreground max-w-[500px]">
                     您的应用程序仪表盘已准备就绪。从左侧导航栏访问各种功能，开启您的私密交流之旅。
                   </p>
                 </div>
-                <Button className="bg-[#3b82f6] hover:bg-[#2563eb] text-white rounded-xl px-6 h-11">
+                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl px-6 h-11">
                   开始探索
                 </Button>
               </div>
