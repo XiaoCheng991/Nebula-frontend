@@ -11,7 +11,7 @@ export default function LayoutWithFullWidth({ children }: LayoutWithFullWidthPro
     <div className="flex-1 flex flex-col">
       {/* Main content - full width, below header */}
       <main className="flex-1 transition-all duration-300">
-        <div className="container mx-auto px-6 py-6">
+        <div className="container mx-auto px-6 pt-24 pb-6">
           {children}
         </div>
       </main>

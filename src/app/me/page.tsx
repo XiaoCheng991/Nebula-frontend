@@ -184,9 +184,9 @@ export default function MePage() {
         }
       `}</style>
 
-      <div className="max-w-[900px] mx-auto px-6 py-20">
+      <div className="max-w-[900px] mx-auto px-6 pt-14 pb-20">
         {/* Hero Section */}
-        <section className="min-h-[100vh] flex flex-col justify-center relative -mt-32">
+        <section className="min-h-[90vh] flex flex-col justify-center relative">
           <div
             className="absolute top-[-200px] right-[-200px] w-[500px] h-[500px] bg-[radial-gradient(circle,rgba(59,130,246,0.08)_0%,transparent_70%)] pointer-events-none"
           />

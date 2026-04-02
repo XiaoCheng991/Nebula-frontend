@@ -80,8 +80,8 @@ export default function LoginPage() {
           }}
         />
 
-        {/* 右侧深色面板 - 让表单区域更清晰 */}
-        <div className="absolute top-0 right-0 h-full w-[320px] bg-gradient-to-l from-black/80 via-black/40 to-transparent" />
+        {/* 右侧面板 - 深色半透明 */}
+        <div className="absolute top-0 right-0 h-full w-[320px] bg-gradient-to-l from-zinc-900/85 via-zinc-900/45 to-transparent" />
 
         {/* 表单区域 - 靠右固定位置，垂直水平居中 */}
         <div className="absolute top-1/2 right-16 -translate-y-1/2 z-10">

@@ -55,14 +55,20 @@ const tags = [
   { name: "碎碎念", count: 10 },
 ];
 
+const GITHUB_OWNER = "XiaoCheng991";
+
 const githubProjects = [
-  { name: "NebulaHub", url: "https://github.com/XiaoCheng991/Nebula-frontend", stars: 1 },
-  { name: "DocsifyBlog", url: "https://github.com/XiaoCheng991/Docsify-blog", stars: 1 },
-  { name: "TinyURL", url: "https://github.com/XiaoCheng991/TinyURL", stars: 0 },
-  { name: "OrangeChain", url: "https://github.com/XiaoCheng991/OrangeChain", stars: 0 },
-  { name: "AgentDashboard", url: "https://github.com/XiaoCheng991/AgentDashboard", stars: 0 },
-  { name: "OrangeClaw", url: "https://github.com/XiaoCheng991/OrangeClaw", stars: 0 }
+  { name: "NebulaHub", url: "https://github.com/XiaoCheng991/Nebula-frontend" },
+  { name: "DocsifyBlog", url: "https://github.com/XiaoCheng991/Docsify-blog" },
+  { name: "TinyURL", url: "https://github.com/XiaoCheng991/TinyURL" },
+  { name: "OrangeChain", url: "https://github.com/XiaoCheng991/OrangeChain" },
+  { name: "AgentDashboard", url: "https://github.com/XiaoCheng991/AgentDashboard" },
+  { name: "OrangeClaw", url: "https://github.com/XiaoCheng991/OrangeClaw" }
 ];
+
+function getRepoPath(url: string): string {
+  return url.replace("https://github.com/", "");
+}
 
 const memos = [
   {
@@ -158,11 +164,53 @@ export default function BlogPage() {
   const [originalFile, setOriginalFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [starCounts, setStarCounts] = useState<Record<string, number>>({});
 
   // 标记客户端挂载
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  // 动态获取 GitHub Stars（单次批量请求）
+  useEffect(() => {
+    if (!isMounted) return;
+    const fetchStars = async () => {
+      try {
+        const res = await fetch(
+          `https://api.github.com/users/${GITHUB_OWNER}/repos?per_page=100`
+        );
+        const allRepos: { full_name: string; stargazers_count: number }[] = await res.json();
+        const counts: Record<string, number> = {};
+        for (const project of githubProjects) {
+          const target = getRepoPath(project.url).toLowerCase();
+          const match = allRepos.find(
+            (r) => r.full_name.toLowerCase() === target
+          );
+          counts[project.url] = match?.stargazers_count ?? 0;
+        }
+        setStarCounts(counts);
+      } catch {
+        // fallback: 逐个请求
+        const results = await Promise.allSettled(
+          githubProjects.map(async (project) => {
+            const repo = getRepoPath(project.url);
+            const res = await fetch(`https://api.github.com/repos/${repo}`);
+            if (!res.ok) return -1;
+            const data = await res.json();
+            return data.stargazers_count ?? 0;
+          })
+        );
+        const counts: Record<string, number> = {};
+        githubProjects.forEach((p, i) => {
+          if (results[i].status === "fulfilled" && results[i].value >= 0) {
+            counts[p.url] = results[i].value;
+          }
+        });
+        setStarCounts(counts);
+      }
+    };
+    fetchStars();
+  }, [isMounted]);
 
   // 获取本地用户信息（仅在客户端）
   const localUser = isMounted ? getLocalUserInfo() : null;
@@ -278,7 +326,7 @@ export default function BlogPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-transparent to-zinc-100 dark:from-zinc-950 dark:to-zinc-900">
       {/* 主内容区 */}
-      <main className="max-w-7xl mx-auto px-4 py-8">
+      <main className="max-w-7xl mx-auto px-4 pt-24 pb-8">
         {/* 自我介绍区 */}
         <section className="mb-8">
           <Card className="border-0 bg-white/90 dark:bg-zinc-900/60 backdrop-blur-xl shadow-lg">
@@ -389,7 +437,7 @@ export default function BlogPage() {
                   <span>{project.name}</span>
                   <span className="flex items-center gap-0.5 text-zinc-400">
                     <Star size={10} />
-                    {project.stars}
+                    {starCounts[project.url] ?? "-"}
                   </span>
                 </a>
               ))}

@@ -132,7 +132,7 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
     : 'text-slate-900 dark:text-white';
 
   return (
-    <header className={`w-full ${isAuthPage ? 'absolute' : 'sticky'} top-0 z-50 ${isAuthPage ? 'bg-transparent' : 'transition-all duration-300'} ${className}`} aria-label="站点头部">
+    <header className={`w-full absolute top-0 z-50 ${isAuthPage ? 'bg-transparent' : 'transition-all duration-300'} ${className}`} aria-label="站点头部">
       {/* 背景层 - 根据滚动状态显示不同样式（登录/注册页面始终透明，无任何背景层） */}
       {!isAuthPage && (
         isScrolled ? (
@@ -206,7 +206,7 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
               href="/blog"
               className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group ${navTextClasses}`}
             >
-              <BookOpen className="h-5 w-5 text-orange-500 group-hover:scale-110 transition-transform" />
+              <BookOpen className="h-5 w-5 text-blue-500 group-hover:scale-110 transition-transform" />
               <span className="text-sm font-medium hidden sm:block">博客</span>
             </Link>
 
