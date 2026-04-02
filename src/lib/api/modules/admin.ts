@@ -174,8 +174,8 @@ export async function getUserList(
     return buildResponse(null as any, 500, '获取用户列表失败')
   }
 
-  // 显式类型转换
-  const sysUsers = (users || []) as SysUser[]
+  // 显式类型转换：Supabase 数据先转 unknown 再转 SysUser[]
+  const sysUsers = (users || []) as unknown as SysUser[]
   return buildPageResponse(sysUsers, count || 0)
 }
 
