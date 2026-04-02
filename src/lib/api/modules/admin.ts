@@ -24,7 +24,7 @@ export interface SysUser {
   avatarSize?: number
   bio?: string
   onlineStatus?: string
-  accountStatus: number // 0-禁用，1-启用
+  accountStatus?: number // 0-禁用，1-启用
   lastLoginAt?: string
   lastSeenAt?: string
   createTime?: string
