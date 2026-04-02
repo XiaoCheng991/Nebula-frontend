@@ -173,7 +173,7 @@ export function transformSysRoleToAdminRole(backendRole: BackendSysRole): AdminR
 export function transformSysMenuToAdminMenu(backendMenu: BackendSysMenu): AdminMenu {
   return {
     id: typeof backendMenu.id === 'string' ? parseInt(backendMenu.id, 10) : backendMenu.id,
-    parentId: backendMenu.parentId,
+    parentId: backendMenu.parentId ? (typeof backendMenu.parentId === 'string' ? parseInt(backendMenu.parentId, 10) : backendMenu.parentId) : undefined,
     name: backendMenu.menuName,
     path: backendMenu.path,
     icon: backendMenu.icon,
