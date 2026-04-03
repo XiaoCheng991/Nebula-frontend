@@ -15,6 +15,7 @@ import {
   Mail,
   Link as LinkIcon,
   Star,
+  Plus,
 } from "lucide-react";
 import {
   SiGithub,
@@ -37,6 +38,8 @@ import { supabase } from "@/lib/supabase/client";
 import { uploadAvatar } from "@/lib/api/modules/file";
 import { toast } from "@/components/ui/use-toast";
 import { useAdminStore } from "@/hooks/useAdminStore";
+import { getArticles, getTags as getApiTags } from "@/lib/supabase/modules/blog";
+import { getMemos } from "@/lib/supabase/modules/memo";
 
 const socialLinks = [
   { icon: SiGithub, href: "https://github.com/XiaoCheng991", label: "GitHub" },
@@ -45,14 +48,6 @@ const socialLinks = [
   { icon: SiTiktok, href: "https://www.douyin.com/user/self?from_tab_name=main&showSubTab=compilation&showTab=favorite_collection", label: "抖音" },
   { icon: Mail, href: "mailto:17516476723@163.com", label: "Email" },
   { icon: LinkIcon, href: "https://www.xiaocheng991.site/me", label: "Website" },
-];
-
-const tags = [
-  { name: "全栈开发", count: 12 },
-  { name: "AI/ML", count: 8 },
-  { name: "极客", count: 6 },
-  { name: "生活随笔", count: 15 },
-  { name: "碎碎念", count: 10 },
 ];
 
 const GITHUB_OWNER = "XiaoCheng991";
@@ -70,76 +65,6 @@ function getRepoPath(url: string): string {
   return url.replace("https://github.com/", "");
 }
 
-const memos = [
-  {
-    id: 1,
-    content: "今天终于完成了新项目的架构设计，使用了 Next.js 14 + Spring Boot 的技术栈，感觉性能提升了很多！",
-    time: "2 小时前",
-    likes: 23,
-  },
-  {
-    id: 2,
-    content: "探索了新的 AI 模型，在代码生成方面的表现令人印象深刻。",
-    time: "5 小时前",
-    likes: 45,
-  },
-  {
-    id: 3,
-    content: "周末读了《设计模式》的最新版，发现很多模式在现代框架中已经有了更好的实现方式。",
-    time: "1 天前",
-    likes: 18,
-  },
-  {
-    id: 4,
-    content: "刚完成了一个基于 RAG 的智能问答系统，响应速度和准确率都比预期要好。",
-    time: "2 天前",
-    likes: 67,
-  },
-];
-
-const articles = [
-  {
-    id: 1,
-    title: "Next.js 14 新特性深度解析：Server Actions 与 Partial Prerendering",
-    excerpt: "Next.js 14 带来了许多令人兴奋的新特性，其中 Server Actions 和 Partial Prerendering 是最具革命性的两个功能...",
-    time: "2024-03-20",
-    readTime: "8 分钟",
-    views: 1234,
-  },
-  {
-    id: 2,
-    title: "构建高可用的微服务架构：从单体到分布式的演进之路",
-    excerpt: "随着业务的发展，单体应用逐渐暴露出扩展性差、部署困难等问题。本文将分享我们如何将单体应用逐步演进为微服务架构...",
-    time: "2024-03-18",
-    readTime: "15 分钟",
-    views: 2567,
-  },
-  {
-    id: 3,
-    title: "AI 辅助编程：让 Copilot 成为你的最佳拍档",
-    excerpt: "GitHub Copilot 已经成为许多开发者的得力助手。本文将分享一些实用的技巧，帮助你更好地利用 AI 提升编程效率...",
-    time: "2024-03-15",
-    readTime: "6 分钟",
-    views: 3456,
-  },
-  {
-    id: 4,
-    title: "TypeScript 高级类型技巧：泛型、条件类型与类型推断",
-    excerpt: "TypeScript 的强大之处在于其类型系统。本文将深入探讨一些高级类型技巧，帮助你编写更类型安全的代码...",
-    time: "2024-03-12",
-    readTime: "12 分钟",
-    views: 1890,
-  },
-  {
-    id: 5,
-    title: "周末随笔：编程与生活的平衡之道",
-    excerpt: "作为一名开发者，如何在繁忙的工作和生活中找到平衡？分享一些我的心得和实践经验...",
-    time: "2024-03-10",
-    readTime: "5 分钟",
-    views: 987,
-  },
-];
-
 // 固定的超级管理员信息
 const ADMIN_INFO = {
   username: "XiaoCheng991",
@@ -155,8 +80,25 @@ const AI_ASSISTANT_INFO = {
   avatarUrl: "/avatars/xiaowei.jpg",
 };
 
+function formatTimeAgo(dateStr: string): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  const diffHour = Math.floor(diffMin / 60);
+  const diffDay = Math.floor(diffHour / 24);
+
+  if (diffMin < 60) return `${diffMin} 分钟前`;
+  if (diffHour < 24) return `${diffHour} 小时前`;
+  if (diffDay < 7) return `${diffDay} 天前`;
+  return date.toLocaleDateString("zh-CN");
+}
+
+function formatDateShort(dateStr: string): string {
+  return new Date(dateStr).toLocaleDateString("zh-CN");
+}
+
 export default function BlogPage() {
-  const [activeTab, setActiveTab] = useState<"memos" | "articles">("articles");
   const { user, loading: userLoading } = useUser();
   const { hasAdminAccess, loadAdminData } = useAdminStore();
   const [showCropDialog, setShowCropDialog] = useState(false);
@@ -165,13 +107,32 @@ export default function BlogPage() {
   const [uploading, setUploading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [starCounts, setStarCounts] = useState<Record<string, number>>({});
+  const [memos, setMemos] = useState<any[]>([]);
+  const [articles, setArticles] = useState<any[]>([]);
+  const [tags, setTags] = useState<any[]>([]);
+  const [dataLoading, setDataLoading] = useState(true);
 
-  // 标记客户端挂载
   useEffect(() => {
     setIsMounted(true);
+
+    (async () => {
+      try {
+        const [memosRes, articlesRes, tagsRes] = await Promise.allSettled([
+          getMemos({ page: 1, pageSize: 4, visibility: "PUBLIC" }),
+          getArticles({ page: 1, pageSize: 10, orderBy: "create_time" }),
+          getApiTags(),
+        ]);
+
+        if (memosRes.status === "fulfilled") setMemos(memosRes.value.data || []);
+        if (articlesRes.status === "fulfilled") setArticles(articlesRes.value.data || []);
+        if (tagsRes.status === "fulfilled") setTags(tagsRes.value.data || []);
+      } finally {
+        setDataLoading(false);
+      }
+    })();
   }, []);
 
-  // 动态获取 GitHub Stars（单次批量请求）
+  // 动态获取 GitHub Stars（单次批请求）
   useEffect(() => {
     if (!isMounted) return;
     const fetchStars = async () => {
@@ -229,43 +190,25 @@ export default function BlogPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // 验证文件类型
     if (!file.type.startsWith('image/')) {
-      toast({
-        title: "文件类型错误",
-        description: "请上传图片文件",
-        variant: "destructive",
-      });
+      toast({ title: "文件类型错误", description: "请上传图片文件", variant: "destructive" });
       return;
     }
-
-    // 验证文件大小（10MB）
     if (file.size > 10 * 1024 * 1024) {
-      toast({
-        title: "文件过大",
-        description: "图片大小不能超过 10MB",
-        variant: "destructive",
-      });
+      toast({ title: "文件过大", description: "图片大小不能超过 10MB", variant: "destructive" });
       return;
     }
 
-    // 保存文件并显示裁剪对话框
     setOriginalFile(file);
     const imageUrl = URL.createObjectURL(file);
     setSelectedImage(imageUrl);
     setShowCropDialog(true);
-
-    // 清空 input
     e.target.value = '';
   };
 
   const handleCropComplete = async (croppedImageBlob: Blob) => {
     if (!userId) {
-      toast({
-        title: "错误",
-        description: "请先登录",
-        variant: "destructive",
-      });
+      toast({ title: '误', description: "请先登录", variant: "destructive" });
       setShowCropDialog(false);
       return;
     }
@@ -274,23 +217,14 @@ export default function BlogPage() {
     setShowCropDialog(false);
 
     try {
-      // 将 Blob 转换为 File 对象
-      const file = new File([croppedImageBlob], `avatar_${Date.now()}.jpg`, {
-        type: 'image/jpeg',
-      });
+      const file = new File([croppedImageBlob], `avatar_${Date.now()}.jpg`, { type: 'image/jpeg' });
+      const publicUrl = await uploadAvatar(file);
 
-    const publicUrl = await uploadAvatar(file);
-
-
-    // 更新 Supabase 用户信息
       const { data: { user: supabaseUser } } = await supabase.auth.getUser();
       if (supabaseUser) {
-        await supabase.auth.updateUser({
-          data: { avatar_url: publicUrl }
-        });
+        await supabase.auth.updateUser({ data: { avatar_url: publicUrl } });
       }
 
-      // 更新本地存储
       if (localUser) {
         localStorage.setItem('userInfo', JSON.stringify({
           ...localUser,
@@ -299,20 +233,11 @@ export default function BlogPage() {
         }));
       }
 
-      // 触发刷新
       window.dispatchEvent(new Event('auth-change'));
-
-      toast({
-        title: "上传成功",
-        description: "头像已更新",
-      });
+      toast({ title: "上传成功", description: "头像已更新" });
     } catch (error: any) {
       console.error('Avatar upload error:', error);
-      toast({
-        title: "上传失败",
-        description: error.message || "无法上传头像",
-        variant: "destructive",
-      });
+      toast({ title: "上传失败", description: error.message || "无法上传头像", variant: "destructive" });
     } finally {
       setUploading(false);
       if (selectedImage) {
@@ -322,6 +247,36 @@ export default function BlogPage() {
       setOriginalFile(null);
     }
   };
+
+  const handleWriteBlog = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!userId) {
+      toast({
+        title: "未登录",
+        description: "请先登录后再发布博客",
+        variant: "destructive",
+      });
+      return;
+    }
+    window.location.href = "/admin/blog/posts/edit";
+  };
+
+  const handleWriteMemo = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!userId) {
+      toast({
+        title: "未登录",
+        description: "请先登录后再发布动态",
+        variant: "destructive",
+      });
+      return;
+    }
+  };
+
+  // 三列分配：Latest / 我的文章 / OpenClaw的文章
+  const latestArticle = articles[0] || null;
+  const myArticles = articles.filter((a) => a.author_name === userNickname);
+  const aiArticles = articles.filter((a) => a.author_name === AI_ASSISTANT_INFO.name);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-transparent to-zinc-100 dark:from-zinc-950 dark:to-zinc-900">
@@ -334,7 +289,6 @@ export default function BlogPage() {
           <div className="flex items-center justify-between gap-6">
             {/* 左侧：用户信息 */}
             <div className="flex items-center gap-6">
-              {/* 超级管理员 XiaoCheng991 */}
               <div className="flex items-center gap-4">
                 <div className="relative">
                   <UserAvatar
@@ -369,10 +323,8 @@ export default function BlogPage() {
                 </div>
               </div>
 
-              {/* 分隔竖线 */}
               <div className="h-10 w-px bg-zinc-200 dark:bg-zinc-700" />
 
-              {/* AI 助手 小薇 */}
               <div className="flex items-center gap-3">
                 <UserAvatar
                   avatarUrl={AI_ASSISTANT_INFO.avatarUrl}
@@ -391,7 +343,6 @@ export default function BlogPage() {
               </div>
             </div>
 
-            {/* 右侧：社交链接 */}
             <div className="flex items-center gap-1">
               {socialLinks.map((social, index) => (
                 <a
@@ -408,21 +359,19 @@ export default function BlogPage() {
             </div>
           </div>
 
-          {/* 标签：放在用户信息下方 */}
           <div className="flex items-center gap-1.5 mt-4">
             <span className="text-[14px] font-medium text-zinc-500 dark:text-zinc-400">标签</span>
-            {tags.slice(0, 4).map((tag, index) => (
+            {tags.slice(0, 4).map((tag) => (
               <Badge
-                key={index}
+                key={tag.id}
                 variant="secondary"
                 className="px-2.5 py-1 text-xs font-medium cursor-pointer hover:opacity-80 transition-opacity bg-zinc-200/80 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 border-0"
               >
-                {tag.name}
+                {tag.tag_name}
               </Badge>
             ))}
           </div>
 
-          {/* Github 项目链接 */}
           <div className="flex items-center gap-2 mt-3">
             <SiGithub size={16} className="text-zinc-500 dark:text-zinc-400 flex-shrink-0" />
             <div className="flex items-center gap-1.5 flex-wrap">
@@ -447,7 +396,6 @@ export default function BlogPage() {
           </Card>
         </section>
 
-
         {/* Memo 横向滚动区 */}
         <section className="mb-8">
           <div className="flex items-center justify-between mb-4">
@@ -457,18 +405,30 @@ export default function BlogPage() {
                 <span className="tracking-widest text-xs">MEMO</span>
               </span>
             </div>
-            <Link
-              href="/memos"
-              className="text-xs text-zinc-400 hover:text-primary transition-colors flex items-center gap-1"
-            >
-              查看全部
-              <ArrowRight className="h-3 w-3" />
-            </Link>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleWriteMemo}
+                className="group flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium text-zinc-600 dark:text-zinc-300 bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-700 rounded-full border border-zinc-200 dark:border-zinc-700 shadow-sm hover:shadow transition-all cursor-pointer"
+              >
+                <MessageSquare className="h-3 w-3 group-hover:text-primary transition-colors" />
+                写动态
+              </button>
+              <Link
+                href="/memos"
+                className="text-xs text-zinc-400 hover:text-primary transition-colors flex items-center gap-1"
+              >
+                查看全部
+                <ArrowRight className="h-3 w-3" />
+              </Link>
+            </div>
           </div>
 
           <ScrollArea className="w-full">
             <div className="flex gap-3 pb-4">
-              {memos.map((memo) => (
+              {memos.length === 0 ? (
+                <p className="text-xs text-zinc-400">暂无动态</p>
+              ) : memos.map((memo) => (
                 <a
                   key={memo.id}
                   href={`/memo/${memo.id}`}
@@ -482,15 +442,15 @@ export default function BlogPage() {
                     </div>
                     <div className="flex items-center gap-2 mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-700">
                       <img
-                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userNickname}`}
-                        alt={userNickname}
+                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${memo.nickname || memo.username || 'default'}`}
+                        alt={memo.nickname || memo.username || '用户'}
                         className="w-5 h-5 rounded-full"
                       />
                       <div className="flex items-center gap-2 text-xs">
                         <span className="font-medium text-zinc-700 dark:text-zinc-300">
-                          {userNickname}
+                          {memo.nickname || memo.username || '用户'}
                         </span>
-                        <span className="text-zinc-400">{memo.time}</span>
+                        <span className="text-zinc-400">{formatTimeAgo(memo.create_time)}</span>
                       </div>
                     </div>
                   </div>
@@ -500,71 +460,153 @@ export default function BlogPage() {
           </ScrollArea>
         </section>
 
-        {/* 文章列表区 */}
+        {/* 博客列表区 - 三列布局 */}
         <section>
-          {/* 标签切换 */}
-          <div className="flex items-center gap-2 mb-4">
-            <Button
-              variant={activeTab === "articles" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setActiveTab("articles")}
-              className="gap-1"
-            >
-              <BookOpen className="h-3.5 w-3.5" />
-              文章
-            </Button>
-            <Button
-              variant={activeTab === "memos" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setActiveTab("memos")}
-              className="gap-1"
-            >
-              <MessageSquare className="h-3.5 w-3.5" />
-              动态
-            </Button>
-          </div>
-
-          <div className="space-y-2">
-            {articles.map((article) => (
-              <a
-                key={article.id}
-                href={`/blog/${article.id}`}
-                className="group flex items-start justify-between gap-4 py-4 border-b border-zinc-200 dark:border-zinc-800 hover:border-primary/20 dark:hover:border-primary/30 transition-colors"
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4 text-zinc-400" />
+              <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                Blog
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleWriteBlog}
+                className="group flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium text-zinc-600 dark:text-zinc-300 bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-700 rounded-full border border-zinc-200 dark:border-zinc-700 shadow-sm hover:shadow transition-all cursor-pointer"
               >
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-medium text-zinc-900 dark:text-zinc-100 group-hover:text-primary transition-colors line-clamp-2 mb-1">
-                    {article.title}
-                  </h3>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 mb-2">
-                    {article.excerpt}
-                  </p>
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1.5">
-                      <img
-                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userNickname}`}
-                        alt={userNickname}
-                        className="w-4 h-4 rounded-full"
-                      />
-                      <span className="text-xs text-zinc-500 dark:text-zinc-400">
-                        {userNickname}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Calendar className="h-3 w-3 text-zinc-400" />
-                      <span className="text-xs text-zinc-400">{article.time}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Clock className="h-3 w-3 text-zinc-400" />
-                      <span className="text-xs text-zinc-400">{article.readTime}</span>
-                    </div>
-                  </div>
-                </div>
-                <ArrowRight className="h-4 w-4 text-zinc-300 dark:text-zinc-600 group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0" />
-              </a>
-            ))}
+                <Plus className="h-3 w-3 group-hover:text-primary transition-colors" />
+                写博客
+              </button>
+              <Link
+                href="/blog"
+                className="text-xs text-zinc-400 hover:text-primary transition-colors flex items-center gap-1"
+              >
+                查看全部
+                <ArrowRight className="h-3 w-3" />
+              </Link>
+            </div>
           </div>
 
-          {/* 加载更多 */}
+          {dataLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-5 w-5 animate-spin text-zinc-400 mr-2" />
+              <span className="text-sm text-zinc-400">加载中...</span>
+            </div>
+          ) : articles.length === 0 ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="text-center">
+                <BookOpen className="h-10 w-10 text-zinc-300 dark:text-zinc-600 mx-auto mb-3" />
+                <p className="text-sm text-zinc-400">暂无文章</p>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3">
+              {/* 第一列：Latest (大字首篇 + 其余按时间) */}
+              <div className="md:pr-6 md:border-r border-zinc-200 dark:border-zinc-700 space-y-3">
+                {latestArticle ? (
+                  <>
+                    {/* 第一篇大字 */}
+                    <a
+                      href={`/blog/${latestArticle.slug || latestArticle.id}`}
+                      className="group block rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white/80 dark:bg-zinc-900/60 p-4 hover:border-primary/30 dark:hover:border-primary/40 transition-colors"
+                    >
+                      <div className="flex items-center gap-1 mb-3">
+                        <span className="text-[10px] font-medium text-zinc-400 uppercase tracking-wider">
+                          Latest
+                        </span>
+                        <span className="text-[10px] text-zinc-400">·</span>
+                        <span className="text-[10px] text-zinc-400">
+                          {latestArticle.create_time ? formatDateShort(latestArticle.create_time) : ""}
+                        </span>
+                      </div>
+                      <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 group-hover:text-primary transition-colors leading-snug mb-2">
+                        {latestArticle.title}
+                      </h3>
+                      <p className="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-3 mb-3">
+                        {latestArticle.summary || "暂无摘要"}
+                      </p>
+                      <div className="flex items-center gap-2 text-xs text-zinc-400">
+                        <Clock className="h-3 w-3" />
+                        <span>{latestArticle.view_count || 0} 阅读</span>
+                      </div>
+                    </a>
+                    {/* 其余按时间 */}
+                    {articles.slice(1).map((article) => (
+                      <a
+                        key={article.id}
+                        href={`/blog/${article.slug || article.id}`}
+                        className="group block p-3 rounded-lg border border-zinc-200 dark:border-zinc-700 hover:border-primary/30 dark:hover:border-primary/40 transition-colors bg-white/60 dark:bg-zinc-900/40"
+                      >
+                        <h4 className="text-xs font-medium text-zinc-900 dark:text-zinc-100 group-hover:text-primary transition-colors line-clamp-3 mb-1.5">
+                          {article.title}
+                        </h4>
+                        <div className="flex items-center gap-2 text-[11px] text-zinc-400">
+                          <Calendar className="h-3 w-3" />
+                          <span>{article.create_time ? formatDateShort(article.create_time) : ""}</span>
+                        </div>
+                      </a>
+                    ))}
+                  </>
+                ) : (
+                  <p className="text-xs text-zinc-400 py-4">暂无内容</p>
+                )}
+              </div>
+
+              {/* 第二列：我的文章 */}
+              <div className="md:px-6 md:border-r border-zinc-200 dark:border-zinc-700 space-y-3">
+                {myArticles.length > 0 ? (
+                  myArticles.map((article) => (
+                    <a
+                      key={article.id}
+                      href={`/blog/${article.slug || article.id}`}
+                      className="group block p-3 rounded hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
+                    >
+                      <h4 className="text-xs font-medium text-zinc-900 dark:text-zinc-100 group-hover:text-primary transition-colors line-clamp-3 mb-1.5">
+                        {article.title}
+                      </h4>
+                      <p className="text-[11px] text-zinc-400 line-clamp-2 mb-1.5">
+                        {article.summary || "暂无摘要"}
+                      </p>
+                      <div className="flex items-center gap-2 text-[11px] text-zinc-400">
+                        <Calendar className="h-3 w-3" />
+                        <span>{article.create_time ? formatDateShort(article.create_time) : ""}</span>
+                      </div>
+                    </a>
+                  ))
+                ) : (
+                  <p className="text-xs text-zinc-400 py-4">暂无文章</p>
+                )}
+              </div>
+
+              {/* 第三列：小薇的文章 */}
+              <div className="md:pl-6 space-y-3">
+                {aiArticles.length > 0 ? (
+                  aiArticles.map((article) => (
+                    <a
+                      key={article.id}
+                      href={`/blog/${article.slug || article.id}`}
+                      className="group block p-3 rounded hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
+                    >
+                      <h4 className="text-xs font-medium text-zinc-900 dark:text-zinc-100 group-hover:text-primary transition-colors line-clamp-3 mb-1.5">
+                        {article.title}
+                      </h4>
+                      <p className="text-[11px] text-zinc-400 line-clamp-2 mb-1.5">
+                        {article.summary || "暂无摘要"}
+                      </p>
+                      <div className="flex items-center gap-2 text-[11px] text-zinc-400">
+                        <Calendar className="h-3 w-3" />
+                        <span>{article.create_time ? formatDateShort(article.create_time) : ""}</span>
+                      </div>
+                    </a>
+                  ))
+                ) : (
+                  <p className="text-xs text-zinc-400 py-4">暂无文章</p>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className="mt-8 text-center">
             <Button variant="outline" size="lg" className="gap-2">
               <BookOpen className="h-4 w-4" />
@@ -573,7 +615,6 @@ export default function BlogPage() {
           </div>
         </section>
 
-        {/* 页脚 */}
         <footer className="mt-16 py-8 border-t border-zinc-200 dark:border-zinc-800">
           <div className="text-center">
             <p className="text-xs text-zinc-400 dark:text-zinc-500">

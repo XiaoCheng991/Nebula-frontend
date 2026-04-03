@@ -1116,3 +1116,159 @@ create index idx_im_user_ban_user_id
 create index idx_im_user_ban_active
     on public.im_user_ban (is_active);
 
+
+-- ============================================
+-- NebulaHub Memo 动态表（补充缺失的 3 张表 + 评论审核调整）
+-- ============================================
+
+-- 1. 评论默认状态改为已通过（评论无需审核）
+ALTER TABLE public.blog_comment
+    ALTER COLUMN status SET DEFAULT 'APPROVED';
+
+-- 2. blog_memo 动态表
+CREATE TABLE IF NOT EXISTS public.blog_memo (
+                                                id              bigserial primary key,
+                                                user_id         bigint not null,
+                                                username        varchar(100),
+    nickname        varchar(100),
+    avatar_url      varchar(500),
+    content         text not null,
+    visibility      varchar(20) default 'PUBLIC' check (visibility in ('PUBLIC', 'FRIENDS', 'PRIVATE')),
+    parent_memo_id  bigint  default 0,
+    image_urls      text[],
+    link_url        varchar(500),
+    link_title      varchar(200),
+    link_description text,
+    link_image_url  varchar(500),
+    like_count      bigint  default 0,
+    comment_count   bigint  default 0,
+    is_pinned       boolean default false,
+    create_time     timestamp with time zone default CURRENT_TIMESTAMP not null,
+    update_time     timestamp with time zone default CURRENT_TIMESTAMP not null,
+                                  deleted         integer default 0 not null
+                                  );
+
+comment on table public.blog_memo is 'Memo 动态表';
+comment on column public.blog_memo.user_id is '发布用户ID';
+comment on column public.blog_memo.content is '动态内容';
+comment on column public.blog_memo.visibility is '可见性：PUBLIC-公开，FRIENDS-仅好友，PRIVATE-仅自己';
+comment on column public.blog_memo.parent_memo_id is '父动态ID（0=原创，>0=回复）';
+comment on column public.blog_memo.image_urls is '图片URL数组';
+comment on column public.blog_memo.link_url is '分享链接URL';
+comment on column public.blog_memo.link_title is '链接标题';
+comment on column public.blog_memo.link_description is '链接描述';
+comment on column public.blog_memo.link_image_url is '链接缩略图URL';
+comment on column public.blog_memo.like_count is '点赞数';
+comment on column public.blog_memo.comment_count is '评论数';
+comment on column public.blog_memo.is_pinned is '是否置顶';
+
+create index idx_blog_memo_user        on public.blog_memo (user_id);
+create index idx_blog_memo_create_time on public.blog_memo (create_time desc);
+create index idx_blog_memo_visibility  on public.blog_memo (visibility);
+create index idx_blog_memo_parent      on public.blog_memo (parent_memo_id);
+
+-- 3. blog_memo_comment 动态评论表（无需审核）
+CREATE TABLE IF NOT EXISTS public.blog_memo_comment (
+                                                        id          bigserial primary key,
+                                                        memo_id     bigint not null,
+                                                        user_id     bigint,
+                                                        username    varchar(100),
+    nickname    varchar(100),
+    avatar_url  varchar(500),
+    parent_id   bigint  default 0,
+    content     text    not null,
+    ip_address  varchar(50),
+    location    varchar(200),
+    like_count  bigint  default 0,
+    create_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+    update_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+                              deleted     integer default 0 not null
+                              );
+
+comment on table public.blog_memo_comment is 'Memo 评论表';
+comment on column public.blog_memo_comment.memo_id is 'Memo 动态ID';
+comment on column public.blog_memo_comment.user_id is '评论用户ID';
+comment on column public.blog_memo_comment.parent_id is '父评论ID（0=一级评论，>0=回复）';
+
+create index idx_blog_memo_comment_memo   on public.blog_memo_comment (memo_id);
+create index idx_blog_memo_comment_user   on public.blog_memo_comment (user_id);
+create index idx_blog_memo_comment_create on public.blog_memo_comment (create_time desc);
+create index idx_blog_memo_comment_parent on public.blog_memo_comment (parent_id);
+
+-- 4. blog_memo_like 点赞表（唯一约束防重复）
+CREATE TABLE IF NOT EXISTS public.blog_memo_like (
+                                                     id          bigserial primary key,
+                                                     memo_id     bigint not null,
+                                                     user_id     bigint not null,
+                                                     create_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+                                                     unique (memo_id, user_id)
+    );
+
+comment on table public.blog_memo_like is 'Memo 点赞表';
+
+create index idx_blog_memo_like_memo on public.blog_memo_like (memo_id);
+create index idx_blog_memo_like_user on public.blog_memo_like (user_id);
+
+-- 5. 自动更新 blog_memo.like_count
+CREATE OR REPLACE FUNCTION update_memo_like_count()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+UPDATE public.blog_memo
+SET like_count = like_count + 1, update_time = CURRENT_TIMESTAMP
+WHERE id = NEW.memo_id;
+ELSIF TG_OP = 'DELETE' THEN
+UPDATE public.blog_memo
+SET like_count = GREATEST(like_count - 1, 0), update_time = CURRENT_TIMESTAMP
+WHERE id = OLD.memo_id;
+END IF;
+RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_memo_like_insert ON public.blog_memo_like;
+CREATE TRIGGER trg_memo_like_insert
+    AFTER INSERT ON public.blog_memo_like
+    FOR EACH ROW EXECUTE FUNCTION update_memo_like_count();
+
+DROP TRIGGER IF EXISTS trg_memo_like_delete ON public.blog_memo_like;
+CREATE TRIGGER trg_memo_like_delete
+    AFTER DELETE ON public.blog_memo_like
+    FOR EACH ROW EXECUTE FUNCTION update_memo_like_count();
+
+-- 6. 自动更新 blog_memo.comment_count
+CREATE OR REPLACE FUNCTION update_memo_comment_count()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+UPDATE public.blog_memo
+SET comment_count = comment_count + 1, update_time = CURRENT_TIMESTAMP
+WHERE id = NEW.memo_id;
+ELSIF TG_OP = 'DELETE' THEN
+UPDATE public.blog_memo
+SET comment_count = GREATEST(comment_count - 1, 0), update_time = CURRENT_TIMESTAMP
+WHERE id = OLD.memo_id;
+END IF;
+RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_memo_comment_insert ON public.blog_memo_comment;
+CREATE TRIGGER trg_memo_comment_insert
+    AFTER INSERT ON public.blog_memo_comment
+    FOR EACH ROW EXECUTE FUNCTION update_memo_comment_count();
+
+DROP TRIGGER IF EXISTS trg_memo_comment_delete ON public.blog_memo_comment;
+CREATE TRIGGER trg_memo_comment_delete
+    AFTER DELETE ON public.blog_memo_comment
+    FOR EACH ROW EXECUTE FUNCTION update_memo_comment_count();
+
+-- 验证
+SELECT 'Memo 表创建完成!' AS status;
+SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = 'public'
+  AND table_name IN ('blog_memo', 'blog_memo_comment', 'blog_memo_like')
+ORDER BY table_name;
+
+

@@ -28,12 +28,12 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
   const { user, loading: userLoading } = useUser()
   const { hasAdminAccess, loadAdminData } = useAdminStore()
   const [src, setSrc] = React.useState<string>('/logo_icon.svg');
-  const [isMounted, setIsMounted] = React.useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
 
   // 检查是否在登录/注册页面
   const isAuthPage = pathname === '/login' || pathname === '/register';
+  const [isMounted, setIsMounted] = React.useState(false);
 
   React.useEffect(() => {
     setIsMounted(true);
@@ -56,20 +56,6 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
       loadAdminData().catch(() => {})
     }
   }, [user?.username, userLoading, loadAdminData])
-
-  if (!isMounted) {
-    return (
-      <header className={`w-full sticky top-0 z-50 bg-transparent ${className}`}>
-        <div className="container mx-auto px-6 py-3 grid grid-cols-3 items-center h-16">
-          <div className="flex items-center justify-start">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600" />
-          </div>
-          <div className="flex items-center justify-center" />
-          <div className="flex items-center justify-end gap-2" />
-        </div>
-      </header>
-    );
-  }
 
   const handleError = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const img = e.currentTarget;
@@ -108,6 +94,12 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
     const toggleTheme = () => {
       setTheme(theme === 'dark' ? 'light' : 'dark');
     };
+
+    if (!isMounted) {
+      return (
+        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-transparent" />
+      );
+    }
 
     return (
       <button

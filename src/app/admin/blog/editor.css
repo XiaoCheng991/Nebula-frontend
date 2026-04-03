@@ -1,0 +1,202 @@
+/* Tiptap 编辑器样式 */
+.editor-content .ProseMirror {
+  min-height: 400px;
+  padding: 1rem;
+  outline: none;
+}
+
+.editor-content .ProseMirror:focus {
+  outline: none;
+}
+
+/* 标题样式 */
+.editor-content h1 {
+  font-size: 2em;
+  font-weight: bold;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+  line-height: 1.2;
+}
+
+.editor-content h2 {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+}
+
+.editor-content h3 {
+  font-size: 1.25em;
+  font-weight: bold;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+  line-height: 1.4;
+}
+
+.editor-content h4 {
+  font-size: 1em;
+  font-weight: bold;
+  margin-top: 0.8em;
+  margin-bottom: 0.4em;
+}
+
+.editor-content h5 {
+  font-size: 0.875em;
+  font-weight: bold;
+  margin-top: 0.8em;
+  margin-bottom: 0.4em;
+}
+
+.editor-content h6 {
+  font-size: 0.85em;
+  font-weight: bold;
+  margin-top: 0.8em;
+  margin-bottom: 0.4em;
+}
+
+/* 段落样式 */
+.editor-content p {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  line-height: 1.6;
+}
+
+/* 列表样式 */
+.editor-content ul,
+.editor-content ol {
+  padding-left: 1.5em;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.editor-content li {
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}
+
+/* 引用样式 */
+.editor-content blockquote {
+  border-left: 4px solid #e5e7eb;
+  padding-left: 1em;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  font-style: italic;
+  color: #6b7280;
+}
+
+.dark .editor-content blockquote {
+  border-left-color: #374151;
+  color: #9ca3af;
+}
+
+/* 代码样式 */
+.editor-content code {
+  background-color: #f3f4f6;
+  padding: 0.2em 0.4em;
+  border-radius: 0.25rem;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.9em;
+}
+
+.dark .editor-content code {
+  background-color: #1f2937;
+}
+
+/* 代码块样式 */
+.editor-content pre {
+  background-color: #1f2937;
+  color: #f9fafb;
+  padding: 1em;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+/* 图片样式 */
+.editor-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+/* 表格样式 */
+.editor-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.editor-content th,
+.editor-content td {
+  border: 1px solid #e5e7eb;
+  padding: 0.5em;
+  text-align: left;
+}
+
+.dark .editor-content th,
+.dark .editor-content td {
+  border-color: #374151;
+}
+
+.editor-content th {
+  background-color: #f3f4f6;
+  font-weight: bold;
+}
+
+.dark .editor-content th {
+  background-color: #374151;
+}
+
+/* 分隔线样式 */
+.editor-content hr {
+  border: none;
+  border-top: 2px solid #e5e7eb;
+  margin: 1em 0;
+}
+
+.dark .editor-content hr {
+  border-top-color: #374151;
+}
+
+/* 选中状态 */
+.editor-content .has-focus {
+  background-color: rgba(59, 130, 246, 0.1);
+  border-radius: 0.25rem;
+}
+
+/* 链接样式 */
+.editor-content a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* 删除线 */
+.editor-content s {
+  text-decoration: line-through;
+  color: #6b7280;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .editor-content .ProseMirror {
+    padding: 0.5rem;
+  }
+
+  .editor-content h1 {
+    font-size: 1.5em;
+  }
+
+  .editor-content h2 {
+    font-size: 1.25em;
+  }
+
+  .editor-content h3 {
+    font-size: 1.1em;
+  }
+}
