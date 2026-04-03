@@ -180,28 +180,28 @@ function EditorForm({ onStateChange }: { onStateChange: (state: EditorState) => 
 
   return (
     <div className="flex flex-col">
-      {/* 标题 */}
-      <Input
-        placeholder="文章标题"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        className="text-xl font-semibold bg-transparent border-0 px-0 focus-visible:ring-0 h-auto py-2 placeholder:text-zinc-300 dark:placeholder:text-zinc-600 text-zinc-900 dark:text-zinc-100 rounded-none"
-      />
-      {/* 摘要 */}
-      <Textarea
-        placeholder="文章摘要（可选）"
-        value={excerpt}
-        onChange={(e) => setExcerpt(e.target.value)}
-        rows={1}
-        className="text-sm bg-transparent border-0 px-0 focus-visible:ring-0 resize-none mt-2 min-h-[28px] h-auto placeholder:text-zinc-300 dark:placeholder:text-zinc-600 text-zinc-500 dark:text-zinc-400 rounded-none"
-      />
-      {/* 字数 */}
-      {charCount > 0 && (
-        <div className="flex items-center gap-1.5 mt-2 text-[11px] text-zinc-400 px-4">
-          <FileText className="h-3 w-3" />
-          <span>正文 {charCount} 字</span>
-        </div>
-      )}
+      {/* 标题 & 摘要区域 */}
+      <div className="px-5 py-4 border-b border-zinc-100 dark:border-zinc-800/50">
+        <input
+          placeholder="文章标题"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="w-full text-xl font-semibold bg-transparent border-0 outline-none h-auto py-1 placeholder:text-zinc-300 dark:placeholder:text-zinc-600 text-zinc-900 dark:text-zinc-100"
+        />
+        <textarea
+          placeholder="简要描述文章内容，用于列表页展示"
+          value={excerpt}
+          onChange={(e) => setExcerpt(e.target.value)}
+          rows={1}
+          className="w-full text-sm bg-transparent border-0 outline-none resize-none mt-1.5 min-h-[24px] placeholder:text-zinc-300 dark:placeholder:text-zinc-600 text-zinc-400 dark:text-zinc-500"
+        />
+        {charCount > 0 && (
+          <div className="flex items-center gap-1.5 mt-2 text-[11px] text-zinc-400">
+            <FileText className="h-3 w-3" />
+            <span>正文 {charCount} 字</span>
+          </div>
+        )}
+      </div>
 
       {/* 编辑器 */}
       <div className="flex-1">
@@ -217,11 +217,8 @@ function EditorForm({ onStateChange }: { onStateChange: (state: EditorState) => 
   )
 }
 
-export default function BlogWritePage() {
+function BlogWriteInner({ editId }: { editId: number | null }) {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const editId = searchParams.get('id') ? Number(searchParams.get('id')) : null
-
   const [loading, setLoading] = useState(false)
 
   const saveDraftRef = { current: null as (() => Promise<{ ok: boolean }>) | null }
@@ -309,4 +306,24 @@ export default function BlogWritePage() {
       </div>
     </main>
   )
+}
+
+export default function BlogWritePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex h-screen items-center justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-orange-500" />
+        </div>
+      }
+    >
+      <BlogWriteInnerWrapper />
+    </Suspense>
+  )
+}
+
+function BlogWriteInnerWrapper() {
+  const searchParams = useSearchParams()
+  const editId = searchParams.get('id') ? Number(searchParams.get('id')) : null
+  return <BlogWriteInner editId={editId} />
 }
