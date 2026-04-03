@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { UserAvatar } from '@/components/ui/user-avatar';
 import { LogoutButton } from '@/components/auth/LogoutButton';
 import { useUser } from '@/lib/user-context';
-import { MessageCircle, Settings, Sparkles, FolderUp, LogOut, Loader2, Moon, Sun, Shield, Zap, BookOpen, User, HelpCircle, Compass } from 'lucide-react';
+import { MessageCircle, Settings, Sparkles, FolderUp, LogOut, Loader2, Moon, Sun, Shield, Zap, BookOpen, User, HelpCircle, Compass, Wrench } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useThemeStore } from '@/hooks/useTheme';
 import { useAdminStore } from '@/hooks/useAdminStore'
@@ -140,13 +140,9 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
         )
       )}
 
-      {/* 装饰性光晕效果 - 仅在未滚动且非登录/注册页面时显示 */}
-      {!isAuthPage && !isScrolled && (
-        <>
-          {/* <div className="absolute inset-0 bg-gradient-to-r from-[var(--accent)]/3 via-transparent to-[var(--accent)]/2 pointer-events-none" /> */}
-          {/* <div className="absolute top-0 left-1/4 w-96 h-96 bg-[var(--accent)]/5 rounded-full blur-3xl -translate-y-48 pointer-events-none" /> */}
-          {/* <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-[var(--accent)]/3 rounded-full blur-3xl translate-y-32 pointer-events-none" /> */}
-        </>
+      {/* 装饰线 - 博客写页面显示 */}
+      {pathname === '/blog/write' && (
+        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-orange-500 to-transparent opacity-60" />
       )}
 
       {/* 头部内容 - 始终在背景层之上 */}
@@ -223,6 +219,22 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
               {pathname === "/blog" && (
                 <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-[2px] rounded-full bg-gradient-to-r from-transparent via-orange-500 to-transparent">
                   <span className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-orange-500 to-transparent blur-[4px] opacity-60" />
+                </span>
+              )}
+            </Link>
+
+            {/* 工具 - 公开页面 */}
+            <Link
+              href="/tools"
+              className={`relative flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group ${
+                pathname.startsWith("/tools") ? "bg-white/[0.06]" : ""
+              } ${navTextClasses}`}
+            >
+              <Wrench className="h-5 w-5 text-cyan-500 group-hover:scale-110 transition-transform" />
+              <span className={`text-sm hidden sm:block transition-all duration-300 ${pathname.startsWith("/tools") ? "font-semibold" : "font-medium"}`}>工具</span>
+              {pathname.startsWith("/tools") && (
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-[2px] rounded-full bg-gradient-to-r from-transparent via-cyan-500 to-transparent">
+                  <span className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-cyan-500 to-transparent blur-[4px] opacity-60" />
                 </span>
               )}
             </Link>
