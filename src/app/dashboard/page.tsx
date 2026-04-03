@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useCallback, useEffect, useState } from "react"
+import React, { useCallback, useEffect, useState, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { getLocalUserInfo } from "@/lib/api/adapters"
 import { getMemos } from "@/lib/supabase/modules/memo"
@@ -43,8 +43,16 @@ type MemoData = {
 
 const CATEGORIES = ["工具", "开发", "设计", "学习", "阅读", "社交", "其他"]
 
-export default function DashboardPage() {
+// Internal component that uses useSearchParams, wrapped in Suspense
+function SearchParamsWatcher({ onAddWebsite }: { onAddWebsite: (open: boolean) => void }) {
   const searchParams = useSearchParams()
+  useEffect(() => {
+    if (searchParams?.get("addWebsite") === "true") onAddWebsite(true)
+  }, [searchParams, onAddWebsite])
+  return null
+}
+
+export default function DashboardPage() {
   const localUser = getLocalUserInfo()
   const userId = typeof localUser?.id === "number" ? localUser.id : Number(localUser?.id) || undefined
 
@@ -85,9 +93,6 @@ export default function DashboardPage() {
 
   useEffect(() => { loadAll() }, [loadAll])
 
-  useEffect(() => {
-    if (searchParams?.get("addWebsite") === "true") setDialogOpen(true)
-  }, [searchParams])
 
   const handleDialogChange = (open: boolean) => {
     setDialogOpen(open)
