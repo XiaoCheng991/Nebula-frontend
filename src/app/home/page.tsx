@@ -24,7 +24,7 @@ export default function Home() {
       </Suspense>
 
       {/* Hero Section */}
-      <section className="relative z-20 container mx-auto px-4 flex min-h-screen items-center justify-center py-24">
+      <section className="relative z-20 container mx-auto px-4 flex min-h-screen items-center justify-center pt-24 pb-12">
         <div className="max-w-4xl mx-auto text-center">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 backdrop-blur-xl bg-white/10 border border-white/20 px-5 py-2 rounded-full text-sm font-medium mb-8 animate-[fadeInDown_0.8s_ease-out]">

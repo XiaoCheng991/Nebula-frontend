@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { UserAvatar } from '@/components/ui/user-avatar';
@@ -30,7 +30,6 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
   const { hasAdminAccess, permissionsLoaded, refreshPermissions } = useAppStore()
   const { loadAdminData } = useAdminStore()
   const [src, setSrc] = React.useState<string>('/logo_icon.svg');
-  const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
 
   // 检查是否在登录/注册页面
@@ -42,17 +41,7 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
   }, []);
 
 
-  // 滚动监听 - 实现透明到玻璃效果的切换（登录/注册页面禁用）
-  useEffect(() => {
-    if (isAuthPage) return; // 登录/注册页面不监听滚动，始终保持透明
-
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isAuthPage]);
+  // 导航栏始终固定在视窗顶部，保持全透明
 
   // 使用统一的权限检查（避免其他组件重复请求）
   useEffect(() => {
@@ -120,25 +109,13 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
     );
   };
 
-  // 文字颜色根据滚动状态变化（登录/注册页面始终使用白色）
+  // 文字颜色 - 登录/注册页面始终使用白色，其他页面使用主题文字颜色
   const navTextClasses = isAuthPage
     ? 'text-white'
-    : isScrolled
-    ? 'text-slate-700 dark:text-slate-300'
     : 'text-slate-900 dark:text-white';
 
   return (
-    <header className={`w-full absolute top-0 z-50 ${isAuthPage ? 'bg-transparent' : 'transition-all duration-300'} ${className}`} aria-label="站点头部">
-      {/* 背景层 - 根据滚动状态显示不同样式（登录/注册页面始终透明，无任何背景层） */}
-      {!isAuthPage && (
-        isScrolled ? (
-          // 滚动后：液态玻璃背景
-          <div className="absolute inset-0 bg-white/80 dark:bg-black/60 backdrop-blur-xl border-b border-[var(--glass-border)]" />
-        ) : (
-          // 未滚动：完全透明，无任何背景或边框
-          <div className="absolute inset-0 bg-transparent" />
-        )
-      )}
+    <header className={`w-full fixed top-0 left-0 z-50 bg-transparent ${className}`} aria-label="站点头部">
 
       {/* 装饰线 - 博客写页面显示 */}
       {pathname === '/blog/write' && (
@@ -316,8 +293,6 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
                   isAuthPage
                     ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-sm'
-                    : isScrolled
-                    ? 'bg-white/90 dark:bg-slate-800/90 hover:bg-white dark:hover:bg-slate-700 border border-slate-200/50 dark:border-slate-700/50 text-slate-700 dark:text-slate-200'
                     : 'bg-white/90 dark:bg-slate-800/90 hover:bg-white dark:hover:bg-slate-700 border border-slate-200/50 dark:border-slate-700/50 text-slate-700 dark:text-slate-200'
                 }`}
               >
