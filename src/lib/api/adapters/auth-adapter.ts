@@ -1,241 +1,176 @@
 /**
- * 认证适配器 - Supabase
+ * 认证管理 - Supabase 模式
  */
 
 import { supabase } from '@/lib/supabase/client'
 
 /**
- * 登录响应类型
+ * 用户信息类型
+ */
+export interface UserProfile {
+  id: number | string
+  username: string
+  email?: string | null
+  nickname?: string | null
+  avatarUrl?: string | null
+  avatarName?: string | null
+  avatarSize?: number | null
+}
+
+/**
+ * 登录响应
  */
 export interface LoginResponse {
-  token?: string
-  refreshToken?: string
-  expiresIn?: number
-  userInfo: {
-    id: number | string
-    username: string
-    email?: string | null
-    nickname?: string | null
-    avatarUrl?: string | null
-    avatarName?: string | null
-    avatarSize?: number | null
+  userInfo: UserProfile
+}
+
+/**
+ * 从 sys_users 表获取用户信息
+ */
+async function fetchUserFromSys(email: string): Promise<any> {
+  const { data } = await supabase
+    .from('sys_users')
+    .select('*')
+    .eq('email', email)
+    .maybeSingle()
+  return data
+}
+
+/**
+ * 构建用户信息对象
+ */
+function buildUserInfo(supabaseUser: any, sysData: any): UserProfile {
+  return {
+    id: sysData?.id ?? supabaseUser.id,
+    username: sysData?.username ?? supabaseUser.user_metadata?.username ?? supabaseUser.email?.split('@')[0] ?? '',
+    email: supabaseUser.email,
+    nickname: sysData?.nickname ?? supabaseUser.user_metadata?.nickname ?? supabaseUser.user_metadata?.name ?? '',
+    avatarUrl: sysData?.avatar_url ?? supabaseUser.user_metadata?.avatar_url ?? supabaseUser.user_metadata?.avatar ?? null,
+    avatarName: sysData?.avatar_name ?? supabaseUser.user_metadata?.avatar_name ?? null,
+    avatarSize: sysData?.avatar_size ?? supabaseUser.user_metadata?.avatar_size ?? null,
   }
 }
 
 /**
  * 登录
- * 使用最新的 Supabase SDK v2 模式
  */
-export async function login(
-  email: string,
-  password: string
-): Promise<LoginResponse> {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  })
-
+export async function login(email: string, password: string): Promise<LoginResponse> {
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password })
   if (error) throw new Error(error.message)
   if (!data.user) throw new Error('登录失败')
 
-  return await buildLoginResponse(data.user)
+  const userInfo = await buildUserInfoFromLogin(data.user)
+  return { userInfo }
+}
+
+async function buildUserInfoFromLogin(user: any): Promise<UserProfile> {
+  const { data: sessionData } = await supabase.auth.getSession()
+  const sysData = user.email ? await fetchUserFromSys(user.email) : null
+  return buildUserInfo(user, sysData)
 }
 
 /**
- * 构建登录响应
+ * 登录并持久化本地状态
  */
-async function buildLoginResponse(user: any): Promise<LoginResponse> {
-  // 先获取当前 session
-  const { data: sessionData } = await supabase.auth.getSession()
-  const session = sessionData.session
+export async function loginWithStorage(email: string, password: string): Promise<LoginResponse> {
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+  if (error) throw new Error(error.message)
+  if (!data.user) throw new Error('登录失败')
 
-  let userInfoData: any = null
-  if (user.email) {
-    const { data: userData } = await supabase
-      .from('sys_users')
-      .select('*')
-      .eq('email', user.email)
-      .maybeSingle()
-    userInfoData = userData
-  }
-
-  const userInfo = {
-    id: userInfoData?.id || user.id,
-    username: userInfoData?.username || user.user_metadata?.username || user.email?.split('@')[0] || '',
-    email: user.email,
-    nickname: userInfoData?.nickname || user.user_metadata?.nickname || user.user_metadata?.name || '',
-    avatarUrl: userInfoData?.avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.avatar || null,
-    avatarName: userInfoData?.avatar_name || user.user_metadata?.avatar_name || null,
-    avatarSize: userInfoData?.avatar_size || user.user_metadata?.avatar_size || null,
-  }
-
+  const userInfo = await buildUserInfoFromLogin(data.user)
   if (typeof window !== 'undefined') {
     localStorage.setItem('userInfo', JSON.stringify(userInfo))
-    // 触发自定义事件通知其他组件
     window.dispatchEvent(new Event('auth-change'))
   }
-
-  return {
-    token: session?.access_token,
-    expiresIn: session?.expires_at
-      ? Number(session.expires_at) - Math.floor(Date.now() / 1000)
-      : 0,
-    userInfo,
-  }
+  return { userInfo }
 }
 
 /**
- * GitHub 登录
+ * GitHub OAuth 登录
  */
 export async function loginWithGithub(redirectUrl?: string): Promise<void> {
-  // 重要：回调 URL 必须与 Supabase 配置中的 Site URL 一致
-  // 统一使用生产域名，确保本地开发和生产环境都能正常工作
   const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost'
   const baseUrl = isDev
     ? 'http://localhost:3000/auth/github/callback'
     : 'https://www.xiaocheng991.site/auth/github/callback'
 
-  // 如果有 redirectUrl，添加到回调 URL 的查询参数中
   const redirectTo = redirectUrl ? `${baseUrl}?redirect=${encodeURIComponent(redirectUrl)}` : baseUrl
 
-  console.log('Starting GitHub OAuth, redirect to:', redirectTo)
-
-  // supabase-js v2 的 OAuth 调用
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'github',
     options: {
       redirectTo,
       scopes: 'read:user user:email',
-      skipBrowserRedirect: false, // 让 Supabase 自动处理跳转
+      skipBrowserRedirect: false,
     },
   })
 
-  if (error) {
-    console.error('GitHub OAuth init error:', error)
-    throw new Error(`GitHub 授权初始化失败: ${error.message}`)
-  }
-
-  // 如果 skipBrowserRedirect 为 true，需要手动跳转
-  // data.url 是 GitHub OAuth 授权页面 URL
-  if (data?.url) {
-    console.log('Redirecting to GitHub OAuth URL:', data.url)
-    window.location.href = data.url
-  }
+  if (error) throw new Error(`GitHub 授权初始化失败: ${error.message}`)
+  if (data?.url) window.location.href = data.url
 }
 
 /**
  * 注册
- * 使用最新的 Supabase SDK v2 模式
  */
-export async function register(
-  username: string,
-  email: string,
-  password: string,
-  nickname?: string
-): Promise<LoginResponse> {
-  // 先注册
-  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+export async function register(username: string, email: string, password: string, nickname?: string): Promise<LoginResponse> {
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: {
-      data: {
-        nickname,
-        username,
-      },
-    },
+    options: { data: { nickname, username } },
   })
 
-  if (signUpError) throw new Error(signUpError.message)
-  if (!signUpData.user) throw new Error('注册失败')
+  if (error) throw new Error(error.message)
+  if (!data.user) throw new Error('注册失败')
 
-  // 注册后立即登录（如果邮箱不需要验证，会有session）
-  if (signUpData.session) {
-    return await buildLoginResponse(signUpData.user)
-  }
+  if (data.session) return buildSignUpResponse(data.user)
 
-  // 如果没有session（需要邮箱验证），尝试直接登录
-  // 注意：有些配置下signUp后不会自动登录
   try {
-    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-
-    if (signInError) {
-      // 如果登录失败（可能需要邮箱验证），返回注册信息
-      console.log('Auto-login after register failed:', signInError.message)
-      // 仍然构建用户响应，但可能没有token
-      return await buildLoginResponse(signUpData.user)
-    }
-
-    if (signInData.user) {
-      return await buildLoginResponse(signInData.user)
-    }
-  } catch (e) {
-    console.log('Auto-login error:', e)
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+    if (signInError || !signInData.user) return buildSignUpResponse(data.user)
+    return buildSignUpResponse(signInData.user)
+  } catch {
+    return buildSignUpResponse(data.user)
   }
+}
 
-  return await buildLoginResponse(signUpData.user)
+async function buildSignUpResponse(user: any): Promise<LoginResponse> {
+  const sysData = user.email ? await fetchUserFromSys(user.email) : null
+  return { userInfo: buildUserInfo(user, sysData) }
 }
 
 /**
  * 登出
- * 使用最新的 Supabase SDK v2 模式
  */
 export async function logout(): Promise<void> {
   if (typeof window !== 'undefined') {
-    // 先清除本地存储，再调用 Supabase 登出
     localStorage.removeItem('userInfo')
     window.dispatchEvent(new Event('auth-change'))
   }
-
-  // 调用 Supabase 登出
   await supabase.auth.signOut()
 }
 
 /**
  * 获取当前用户信息
  */
-export async function getUserInfo(): Promise<LoginResponse['userInfo']> {
+export async function getUserInfo(): Promise<UserProfile> {
   const { data: { user }, error } = await supabase.auth.getUser()
-
   if (error || !user) throw new Error('未登录')
 
-  let userInfoData: any = null
-  if (user.email) {
-    const { data: userData } = await supabase
-      .from('sys_users')
-      .select('*')
-      .eq('email', user.email)
-      .maybeSingle()
-    userInfoData = userData
-  }
-
-  return {
-    id: userInfoData?.id || user.id,
-    username: userInfoData?.username || user.email || '',
-    email: user.email,
-    nickname: userInfoData?.nickname || user.user_metadata?.nickname || '',
-    avatarUrl: userInfoData?.avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.avatar || null,
-    avatarName: userInfoData?.avatar_name || user.user_metadata?.avatar_name || null,
-    avatarSize: userInfoData?.avatar_size || user.user_metadata?.avatar_size || null,
-  }
+  const sysData = user.email ? await fetchUserFromSys(user.email) : null
+  return buildUserInfo(user, sysData)
 }
 
 /**
  * 获取本地存储的用户信息
  */
-export function getLocalUserInfo(): LoginResponse['userInfo'] | null {
+export function getLocalUserInfo(): UserProfile | null {
   if (typeof window === 'undefined') return null
-  const userInfoStr = localStorage.getItem('userInfo')
-  if (userInfoStr) {
-    try {
-      return JSON.parse(userInfoStr)
-    } catch {
-      return null
-    }
+  try {
+    const str = localStorage.getItem('userInfo')
+    return str ? JSON.parse(str) : null
+  } catch {
+    return null
   }
-  return null
 }
 
 /**
@@ -253,20 +188,4 @@ export function emitAuthChange(): void {
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new Event('auth-change'))
   }
-}
-
-/**
- * 刷新会话
- */
-export async function refreshSession(): Promise<void> {
-  await supabase.auth.refreshSession()
-}
-
-/**
- * 监听认证状态变化
- */
-export function onAuthStateChange(callback: (event: string, session: any) => void) {
-  return supabase.auth.onAuthStateChange((event, session) => {
-    callback(event, session)
-  })
 }

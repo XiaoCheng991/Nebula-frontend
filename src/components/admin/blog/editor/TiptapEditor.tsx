@@ -1,15 +1,11 @@
-'use client'
-
-import React, { useEditor, EditorContent } from '@tiptap/react'
+import React, { useRef, useCallback, useState, useEffect } from 'react'
+import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
-import Table from '@tiptap/extension-table'
-import TableRow from '@tiptap/extension-table-row'
-import TableHeader from '@tiptap/extension-table-header'
-import TableCell from '@tiptap/extension-table-cell'
+import { Table, TableRow, TableHeader, TableCell } from '@tiptap/extension-table'
 import { common, createLowlight } from 'lowlight'
 import {
   Bold,
@@ -28,13 +24,15 @@ import {
   Link as LinkIcon,
   Table as TableIcon,
   RemoveFormatting,
+  Loader2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-import { useState } from 'react'
+import { uploadBlogImage } from '@/lib/api/modules/file'
+import { toast } from '@/components/ui/use-toast'
 
 const lowlight = createLowlight(common)
 
@@ -53,8 +51,11 @@ export function TiptapEditor({ content, onChange, placeholder = '开始写作...
   const [tempLinkText, setTempLinkText] = useState('')
   const [tableRows, setTableRows] = useState(3)
   const [tableCols, setTableCols] = useState(3)
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         codeBlock: false,
@@ -92,8 +93,46 @@ export function TiptapEditor({ content, onChange, placeholder = '开始写作...
       attributes: {
         class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-xl dark:prose-invert min-h-[400px] p-4 focus:outline-none max-w-none',
       },
+      handlePaste: (view, event) => {
+        const items = event.clipboardData?.items
+        if (!items) return false
+        for (const item of items) {
+          if (item.type.startsWith('image/')) {
+            const file = item.getAsFile()
+            if (!file) continue
+            event.preventDefault()
+            handleImageFile(file)
+            return true
+          }
+        }
+        return false
+      },
+      handleDrop: (view, event) => {
+        const files = event.dataTransfer?.files
+        if (!files) return false
+        for (const file of files) {
+          if (file.type.startsWith('image/')) {
+            event.preventDefault()
+            handleImageFile(file)
+            return true
+          }
+        }
+        return false
+      },
     },
   })
+
+  const handleImageFile = useCallback(async (file: File) => {
+    try {
+      setUploading(true)
+      const url = await uploadBlogImage(file)
+      editor?.chain().focus().setImage({ src: url }).run()
+    } catch (err: any) {
+      toast({ title: '上传失败', description: err.message || '图片上传失败', variant: 'destructive' })
+    } finally {
+      setUploading(false)
+    }
+  }, [editor])
 
   if (!editor) {
     return null
@@ -267,10 +306,58 @@ export function TiptapEditor({ content, onChange, placeholder = '开始写作...
             <DialogTitle>插入图片</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
+            {/* 文件上传 */}
             <div className="grid gap-2">
-              <Label htmlFor="imageUrl">图片 URL</Label>
+              <Label>上传图片</Label>
+              <div
+                className="border-2 border-dashed border-zinc-300 dark:border-zinc-600 rounded-lg p-6 text-center hover:border-zinc-400 dark:hover:border-zinc-500 transition-colors cursor-pointer"
+                onClick={() => fileInputRef.current?.click()}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault()
+                  const file = e.dataTransfer.files[0]
+                  if (file?.type.startsWith('image/')) {
+                    handleImageFile(file)
+                    setImageDialogOpen(false)
+                  }
+                }}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      handleImageFile(file)
+                      setImageDialogOpen(false)
+                    }
+                  }}
+                />
+                {uploading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span className="text-sm text-zinc-500">上传中...</span>
+                  </div>
+                ) : (
+                  <>
+                    <ImageIcon className="h-8 w-8 mx-auto mb-2 text-zinc-400" />
+                    <p className="text-sm text-zinc-500">点击或拖拽上传图片</p>
+                    <p className="text-xs text-zinc-400 mt-1">支持 JPG、PNG、GIF、WebP</p>
+                  </>
+                )}
+              </div>
+            </div>
+            {/* 分隔线 */}
+            <div className="flex items-center gap-2">
+              <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-700" />
+              <span className="text-xs text-zinc-400">或输入图片 URL</span>
+              <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-700" />
+            </div>
+            {/* URL 输入 */}
+            <div className="grid gap-2">
               <Input
-                id="imageUrl"
                 placeholder="https://example.com/image.jpg"
                 value={tempImageUrl}
                 onChange={(e) => setTempImageUrl(e.target.value)}
@@ -279,7 +366,7 @@ export function TiptapEditor({ content, onChange, placeholder = '开始写作...
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setImageDialogOpen(false)}>取消</Button>
-            <Button onClick={addImage}>插入</Button>
+            <Button onClick={addImage} disabled={!tempImageUrl.trim()}>插入</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

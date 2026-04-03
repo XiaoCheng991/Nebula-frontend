@@ -41,10 +41,10 @@ import {
   Eye,
   LogIn,
   UserCheck,
+  Loader2,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { useAdminStore } from '@/hooks/useAdminStore'
+import { supabase } from '@/lib/supabase/client'
 import { AdminMenu as AdminMenuType } from '@/lib/admin/types'
 
 // 增强的图标映射 - 支持多种可能的 icon 名称格式
@@ -216,44 +216,51 @@ interface MenuItemProps {
 
 const MenuItem: React.FC<MenuItemProps> = ({ item, level, isFirst = false }) => {
   const pathname = usePathname()
-  const menuChildren = item.children?.filter((c) => c.type === 'menu') ?? []
-  const hasChildren = menuChildren.length > 0
   const isActive = pathname === item.path
   const IconComponent = getIcon(item.icon)
 
-  // 检查当前菜单或其子菜单是否处于激活状态
-  const isCurrentMenuOrChildActive = () => {
-    if (isActive) return true
-    if (!hasChildren) return false
-    return menuChildren.some(child => {
-      if (child.path === pathname) return true
-      if (child.children) {
-        return child.children.some(grandChild => grandChild.path === pathname)
-      }
-      return false
-    })
+  // 获取所有有效的子菜单（directory 和 menu 类型）
+  const allChildren = item.children?.filter(c => c.type !== 'button') ?? []
+  const hasChildren = allChildren.length > 0
+
+  // 递归检查子节点是否高亮
+  const hasActiveDescendant = (menu: AdminMenuType): boolean => {
+    if (pathname === menu.path) return true
+    return menu.children?.some(hasActiveDescendant) ?? false
+  }
+  const childIsActive = hasChildren && allChildren.some(hasActiveDescendant)
+
+  const [isExpanded, setIsExpanded] = React.useState(() => isFirst || childIsActive)
+
+  React.useEffect(() => {
+    if (childIsActive) setIsExpanded(true)
+  }, [pathname, childIsActive])
+
+  // 渲染子菜单
+  const renderChildren = () => {
+    if (!isExpanded || !hasChildren) return null
+    return (
+      <div className={cn('submenu', isExpanded && 'expanded')}>
+        {allChildren.map(child => (
+          <MenuItem key={child.id} item={child} level={level + 1} />
+        ))}
+      </div>
+    )
   }
 
-  const [isExpanded, setIsExpanded] = React.useState(() => {
-    // 如果是当前页面或子菜单被激活，自动展开
-    if (isCurrentMenuOrChildActive()) return true
-    return isFirst
-  })
-
-  // 当 pathname 变化时，检查是否需要自动展开
-  React.useEffect(() => {
-    if (isCurrentMenuOrChildActive()) {
-      setIsExpanded(true)
-    }
-  }, [pathname])
-
-  // 有子菜单的项（无论层级）都渲染button用于展开/收起
+  // 目录/有子菜单的项 — 渲染为可展开的按钮
   if (hasChildren) {
     return (
       <div>
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className={cn('menu-item', isExpanded && 'expanded')}
+          className={cn(
+            'menu-item',
+            isExpanded && 'expanded',
+            childIsActive && 'active-parent',
+            level === 0 && 'is-top-level',
+          )}
+          data-level={level}
           type="button"
         >
           {IconComponent ? (
@@ -262,27 +269,22 @@ const MenuItem: React.FC<MenuItemProps> = ({ item, level, isFirst = false }) => 
             <Circle className="menu-item-icon" />
           )}
           <span className="menu-item-text">{item.name}</span>
-          <ChevronDown className={cn('menu-chevron', !isExpanded && 'rotate-[-90deg]')} />
+          <ChevronDown className="menu-chevron" />
         </button>
-        {isExpanded && (
-          <div className={cn('submenu', isExpanded && 'expanded')}>
-            {menuChildren.map((child) => (
-              <MenuItem key={child.id} item={child} level={level + 1} />
-            ))}
-          </div>
-        )}
+        {renderChildren()}
       </div>
     )
   }
 
-  // 叶子菜单项（无children）渲染Link用于页面跳转
+  // 叶子菜单项 — 渲染为链接
   if (item.path) {
     const normalizedPath = item.path.startsWith('/') ? item.path : `/admin/${item.path}`
     return (
       <Link
         href={normalizedPath}
-        className={cn('menu-item', isActive && 'active')}
+        className={cn('menu-item', isActive && 'active', level === 0 && 'is-top-level')}
         prefetch={false}
+        data-level={level}
       >
         {IconComponent ? (
           <IconComponent className="menu-item-icon" />
@@ -294,7 +296,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ item, level, isFirst = false }) => 
     )
   }
 
-  // 其他情况（如无path的分组节点）不渲染
+  // 无效节点不渲染
   return null
 }
 
@@ -303,12 +305,65 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
-  const { menus } = useAdminStore()
+  const [menus, setMenus] = React.useState<AdminMenuType[]>([])
+  const [loading, setLoading] = React.useState(true)
   const [isMounted, setIsMounted] = React.useState(false)
 
   React.useEffect(() => {
     setIsMounted(true)
   }, [])
+
+  // 直接从 Supabase 查询菜单（管理员拥有所有权限，直接查询全部）
+  useEffect(() => {
+    if (!isMounted) return
+
+    (async () => {
+      try {
+        const { data: allMenus } = await supabase
+          .from('sys_menu')
+          .select('*')
+          .eq('deleted', 0)
+          .eq('is_visible', true)
+          .order('sort_order', { ascending: true })
+        if (!allMenus) { setLoading(false); return }
+
+        const rawMenus = allMenus as unknown as {
+          id: number; parent_id: number | null; menu_name: string; menu_type: string;
+          path?: string; icon?: string; sort_order?: number;
+        }[]
+
+        const visibleMenus = rawMenus.map(m => ({
+          id: m.id,
+          parentId: m.parent_id,
+          name: m.menu_name,
+          type: m.menu_type as 'directory' | 'menu' | 'button',
+          path: m.path,
+          icon: m.icon,
+          sortOrder: m.sort_order ?? 0,
+          children: [],
+        })) as unknown as AdminMenuType[]
+
+        function buildTree(parentId: number | null): AdminMenuType[] {
+          return visibleMenus
+            .filter(m => {
+              const pid = m.parentId ?? 0
+              if (parentId === null) return pid === 0
+              return pid === parentId
+            })
+            .map(m => ({
+              ...m,
+              children: buildTree(m.id),
+            }))
+        }
+
+        setMenus(buildTree(null))
+      } catch {
+        // 静默失败
+      } finally {
+        setLoading(false)
+      }
+    })()
+  }, [isMounted])
 
   if (!isMounted) {
     return (
@@ -320,17 +375,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
 
   return (
     <aside className={cn('flex h-full w-56 flex-col admin-sidebar', className)}>
-      {/* Logo 区域 - 使用图片，类似前台 */}
+      {/* Logo 区域 */}
       <div className="flex h-16 items-center px-6 relative z-10">
         <Link href="/admin" className="flex items-center gap-3 group">
           <img
             src="/logo_icon.svg"
             alt="NebulaHub Logo"
             className="h-10 w-10 rounded-[var(--radius-md)]"
-            onError={(e) => {
-              // 如果图片加载失败，使用文字 fallback
-              e.currentTarget.style.display = 'none'
-            }}
+            onError={(e) => { e.currentTarget.style.display = 'none' }}
           />
           <div className="flex flex-col">
             <span className="text-lg font-bold text-[var(--text-primary)] tracking-tight">
@@ -345,18 +397,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
 
       {/* 菜单区域 */}
       <nav className="flex-1 overflow-y-auto py-4 px-2 relative z-10">
-        {menus.length === 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-5 w-5 animate-spin text-[var(--text-tertiary)]" />
+          </div>
+        ) : menus.length === 0 ? (
           <div className="px-4 py-8 text-center">
-            <p className="text-sm text-[var(--text-tertiary)] mb-4">暂无菜单数据</p>
-            <button
-              className="btn-glass"
-              onClick={() => {
-                localStorage.removeItem('admin-storage')
-                window.location.reload()
-              }}
-            >
-              清除缓存重试
-            </button>
+            <p className="text-sm text-[var(--text-tertiary)]">暂无菜单数据</p>
           </div>
         ) : (
           menus.map((menu, index) => (

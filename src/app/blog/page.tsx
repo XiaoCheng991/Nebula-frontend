@@ -11,7 +11,6 @@ import {
   BookOpen,
   MessageSquare,
   Camera,
-  Loader2,
   Mail,
   Link as LinkIcon,
   Star,
@@ -32,14 +31,16 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { AvatarCropDialog } from "@/components/ui/avatar-crop-dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useUser } from "@/lib/user-context";
 import { getLocalUserInfo } from "@/lib/api";
 import { supabase } from "@/lib/supabase/client";
 import { uploadAvatar } from "@/lib/api/modules/file";
 import { toast } from "@/components/ui/use-toast";
-import { useAdminStore } from "@/hooks/useAdminStore";
+import { checkHasAdminAccess } from "@/hooks/useAdminStore";
 import { getArticles, getTags as getApiTags } from "@/lib/supabase/modules/blog";
 import { getMemos } from "@/lib/supabase/modules/memo";
+import { useSystemConfig } from "@/hooks/useSystemConfig";
 
 const socialLinks = [
   { icon: SiGithub, href: "https://github.com/XiaoCheng991", label: "GitHub" },
@@ -100,7 +101,9 @@ function formatDateShort(dateStr: string): string {
 
 export default function BlogPage() {
   const { user, loading: userLoading } = useUser();
-  const { hasAdminAccess, loadAdminData } = useAdminStore();
+  const [hasAdminAccess, setHasAdminAccess] = useState(false);
+  const { value: blogWritePerm } = useSystemConfig('blog_write_permission');
+  const { value: memoWritePerm } = useSystemConfig('memo_write_permission');
   const [showCropDialog, setShowCropDialog] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [originalFile, setOriginalFile] = useState<File | null>(null);
@@ -110,25 +113,27 @@ export default function BlogPage() {
   const [memos, setMemos] = useState<any[]>([]);
   const [articles, setArticles] = useState<any[]>([]);
   const [tags, setTags] = useState<any[]>([]);
-  const [dataLoading, setDataLoading] = useState(true);
+  const [memosLoading, setMemosLoading] = useState(true);
+  const [articlesLoading, setArticlesLoading] = useState(true);
+  const [tagsLoading, setTagsLoading] = useState(true);
 
   useEffect(() => {
     setIsMounted(true);
 
     (async () => {
-      try {
-        const [memosRes, articlesRes, tagsRes] = await Promise.allSettled([
-          getMemos({ page: 1, pageSize: 4, visibility: "PUBLIC" }),
-          getArticles({ page: 1, pageSize: 10, orderBy: "create_time" }),
-          getApiTags(),
-        ]);
+      const [memosRes, articlesRes, tagsRes] = await Promise.allSettled([
+        getMemos({ page: 1, pageSize: 4, visibility: "PUBLIC" }),
+        getArticles({ page: 1, pageSize: 10, orderBy: "create_time" }),
+        getApiTags(),
+      ]);
 
-        if (memosRes.status === "fulfilled") setMemos(memosRes.value.data || []);
-        if (articlesRes.status === "fulfilled") setArticles(articlesRes.value.data || []);
-        if (tagsRes.status === "fulfilled") setTags(tagsRes.value.data || []);
-      } finally {
-        setDataLoading(false);
-      }
+      if (memosRes.status === "fulfilled") setMemos(memosRes.value.data || []);
+      if (articlesRes.status === "fulfilled") setArticles(articlesRes.value.data || []);
+      if (tagsRes.status === "fulfilled") setTags(tagsRes.value.data || []);
+
+      setMemosLoading(false);
+      setArticlesLoading(false);
+      setTagsLoading(false);
     })();
   }, []);
 
@@ -179,12 +184,11 @@ export default function BlogPage() {
   const userNickname = user?.nickname || localUser?.nickname || "用户";
   const userAvatar = user?.avatarUrl || localUser?.avatarUrl || null;
 
-  // 加载管理员数据
+  // 检查管理员权限
   useEffect(() => {
-    if (user && !userLoading) {
-      loadAdminData().catch(() => {});
-    }
-  }, [user, userLoading, loadAdminData]);
+    if (!isMounted) return;
+    checkHasAdminAccess().then(setHasAdminAccess);
+  }, [isMounted]);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -251,24 +255,24 @@ export default function BlogPage() {
   const handleWriteBlog = (e: React.MouseEvent) => {
     e.preventDefault();
     if (!userId) {
-      toast({
-        title: "未登录",
-        description: "请先登录后再发布博客",
-        variant: "destructive",
-      });
+      toast({ title: "未登录", description: "请先登录后再发布博客", variant: "destructive" });
       return;
     }
-    window.location.href = "/admin/blog/posts/edit";
+    if (blogWritePerm !== 'all' && !hasAdminAccess) {
+      toast({ title: "无权限", description: "当前仅管理员可发布博客", variant: "destructive" });
+      return;
+    }
+    window.location.href = "/blog/write";
   };
 
   const handleWriteMemo = (e: React.MouseEvent) => {
     e.preventDefault();
     if (!userId) {
-      toast({
-        title: "未登录",
-        description: "请先登录后再发布动态",
-        variant: "destructive",
-      });
+      toast({ title: "未登录", description: "请先登录后再发布动态", variant: "destructive" });
+      return;
+    }
+    if (memoWritePerm !== 'all' && !hasAdminAccess) {
+      toast({ title: "无权限", description: "当前仅管理员可发布动态", variant: "destructive" });
       return;
     }
   };
@@ -361,7 +365,11 @@ export default function BlogPage() {
 
           <div className="flex items-center gap-1.5 mt-4">
             <span className="text-[14px] font-medium text-zinc-500 dark:text-zinc-400">标签</span>
-            {tags.slice(0, 4).map((tag) => (
+            {tagsLoading ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-5 w-12 rounded-full" />
+              ))
+            ) : tags.slice(0, 4).map((tag) => (
               <Badge
                 key={tag.id}
                 variant="secondary"
@@ -426,7 +434,20 @@ export default function BlogPage() {
 
           <ScrollArea className="w-full">
             <div className="flex gap-3 pb-4">
-              {memos.length === 0 ? (
+              {memosLoading ? (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="shrink-0 w-64 flex flex-col rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white/80 dark:bg-zinc-900/40">
+                    <div className="flex-1 flex flex-col justify-between p-3 min-h-[144px]">
+                      <Skeleton className="h-4 w-full mb-2" />
+                      <Skeleton className="h-4 w-3/4 mb-2" />
+                      <div className="flex items-center gap-2 mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-700">
+                        <Skeleton className="w-5 h-5 rounded-full" />
+                        <Skeleton className="h-3 w-16" />
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : memos.length === 0 ? (
                 <p className="text-xs text-zinc-400">暂无动态</p>
               ) : memos.map((memo) => (
                 <a
@@ -488,10 +509,44 @@ export default function BlogPage() {
             </div>
           </div>
 
-          {dataLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-5 w-5 animate-spin text-zinc-400 mr-2" />
-              <span className="text-sm text-zinc-400">加载中...</span>
+          {articlesLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-3">
+              {/* 第一列骨架 */}
+              <div className="md:pr-6 md:border-r border-zinc-200 dark:border-zinc-700 space-y-3">
+                <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white/80 dark:bg-zinc-900/60 p-4 space-y-3">
+                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="h-5 w-full" />
+                  <Skeleton className="h-4 w-4/5" />
+                  <Skeleton className="h-3 w-24" />
+                </div>
+                {Array.from({ length: 2 }).map((_, i) => (
+                  <div key={i} className="p-3 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white/60 dark:bg-zinc-900/40 space-y-2">
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-3 w-2/3" />
+                    <Skeleton className="h-2.5 w-16" />
+                  </div>
+                ))}
+              </div>
+              {/* 第二列骨架 */}
+              <div className="md:px-6 md:border-r border-zinc-200 dark:border-zinc-700 space-y-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="p-3 rounded space-y-2">
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-2.5 w-3/4" />
+                    <Skeleton className="h-2.5 w-16" />
+                  </div>
+                ))}
+              </div>
+              {/* 第三列骨架 */}
+              <div className="md:pl-6 space-y-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="p-3 rounded space-y-2">
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-2.5 w-3/4" />
+                    <Skeleton className="h-2.5 w-16" />
+                  </div>
+                ))}
+              </div>
             </div>
           ) : articles.length === 0 ? (
             <div className="flex items-center justify-center py-20">

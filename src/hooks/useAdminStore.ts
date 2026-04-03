@@ -2,6 +2,7 @@
 
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
+import { supabase } from '@/lib/supabase/client'
 import {
  AdminState,
  AdminUser,
@@ -19,6 +20,48 @@ import {
  getAllRoles,
  getCurrentUserMenus,
 } from '@/lib/api/modules/admin'
+
+/**
+ * 直接从 Supabase 检查用户是否有管理员/超级管理员角色
+ * 绕过 loadAdminData 的复杂链路，提供更可靠的权限检查
+ */
+export async function checkHasAdminAccess(): Promise<boolean> {
+  // 获取当前会话
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session?.user?.email) return false
+
+  // 查找 sys_users 中的用户
+  const { data: sysUser } = await supabase
+    .from('sys_users')
+    .select('id')
+    .eq('email', session.user.email)
+    .maybeSingle() as { data: { id: number } | null }
+
+  if (!sysUser?.id) return false
+
+  // 查找该用户的角色
+  const { data: userRoles } = await supabase
+    .from('sys_user_role')
+    .select('role_id')
+    .eq('user_id', sysUser.id) as { data: { role_id: number }[] | null; error: any }
+
+  if (!userRoles || userRoles.length === 0) return false
+
+  // 查询角色代码
+  const roleIds = userRoles.map(ur => ur.role_id)
+  const { data: roles } = await supabase
+    .from('sys_role')
+    .select('role_code')
+    .in('id', roleIds) as { data: { role_code: string }[] | null; error: any }
+
+  if (!roles || roles.length === 0) return false
+
+  // 检查是否包含 admin 或 super_admin
+  return roles.some(role => {
+    const code = (role.role_code || '').toLowerCase()
+    return code.includes('admin') || code.includes('super')
+  })
+}
 
 export const useAdminStore = create<AdminState>()(
  persist(

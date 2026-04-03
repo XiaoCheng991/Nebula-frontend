@@ -6,7 +6,7 @@ import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Sidebar } from './Sidebar'
 import { AdminHeader } from './AdminHeader'
-import { useAdminStore } from '@/hooks/useAdminStore'
+import { useAdminStore, checkHasAdminAccess } from '@/hooks/useAdminStore'
 import { useThemeEffect } from '@/hooks/useTheme'
 import '@/app/admin/layout.css'
 import '@/app/admin/page-styles.css'
@@ -17,8 +17,9 @@ interface AdminLayoutProps {
 
 export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const router = useRouter()
-  const { hasAdminAccess, isLoading, loadAdminData } = useAdminStore()
+  const { loadAdminData } = useAdminStore()
   const [isClient, setIsClient] = useState(false)
+  const [hasAccess, setHasAccess] = useState<boolean | null>(null)
 
   // 激活主题切换功能
   useThemeEffect()
@@ -28,26 +29,25 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     setIsClient(true)
   }, [])
 
-  // 加载管理员数据
+  // 直接从 Supabase 检查权限（快速、可靠）
   useEffect(() => {
-    if (isClient) {
-      loadAdminData()
-    }
-  }, [isClient, loadAdminData])
+    if (!isClient) return
+    checkHasAdminAccess().then(ok => {
+      setHasAccess(ok)
+      if (ok) loadAdminData().catch(() => {})
+    }).catch(() => setHasAccess(false))
+  }, [isClient])
 
   // 权限检查与跳转
   useEffect(() => {
-    // 等待客户端挂载和数据加载完成
-    if (!isClient || isLoading) return
-
-    // 如果没有管理员权限，跳转到首页
-    if (!hasAdminAccess) {
+    if (!isClient || hasAccess === null) return
+    if (!hasAccess) {
       router.push('/')
     }
-  }, [hasAdminAccess, isLoading, router, isClient])
+  }, [hasAccess, isClient, router])
 
-  // 服务端渲染或客户端初始化时显示加载状态
-  if (!isClient || isLoading) {
+  // 服务端渲染或权限检查中，显示加载状态
+  if (!isClient || hasAccess === null) {
     return (
       <div className="flex h-screen items-center justify-center admin-layout">
         <div className="text-center">
@@ -58,8 +58,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     )
   }
 
-  // 客户端挂载且加载完成后，如果没有权限则不渲染（等待跳转）
-  if (!hasAdminAccess) {
+  // 没有权限则不渲染（等待跳转）
+  if (!hasAccess) {
     return null
   }
 

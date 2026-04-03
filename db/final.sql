@@ -1271,4 +1271,127 @@ WHERE table_schema = 'public'
   AND table_name IN ('blog_memo', 'blog_memo_comment', 'blog_memo_like')
 ORDER BY table_name;
 
+-- 创建系统配置表
+create table if not exists public.sys_config (
+                                                 id bigserial primary key,
+                                                 config_key varchar(100) not null unique,
+    config_value text not null,
+    config_type varchar(20) default 'STRING',  -- BOOLEAN, STRING, NUMBER
+    description varchar(500),
+    is_system boolean default false,
+    create_time timestamptz default now(),
+    update_time timestamptz default now()
+    );
 
+-- 插入初始化数据
+insert into public.sys_config (config_key, config_value, config_type, description, is_system)
+values
+    ('blog_write_permission', 'admin_only', 'STRING', '博客编写权限：admin_only=仅管理员，all=所有人', true),
+    ('memo_write_permission', 'admin_only', 'STRING', '动态编写权限：admin_only=仅管理员，all=所有人', true)
+    on conflict (config_key) do nothing;
+
+-- RLS policy: 所有人都可读取配置
+alter table public.sys_config enable row level security;
+
+create policy "所有人可读配置" on sys_config
+  for select using (true);
+
+-- 创建更新时间触发器
+create or replace function public.update_sys_config_timestamp()
+returns trigger language plpgsql as $$
+begin
+  new.update_time = now();
+return new;
+end;
+$$;
+
+create trigger trg_sys_config_update
+    before update on public.sys_config
+    for each row
+    execute function public.update_sys_config_timestamp();
+
+-- ============================================
+-- 网站收藏表
+-- ============================================
+create table public.user_website_collection
+(
+    id          bigserial primary key,
+    user_id     bigint not null,
+    url         text not null,
+    title       varchar(200) not null,
+    description text,
+    icon_url    text,
+    category    varchar(50) not null default '工具',
+    is_featured boolean not null default false,
+    visit_count integer not null default 0,
+    create_time timestamp with time zone default now() not null,
+    update_time timestamp with time zone default now() not null,
+    deleted     integer not null default 0
+);
+
+comment on table public.user_website_collection is '用户网站精选收藏表';
+
+comment on column public.user_website_collection.id is '收藏ID';
+comment on column public.user_website_collection.user_id is '收藏用户ID';
+comment on column public.user_website_collection.url is '网站链接';
+comment on column public.user_website_collection.title is '网站名称';
+comment on column public.user_website_collection.description is '网站简介';
+comment on column public.user_website_collection.icon_url is '网站图标URL';
+comment on column public.user_website_collection.category is '网站分类：开发/设计/学习/工具/阅读/社交等';
+comment on column public.user_website_collection.is_featured is '是否精选';
+comment on column public.user_website_collection.visit_count is '访问点击次数';
+
+create index idx_uwc_user_id      on public.user_website_collection (user_id);
+create index idx_uwc_category     on public.user_website_collection (category);
+create index idx_uwc_is_featured  on public.user_website_collection (is_featured);
+create index idx_uwc_create_time  on public.user_website_collection (create_time desc);
+
+-- RLS (Row Level Security)
+alter table public.user_website_collection enable row level security;
+
+create policy "用户可查看和插入自己的网站收藏"
+  on public.user_website_collection
+  for all using (
+      user_id = (select id from public.sys_users where username = auth.jwt()->>'aud')
+  );
+
+-- 自动更新时间戳触发器
+create or replace function public.update_uwc_timestamp()
+returns trigger language plpgsql as $$
+begin
+  new.update_time = now();
+  return new;
+end;
+$$;
+
+create trigger trg_uwc_update
+    before update on public.user_website_collection
+    for each row
+    execute function public.update_uwc_timestamp();
+
+-- 访问计数自增函数（通过 RPC 调用）
+create or replace function increment_uwc_visit(website_id_param bigint)
+returns void language plpgsql as $$
+begin
+    update public.user_website_collection
+    set visit_count = visit_count + 1, update_time = now()
+    where id = website_id_param and deleted = 0;
+end;
+$$;
+
+-- 创建博客图片 Storage Bucket
+insert into storage.buckets (id, name, public) values ('blog-images', 'blog-images', true)
+    on conflict (id) do nothing;
+
+-- 任何人可读取 blog-images
+create policy "任何人可读取 blog-images" on storage.objects
+  for select using (bucket_id = 'blog-images');
+
+-- 认证用户可上传 blog-images
+create policy "认证用户可上传 blog-images" on storage.objects
+  for insert
+  with check (bucket_id = 'blog-images' and auth.role() = 'authenticated');
+
+-- 认证用户可删除自己上传的图片
+create policy "认证用户可删除 blog-images" on storage.objects
+  for delete using (bucket_id = 'blog-images' and auth.role() = 'authenticated');

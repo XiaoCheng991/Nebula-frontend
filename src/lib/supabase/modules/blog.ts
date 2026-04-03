@@ -36,14 +36,14 @@ export async function getArticles(options?: {
 
   let query = supabase
     .from('blog_article')
-    .select('*', { count: 'exact' })
+    .select('*', { count: 'estimated' })
     .eq('status', 'PUBLISHED')
     .eq('deleted', 0)
     .order(orderBy, { ascending: false })
     .range(from, to)
 
-  if (search) {
-    query = query.or(`title.ilike.%${search}%,summary.ilike.%${search}%`)
+  if (options?.search) {
+    query = query.or(`title.ilike.%${options.search}%,summary.ilike.%${options.search}%`)
   }
 
   if (options?.categoryId) {
@@ -53,8 +53,9 @@ export async function getArticles(options?: {
   if (options?.tagId) {
     const { data: articleTags } = await supabase
       .from('blog_article_tag')
-      .select('article_id')
+      .select('article_id, id')
       .eq('tag_id', options.tagId)
+      .limit(1000) as unknown as { data: { article_id: number }[] | null }
     const articleIds = articleTags?.map(t => t.article_id) || []
     if (articleIds.length > 0) {
       query = query.in('id', articleIds)
@@ -86,7 +87,7 @@ export async function getArticleById(id: number, slug?: string): Promise<{ data:
  */
 export async function incrementArticleView(id: number): Promise<boolean> {
   if (!isSupabaseAvailable()) return false
-  const { error } = await supabase.rpc('increment_blog_article_view_count', { article_id_param: id })
+  const { error } = await (supabase as any).rpc('increment_blog_article_view_count', { article_id_param: id })
   return !error
 }
 
@@ -96,8 +97,8 @@ export async function incrementArticleView(id: number): Promise<boolean> {
 export async function createArticle(article: ArticleInsert): Promise<{ data: Article | null; error: any }> {
   if (!isSupabaseAvailable()) return { data: null, error: 'Supabase not configured' }
 
-  const { data, error } = await supabase
-    .from('blog_article')
+  const { data, error } = await (supabase
+    .from('blog_article') as any)
     .insert(article)
     .select()
     .single()
@@ -111,8 +112,8 @@ export async function createArticle(article: ArticleInsert): Promise<{ data: Art
 export async function updateArticle(id: number, update: ArticleUpdate): Promise<{ data: Article | null; error: any }> {
   if (!isSupabaseAvailable()) return { data: null, error: 'Supabase not configured' }
 
-  const { data, error } = await supabase
-    .from('blog_article')
+  const { data, error } = await (supabase
+    .from('blog_article') as any)
     .update(update)
     .eq('id', id)
     .eq('deleted', 0)
@@ -128,8 +129,8 @@ export async function updateArticle(id: number, update: ArticleUpdate): Promise<
 export async function deleteArticle(id: number): Promise<boolean> {
   if (!isSupabaseAvailable()) return false
 
-  const { error } = await supabase
-    .from('blog_article')
+  const { error } = await (supabase
+    .from('blog_article') as any)
     .update({ deleted: 1 })
     .eq('id', id)
 
@@ -158,14 +159,15 @@ export async function getCategories(): Promise<{ data: Category[]; error: any }>
 export async function getTags(): Promise<{ data: Tag[]; error: any }> {
   if (!isSupabaseAvailable()) return { data: [], error: 'Supabase not configured' }
 
-  const { data, error } = await supabase
-    .from('blog_tag')
-    .select('*')
+  const { data, error } = await (supabase
+    .from('blog_tag') as any)
+    .select('id, tag_name')
     .eq('status', 'ACTIVE')
     .eq('deleted', 0)
+    .limit(20)
     .order('create_time', { ascending: false })
 
-  return { data: data || [], error }
+  return { data: (data as Tag[]) || [], error }
 }
 
 // ==================== 评论 ====================
@@ -198,8 +200,8 @@ export async function getArticleComments(articleId: number, parent?: number): Pr
 export async function addComment(comment: TablesInsert<'blog_comment'>): Promise<{ data: Comment | null; error: any }> {
   if (!isSupabaseAvailable()) return { data: null, error: 'Supabase not configured' }
 
-  const { data, error } = await supabase
-    .from('blog_comment')
+  const { data, error } = await (supabase
+    .from('blog_comment') as any)
     .insert({
       ...comment,
       parent_id: comment.parent_id || 0,
@@ -219,8 +221,8 @@ export async function addComment(comment: TablesInsert<'blog_comment'>): Promise
 export async function deleteComment(id: number): Promise<boolean> {
   if (!isSupabaseAvailable()) return false
 
-  const { error } = await supabase
-    .from('blog_comment')
+  const { error } = await (supabase
+    .from('blog_comment') as any)
     .update({ deleted: 1 })
     .eq('id', id)
 
@@ -238,15 +240,15 @@ export async function getArticleTags(articleId: number): Promise<{ data: Tag[]; 
   const { data: relations } = await supabase
     .from('blog_article_tag')
     .select('tag_id')
-    .eq('article_id', articleId)
+    .eq('article_id', articleId) as unknown as { data: { tag_id: number }[] | null; error: any }
 
   if (!relations || relations.length === 0) {
     return { data: [], error: null }
   }
 
   const tagIds = relations.map(r => r.tag_id)
-  const { data, error } = await supabase
-    .from('blog_tag')
+  const { data, error } = await (supabase
+    .from('blog_tag') as any)
     .select('*')
     .in('id', tagIds)
     .eq('deleted', 0)
@@ -260,8 +262,8 @@ export async function getArticleTags(articleId: number): Promise<{ data: Tag[]; 
 export async function setArticleTags(articleId: number, tagIds: number[]): Promise<boolean> {
   if (!isSupabaseAvailable()) return false
 
-  const { error: deleteError } = await supabase
-    .from('blog_article_tag')
+  const { error: deleteError } = await (supabase
+    .from('blog_article_tag') as any)
     .delete()
     .eq('article_id', articleId)
 
@@ -270,7 +272,9 @@ export async function setArticleTags(articleId: number, tagIds: number[]): Promi
   if (tagIds.length === 0) return true
 
   const inserts = tagIds.map(tagId => ({ article_id: articleId, tag_id: tagId }))
-  const { error } = await supabase.from('blog_article_tag').insert(inserts)
+  const { error } = await (supabase
+    .from('blog_article_tag') as any)
+    .insert(inserts)
 
   return !error
 }

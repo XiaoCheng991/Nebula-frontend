@@ -86,3 +86,38 @@ export async function uploadAvatar(
 
   return publicUrl
 }
+
+/**
+ * 上传博客图片到 Supabase Storage
+ */
+export async function uploadBlogImage(
+  file: File,
+  onProgress?: (progress: number) => void
+): Promise<string> {
+  const { data: { session } } = await supabase.auth.getSession()
+
+  if (!session) {
+    throw new Error('未登录，无法上传图片')
+  }
+
+  const fileExt = file.name.split('.').pop() || 'png'
+  const fileName = `blog-${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
+  const filePath = `${fileName}`
+
+  const { error } = await supabase.storage
+    .from('blog-images')
+    .upload(filePath, file, {
+      upsert: false,
+      cacheControl: '86400', // 1 天缓存
+    })
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  const { data: { publicUrl } } = supabase.storage
+    .from('blog-images')
+    .getPublicUrl(filePath)
+
+  return publicUrl
+}

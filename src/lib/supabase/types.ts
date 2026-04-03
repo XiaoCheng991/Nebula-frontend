@@ -588,434 +588,618 @@ export interface Database {
           }
         ]
       }
-// 角色菜单关联表
-sys_role_menu: {
-  Row: {
-    id: number
-    role_id: number
-    menu_id: number
-    create_time: string
-  }
-  Insert: {
-    id?: number
-    role_id: number
-    menu_id: number
-    create_time?: string
-  }
-  Update: {
-    id?: number
-    role_id?: number
-    menu_id?: number
-    create_time?: string
-  }
-  Relationships: [
-    {
-      foreignKeyName: 'sys_role_menu_role_id_fkey'
-      columns: ['role_id']
-      referencedRelation: 'sys_roles'
-      referencedColumns: ['id']
-    },
-    {
-      foreignKeyName: 'sys_role_menu_menu_id_fkey'
-      columns: ['menu_id']
-      referencedRelation: 'sys_menus'
-      referencedColumns: ['id']
-    }
-  ]
-}
+      // 角色菜单关联表
+      sys_role_menu: {
+        Row: {
+          id: number
+          role_id: number
+          menu_id: number
+          create_time: string
+        }
+        Insert: {
+          id?: number
+          role_id: number
+          menu_id: number
+          create_time?: string
+        }
+        Update: {
+          id?: number
+          role_id?: number
+          menu_id?: number
+          create_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'sys_role_menu_role_id_fkey'
+            columns: ['role_id']
+            referencedRelation: 'sys_roles'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'sys_role_menu_menu_id_fkey'
+            columns: ['menu_id']
+            referencedRelation: 'sys_menus'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      // ======================
+      // 管理系统补充表（单数名，与 DB 表名对齐）
+      // ======================
+      sys_role: {
+        Row: {
+          id: number
+          role_name: string
+          role_code: string
+          data_scope?: string
+          description?: string
+          is_system?: boolean
+          sort_order?: number
+          status: string
+          create_time: string
+          update_time: string
+          deleted?: number
+        }
+        Insert: {
+          id?: number
+          role_name?: string
+          role_code?: string
+          data_scope?: string
+          description?: string
+          is_system?: boolean
+          sort_order?: number
+          status?: string
+          create_time?: string
+          update_time?: string
+          deleted?: number
+        }
+        Update: {
+          id?: number
+          role_name?: string
+          role_code?: string
+          data_scope?: string
+          description?: string
+          is_system?: boolean
+          sort_order?: number
+          status?: string
+          create_time?: string
+          update_time?: string
+          deleted?: number
+        }
+        Relationships: []
+      }
+      sys_menu: {
+        Row: {
+          id: number
+          parent_id?: number | null
+          menu_type: string
+          menu_name: string
+          path?: string
+          component?: string
+          permission?: string
+          icon?: string
+          sort_order?: number
+          is_visible?: boolean
+          is_system?: boolean
+          create_time: string
+          update_time: string
+          deleted?: number
+        }
+        Insert: {
+          id?: number
+          parent_id?: number | null
+          menu_type?: string
+          menu_name?: string
+          path?: string
+          component?: string
+          permission?: string
+          icon?: string
+          sort_order?: number
+          is_visible?: boolean
+          is_system?: boolean
+          create_time?: string
+          update_time?: string
+          deleted?: number
+        }
+        Update: {
+          id?: number
+          parent_id?: number | null
+          menu_type?: string
+          menu_name?: string
+          path?: string
+          component?: string
+          permission?: string
+          icon?: string
+          sort_order?: number
+          is_visible?: boolean
+          is_system?: boolean
+          create_time?: string
+          update_time?: string
+          deleted?: number
+        }
+        Relationships: []
+      }
+      sys_config: {
+        Row: {
+          id: number
+          config_key: string
+          config_value: string
+          config_type?: string
+          description?: string
+          is_system?: boolean
+          create_time: string
+          update_time: string
+        }
+        Insert: {
+          id?: number
+          config_key?: string
+          config_value?: string
+          config_type?: string
+          description?: string
+          is_system?: boolean
+          create_time?: string
+          update_time?: string
+        }
+        Update: {
+          id?: number
+          config_key?: string
+          config_value?: string
+          config_type?: string
+          description?: string
+          is_system?: boolean
+          create_time?: string
+          update_time?: string
+        }
+        Relationships: []
+      }
+      // ======================
+      // 博客系统表（与 final.sql 对齐）
+      // ======================
+      blog_category: {
+        Row: {
+          id: number
+          parent_id: number
+          category_name: string
+          slug: string | null
+          description: string | null
+          icon: string | null
+          sort_order: number
+          article_count: number
+          status: string
+          create_time: string
+          update_time: string
+          create_by: number | null
+          deleted: number
+        }
+        Insert: {
+          id?: number
+          parent_id?: number
+          category_name: string
+          slug?: string | null
+          description?: string | null
+          icon?: string | null
+          sort_order?: number
+          article_count?: number
+          status?: string
+          create_time?: string
+          update_time?: string
+          create_by?: number | null
+          deleted?: number
+        }
+        Update: {
+          id?: number
+          parent_id?: number
+          category_name?: string
+          slug?: string | null
+          description?: string | null
+          icon?: string | null
+          sort_order?: number
+          article_count?: number
+          status?: string
+          create_time?: string
+          update_time?: string
+          create_by?: number | null
+          deleted?: number
+        }
+        Relationships: []
+      }
+      blog_tag: {
+        Row: {
+          id: number
+          tag_name: string
+          slug: string | null
+          description: string | null
+          icon: string | null
+          color: string | null
+          article_count: number
+          sort_order: number
+          status: string
+          create_time: string
+          update_time: string
+          create_by: number | null
+          deleted: number
+        }
+        Insert: {
+          id?: number
+          tag_name: string
+          slug?: string | null
+          description?: string | null
+          icon?: string | null
+          color?: string | null
+          article_count?: number
+          sort_order?: number
+          status?: string
+          create_time?: string
+          update_time?: string
+          create_by?: number | null
+          deleted?: number
+        }
+        Update: {
+          id?: number
+          tag_name?: string
+          slug?: string | null
+          description?: string | null
+          icon?: string | null
+          color?: string | null
+          article_count?: number
+          sort_order?: number
+          status?: string
+          create_time?: string
+          update_time?: string
+          create_by?: number | null
+          deleted?: number
+        }
+        Relationships: []
+      }
+      blog_article: {
+        Row: {
+          id: number
+          title: string
+          slug: string | null
+          summary: string | null
+          content: string
+          content_html: string | null
+          cover_image: string | null
+          category_id: number | null
+          author_id: number
+          author_name: string | null
+          view_count: number
+          like_count: number
+          comment_count: number
+          status: string
+          is_top: boolean
+          is_recommended: boolean
+          is_comment_enabled: boolean
+          word_count: number | null
+          publish_time: string | null
+          create_time: string
+          update_time: string
+          deleted: number
+        }
+        Insert: {
+          id?: number
+          title: string
+          slug?: string | null
+          summary?: string | null
+          content: string
+          content_html?: string | null
+          cover_image?: string | null
+          category_id?: number | null
+          author_id: number
+          author_name?: string | null
+          view_count?: number
+          like_count?: number
+          comment_count?: number
+          status?: string
+          is_top?: boolean
+          is_recommended?: boolean
+          is_comment_enabled?: boolean
+          word_count?: number | null
+          publish_time?: string | null
+          create_time?: string
+          update_time?: string
+          deleted?: number
+        }
+        Update: {
+          id?: number
+          title?: string
+          slug?: string | null
+          summary?: string | null
+          content?: string
+          content_html?: string | null
+          cover_image?: string | null
+          category_id?: number | null
+          author_id?: number
+          author_name?: string | null
+          view_count?: number
+          like_count?: number
+          comment_count?: number
+          status?: string
+          is_top?: boolean
+          is_recommended?: boolean
+          is_comment_enabled?: boolean
+          word_count?: number | null
+          publish_time?: string | null
+          create_time?: string
+          update_time?: string
+          deleted?: number
+        }
+        Relationships: []
+      }
+      blog_article_tag: {
+        Row: {
+          id: number
+          article_id: number
+          tag_id: number
+          create_time: string
+        }
+        Insert: {
+          id?: number
+          article_id: number
+          tag_id: number
+          create_time?: string
+        }
+        Update: {
+          id?: number
+          article_id?: number
+          tag_id?: number
+          create_time?: string
+        }
+        Relationships: []
+      }
+      blog_comment: {
+        Row: {
+          id: number
+          article_id: number
+          parent_id: number
+          user_id: number
+          username: string | null
+          nickname: string | null
+          avatar_url: string | null
+          content: string
+          ip_address: string | null
+          location: string | null
+          like_count: number
+          status: string
+          create_time: string
+          update_time: string
+          deleted: number
+        }
+        Insert: {
+          id?: number
+          article_id: number
+          parent_id?: number
+          user_id: number
+          username?: string | null
+          nickname?: string | null
+          avatar_url?: string | null
+          content: string
+          ip_address?: string | null
+          location?: string | null
+          like_count?: number
+          status?: string
+          create_time?: string
+          update_time?: string
+          deleted?: number
+        }
+        Update: {
+          id?: number
+          article_id?: number
+          parent_id?: number
+          user_id?: number
+          username?: string | null
+          nickname?: string | null
+          avatar_url?: string | null
+          content?: string
+          ip_address?: string | null
+          location?: string | null
+          like_count?: number
+          status?: string
+          create_time?: string
+          update_time?: string
+          deleted?: number
+        }
+        Relationships: []
+      }
+      blog_memo: {
+        Row: {
+          id: number
+          user_id: number
+          username: string | null
+          nickname: string | null
+          avatar_url: string | null
+          content: string
+          visibility: string
+          parent_memo_id: number
+          image_urls: string[] | null
+          link_url: string | null
+          link_title: string | null
+          link_description: string | null
+          link_image_url: string | null
+          like_count: number
+          comment_count: number
+          is_pinned: boolean
+          create_time: string
+          update_time: string
+          deleted: number
+        }
+        Insert: {
+          id?: number
+          user_id: number
+          username?: string | null
+          nickname?: string | null
+          avatar_url?: string | null
+          content: string
+          visibility?: string
+          parent_memo_id?: number
+          image_urls?: string[] | null
+          link_url?: string | null
+          link_title?: string | null
+          link_description?: string | null
+          link_image_url?: string | null
+          like_count?: number
+          comment_count?: number
+          is_pinned?: boolean
+          create_time?: string
+          update_time?: string
+          deleted?: number
+        }
+        Update: {
+          id?: number
+          user_id?: number
+          username?: string | null
+          nickname?: string | null
+          avatar_url?: string | null
+          content?: string
+          visibility?: string
+          parent_memo_id?: number
+          image_urls?: string[] | null
+          link_url?: string | null
+          link_title?: string | null
+          link_description?: string | null
+          link_image_url?: string | null
+          like_count?: number
+          comment_count?: number
+          is_pinned?: boolean
+          create_time?: string
+          update_time?: string
+          deleted?: number
+        }
+        Relationships: []
+      }
+      blog_memo_comment: {
+        Row: {
+          id: number
+          memo_id: number
+          user_id: number | null
+          username: string | null
+          nickname: string | null
+          avatar_url: string | null
+          parent_id: number
+          content: string
+          ip_address: string | null
+          location: string | null
+          like_count: number
+          create_time: string
+          update_time: string
+          deleted: number
+        }
+        Insert: {
+          id?: number
+          memo_id: number
+          user_id?: number | null
+          username?: string | null
+          nickname?: string | null
+          avatar_url?: string | null
+          parent_id?: number
+          content: string
+          ip_address?: string | null
+          location?: string | null
+          like_count?: number
+          create_time?: string
+          update_time?: string
+          deleted?: number
+        }
+        Update: {
+          id?: number
+          memo_id?: number
+          user_id?: number | null
+          username?: string | null
+          nickname?: string | null
+          avatar_url?: string | null
+          parent_id?: number
+          content?: string
+          ip_address?: string | null
+          location?: string | null
+          like_count?: number
+          create_time?: string
+          update_time?: string
+          deleted?: number
+        }
+        Relationships: []
+      }
+      blog_memo_like: {
+        Row: {
+          id: number
+          memo_id: number
+          user_id: number
+          create_time: string
+        }
+        Insert: {
+          id?: number
+          memo_id: number
+          user_id: number
+          create_time?: string
+        }
+        Update: {
+          id?: number
+          memo_id?: number
+          user_id?: number
+          create_time?: string
+        }
+        Relationships: []
+      }
 
-        // ======================
-        // 博客系统表（与 final.sql 对齐）
-        // ======================
-        blog_category: {
-          Row: {
-            id: number
-            parent_id: number
-            category_name: string
-            slug: string | null
-            description: string | null
-            icon: string | null
-            sort_order: number
-            article_count: number
-            status: string
-            create_time: string
-            update_time: string
-            create_by: number | null
-            deleted: number
-          }
-          Insert: {
-            id?: number
-            parent_id?: number
-            category_name: string
-            slug?: string | null
-            description?: string | null
-            icon?: string | null
-            sort_order?: number
-            article_count?: number
-            status?: string
-            create_time?: string
-            update_time?: string
-            create_by?: number | null
-            deleted?: number
-          }
-          Update: {
-            id?: number
-            parent_id?: number
-            category_name?: string
-            slug?: string | null
-            description?: string | null
-            icon?: string | null
-            sort_order?: number
-            article_count?: number
-            status?: string
-            create_time?: string
-            update_time?: string
-            create_by?: number | null
-            deleted?: number
-          }
-          Relationships: []
+      // 用户网站精选收藏表
+      user_website_collection: {
+        Row: {
+          id: number
+          user_id: number
+          url: string
+          title: string
+          description: string | null
+          icon_url: string | null
+          category: string
+          is_featured: boolean
+          visit_count: number
+          create_time: string
+          update_time: string
+          deleted: number
         }
-        blog_tag: {
-          Row: {
-            id: number
-            tag_name: string
-            slug: string | null
-            description: string | null
-            icon: string | null
-            color: string | null
-            article_count: number
-            sort_order: number
-            status: string
-            create_time: string
-            update_time: string
-            create_by: number | null
-            deleted: number
-          }
-          Insert: {
-            id?: number
-            tag_name: string
-            slug?: string | null
-            description?: string | null
-            icon?: string | null
-            color?: string | null
-            article_count?: number
-            sort_order?: number
-            status?: string
-            create_time?: string
-            update_time?: string
-            create_by?: number | null
-            deleted?: number
-          }
-          Update: {
-            id?: number
-            tag_name?: string
-            slug?: string | null
-            description?: string | null
-            icon?: string | null
-            color?: string | null
-            article_count?: number
-            sort_order?: number
-            status?: string
-            create_time?: string
-            update_time?: string
-            create_by?: number | null
-            deleted?: number
-          }
-          Relationships: []
+        Insert: {
+          id?: number
+          user_id: number
+          url: string
+          title: string
+          description?: string | null
+          icon_url?: string | null
+          category?: string
+          is_featured?: boolean
+          visit_count?: number
+          create_time?: string
+          update_time?: string
+          deleted?: number
         }
-        blog_article: {
-          Row: {
-            id: number
-            title: string
-            slug: string | null
-            summary: string | null
-            content: string
-            content_html: string | null
-            cover_image: string | null
-            category_id: number | null
-            author_id: number
-            author_name: string | null
-            view_count: number
-            like_count: number
-            comment_count: number
-            status: string
-            is_top: boolean
-            is_recommended: boolean
-            is_comment_enabled: boolean
-            word_count: number | null
-            publish_time: string | null
-            create_time: string
-            update_time: string
-            deleted: number
-          }
-          Insert: {
-            id?: number
-            title: string
-            slug?: string | null
-            summary?: string | null
-            content: string
-            content_html?: string | null
-            cover_image?: string | null
-            category_id?: number | null
-            author_id: number
-            author_name?: string | null
-            view_count?: number
-            like_count?: number
-            comment_count?: number
-            status?: string
-            is_top?: boolean
-            is_recommended?: boolean
-            is_comment_enabled?: boolean
-            word_count?: number | null
-            publish_time?: string | null
-            create_time?: string
-            update_time?: string
-            deleted?: number
-          }
-          Update: {
-            id?: number
-            title?: string
-            slug?: string | null
-            summary?: string | null
-            content?: string
-            content_html?: string | null
-            cover_image?: string | null
-            category_id?: number | null
-            author_id?: number
-            author_name?: string | null
-            view_count?: number
-            like_count?: number
-            comment_count?: number
-            status?: string
-            is_top?: boolean
-            is_recommended?: boolean
-            is_comment_enabled?: boolean
-            word_count?: number | null
-            publish_time?: string | null
-            create_time?: string
-            update_time?: string
-            deleted?: number
-          }
-          Relationships: []
+        Update: {
+          id?: number
+          user_id?: number
+          url?: string
+          title?: string
+          description?: string | null
+          icon_url?: string | null
+          category?: string
+          is_featured?: boolean
+          visit_count?: number
+          create_time?: string
+          update_time?: string
+          deleted?: number
         }
-        blog_article_tag: {
-          Row: {
-            id: number
-            article_id: number
-            tag_id: number
-            create_time: string
-          }
-          Insert: {
-            id?: number
-            article_id: number
-            tag_id: number
-            create_time?: string
-          }
-          Update: {
-            id?: number
-            article_id?: number
-            tag_id?: number
-            create_time?: string
-          }
-          Relationships: []
-        }
-        blog_comment: {
-          Row: {
-            id: number
-            article_id: number
-            parent_id: number
-            user_id: number
-            username: string | null
-            nickname: string | null
-            avatar_url: string | null
-            content: string
-            ip_address: string | null
-            location: string | null
-            like_count: number
-            status: string
-            create_time: string
-            update_time: string
-            deleted: number
-          }
-          Insert: {
-            id?: number
-            article_id: number
-            parent_id?: number
-            user_id: number
-            username?: string | null
-            nickname?: string | null
-            avatar_url?: string | null
-            content: string
-            ip_address?: string | null
-            location?: string | null
-            like_count?: number
-            status?: string
-            create_time?: string
-            update_time?: string
-            deleted?: number
-          }
-          Update: {
-            id?: number
-            article_id?: number
-            parent_id?: number
-            user_id?: number
-            username?: string | null
-            nickname?: string | null
-            avatar_url?: string | null
-            content?: string
-            ip_address?: string | null
-            location?: string | null
-            like_count?: number
-            status?: string
-            create_time?: string
-            update_time?: string
-            deleted?: number
-          }
-          Relationships: []
-        }
-        blog_memo: {
-          Row: {
-            id: number
-            user_id: number
-            username: string | null
-            nickname: string | null
-            avatar_url: string | null
-            content: string
-            visibility: string
-            parent_memo_id: number
-            image_urls: string[] | null
-            link_url: string | null
-            link_title: string | null
-            link_description: string | null
-            link_image_url: string | null
-            like_count: number
-            comment_count: number
-            is_pinned: boolean
-            create_time: string
-            update_time: string
-            deleted: number
-          }
-          Insert: {
-            id?: number
-            user_id: number
-            username?: string | null
-            nickname?: string | null
-            avatar_url?: string | null
-            content: string
-            visibility?: string
-            parent_memo_id?: number
-            image_urls?: string[] | null
-            link_url?: string | null
-            link_title?: string | null
-            link_description?: string | null
-            link_image_url?: string | null
-            like_count?: number
-            comment_count?: number
-            is_pinned?: boolean
-            create_time?: string
-            update_time?: string
-            deleted?: number
-          }
-          Update: {
-            id?: number
-            user_id?: number
-            username?: string | null
-            nickname?: string | null
-            avatar_url?: string | null
-            content?: string
-            visibility?: string
-            parent_memo_id?: number
-            image_urls?: string[] | null
-            link_url?: string | null
-            link_title?: string | null
-            link_description?: string | null
-            link_image_url?: string | null
-            like_count?: number
-            comment_count?: number
-            is_pinned?: boolean
-            create_time?: string
-            update_time?: string
-            deleted?: number
-          }
-          Relationships: []
-        }
-        blog_memo_comment: {
-          Row: {
-            id: number
-            memo_id: number
-            user_id: number | null
-            username: string | null
-            nickname: string | null
-            avatar_url: string | null
-            parent_id: number
-            content: string
-            ip_address: string | null
-            location: string | null
-            like_count: number
-            create_time: string
-            update_time: string
-            deleted: number
-          }
-          Insert: {
-            id?: number
-            memo_id: number
-            user_id?: number | null
-            username?: string | null
-            nickname?: string | null
-            avatar_url?: string | null
-            parent_id?: number
-            content: string
-            ip_address?: string | null
-            location?: string | null
-            like_count?: number
-            create_time?: string
-            update_time?: string
-            deleted?: number
-          }
-          Update: {
-            id?: number
-            memo_id?: number
-            user_id?: number | null
-            username?: string | null
-            nickname?: string | null
-            avatar_url?: string | null
-            parent_id?: number
-            content?: string
-            ip_address?: string | null
-            location?: string | null
-            like_count?: number
-            create_time?: string
-            update_time?: string
-            deleted?: number
-          }
-          Relationships: []
-        }
-        blog_memo_like: {
-          Row: {
-            id: number
-            memo_id: number
-            user_id: number
-            create_time: string
-          }
-          Insert: {
-            id?: number
-            memo_id: number
-            user_id: number
-            create_time?: string
-          }
-          Update: {
-            id?: number
-            memo_id?: number
-            user_id?: number
-            create_time?: string
-          }
-          Relationships: []
-        }
-
-      Views: Record<string, never>
-      Functions: Record<string, never>
-      Enums: Record<string, never>
+        Relationships: []
+      }
     }
+
+    Views: Record<string, never>
+    Functions: {
+      increment_uwc_visit: {
+        Args: { website_id_param: number }
+        Returns: void
+      }
+      increment_blog_article_view_count: {
+        Args: { article_id_param: number }
+        Returns: void
+      }
+    }
+    Enums: Record<string, never>
   }
 }
 

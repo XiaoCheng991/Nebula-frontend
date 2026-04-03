@@ -29,7 +29,7 @@ export async function getMemos(options?: {
 
   let query = supabase
     .from('blog_memo')
-    .select('*', { count: 'exact' })
+    .select('*', { count: 'estimated' })
     .eq('deleted', 0)
     .order('is_pinned', { ascending: false })
     .order('create_time', { ascending: false })
@@ -80,8 +80,8 @@ export async function getMemoById(id: number): Promise<{ data: Memo | null; erro
 export async function createMemo(memo: TablesInsert<'blog_memo'>): Promise<{ data: Memo | null; error: any }> {
   if (!isSupabaseAvailable()) return { data: null, error: 'Supabase not configured' }
 
-  const { data, error } = await supabase
-    .from('blog_memo')
+  const { data, error } = await (supabase
+    .from('blog_memo') as any)
     .insert({
       user_id: memo.user_id,
       content: memo.content,
@@ -109,8 +109,8 @@ export async function createMemo(memo: TablesInsert<'blog_memo'>): Promise<{ dat
 export async function updateMemo(id: number, update: TablesInsert<'blog_memo'>): Promise<{ data: Memo | null; error: any }> {
   if (!isSupabaseAvailable()) return { data: null, error: 'Supabase not configured' }
 
-  const { data, error } = await supabase
-    .from('blog_memo')
+  const { data, error } = await (supabase
+    .from('blog_memo') as any)
     .update(update)
     .eq('id', id)
     .eq('deleted', 0)
@@ -126,8 +126,8 @@ export async function updateMemo(id: number, update: TablesInsert<'blog_memo'>):
 export async function deleteMemo(id: number): Promise<boolean> {
   if (!isSupabaseAvailable()) return false
 
-  const { error } = await supabase
-    .from('blog_memo')
+  const { error } = await (supabase
+    .from('blog_memo') as any)
     .update({ deleted: 1 })
     .eq('id', id)
 
@@ -163,8 +163,8 @@ export async function getMemoComments(memoId: number, parent?: number): Promise<
 export async function addMemoComment(comment: TablesInsert<'blog_memo_comment'>): Promise<{ data: MemoComment | null; error: any }> {
   if (!isSupabaseAvailable()) return { data: null, error: 'Supabase not configured' }
 
-  const { data, error } = await supabase
-    .from('blog_memo_comment')
+  const { data, error } = await (supabase
+    .from('blog_memo_comment') as any)
     .insert({
       ...comment,
       parent_id: comment.parent_id || 0,
@@ -183,8 +183,8 @@ export async function addMemoComment(comment: TablesInsert<'blog_memo_comment'>)
 export async function deleteMemoComment(id: number): Promise<boolean> {
   if (!isSupabaseAvailable()) return false
 
-  const { error } = await supabase
-    .from('blog_memo_comment')
+  const { error } = await (supabase
+    .from('blog_memo_comment') as any)
     .update({ deleted: 1 })
     .eq('id', id)
 
@@ -199,8 +199,8 @@ export async function deleteMemoComment(id: number): Promise<boolean> {
 export async function isMemoLiked(memoId: number, userId: number): Promise<boolean> {
   if (!isSupabaseAvailable()) return false
 
-  const { data, error } = await supabase
-    .from('blog_memo_like')
+  const { data } = await (supabase
+    .from('blog_memo_like') as any)
     .select('id')
     .eq('memo_id', memoId)
     .eq('user_id', userId)
@@ -215,8 +215,8 @@ export async function isMemoLiked(memoId: number, userId: number): Promise<boole
 export async function likeMemo(memoId: number, userId: number): Promise<boolean> {
   if (!isSupabaseAvailable()) return false
 
-  const { error } = await supabase
-    .from('blog_memo_like')
+  const { error } = await (supabase
+    .from('blog_memo_like') as any)
     .upsert({ memo_id: memoId, user_id: userId })
 
   return !error
@@ -228,8 +228,8 @@ export async function likeMemo(memoId: number, userId: number): Promise<boolean>
 export async function unlikeMemo(memoId: number, userId: number): Promise<boolean> {
   if (!isSupabaseAvailable()) return false
 
-  const { error } = await supabase
-    .from('blog_memo_like')
+  const { error } = await (supabase
+    .from('blog_memo_like') as any)
     .delete()
     .eq('memo_id', memoId)
     .eq('user_id', userId)

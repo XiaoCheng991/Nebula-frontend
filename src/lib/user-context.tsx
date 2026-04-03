@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react'
 import { supabase } from '@/lib/supabase/client'
-import { getLocalUserInfo } from '@/lib/api/adapters'
+import { getLocalUserInfo } from '@/lib/api/adapters/auth-adapter'
 import { useRouter } from 'next/navigation'
 
 interface UserProfile {

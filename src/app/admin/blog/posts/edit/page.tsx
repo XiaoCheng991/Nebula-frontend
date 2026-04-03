@@ -15,10 +15,16 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react'
+import TurndownService from 'turndown'
 import { toast } from '@/components/ui/use-toast'
 import { createArticle, updateArticle, getArticleById } from '@/lib/supabase/modules/blog'
 import { supabase } from '@/lib/supabase/client'
 import '@/app/admin/blog/editor.css'
+
+const turndown = new TurndownService({
+  headingStyle: 'atx',
+  codeBlockStyle: 'fenced',
+})
 
 export default function PostEditPage() {
   const router = useRouter()
@@ -44,7 +50,8 @@ export default function PostEditPage() {
       }
       setTitle(data.title)
       setExcerpt(data.summary || '')
-      setContent(data.content_html || data.content || '')
+      // 优先加载 HTML 到编辑器
+      setContent(data.content_html || '')
       setFetching(false)
     })()
   }, [editId])
@@ -68,11 +75,14 @@ export default function PostEditPage() {
     setLoading(true)
 
     try {
+      const html = content
+      const markdown = turndown.turndown(html)
+
       const postData = {
         title: title.trim(),
         summary: excerpt.trim() || null,
-        content_html: content,
-        content: content, // 也存一份纯文本
+        content_html: html,
+        content: markdown,
         status: draft ? 'DRAFT' : 'PUBLISHED',
         author_id: Number(user.id) || 5,
         author_name: user.email?.split('@')[0] || '用户',

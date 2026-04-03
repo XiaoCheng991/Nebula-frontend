@@ -228,7 +228,7 @@ async function getUserIdAsNumber(userId: string): Promise<number | null> {
     .from('sys_users')
     .select('id')
     .eq('id', numId)
-    .maybeSingle()
+    .maybeSingle() as { data: { id: number } | null }
 
   if (user) {
     return user.id
@@ -240,7 +240,7 @@ async function getUserIdAsNumber(userId: string): Promise<number | null> {
       .from('sys_users')
       .select('id')
       .eq('email', userId)
-      .maybeSingle()
+      .maybeSingle() as { data: { id: number } | null }
 
     return userByEmail?.id || null
   }
@@ -262,7 +262,7 @@ export async function getUserRoleIds(userId: string): Promise<ApiResponse<number
   const { data: userRoles, error } = await supabase
     .from('sys_user_role')
     .select('role_id')
-    .eq('user_id', userNumId)
+    .eq('user_id', userNumId) as { data: { role_id: number }[] | null; error: any }
 
   if (error) {
     return buildResponse([], 500, '获取用户角色失败')
@@ -296,8 +296,8 @@ export async function updateUser(user: Partial<SysUser>): Promise<ApiResponse<vo
   if (user.lastLoginAt !== undefined) updateData.last_login_at = user.lastLoginAt
   if (user.lastSeenAt !== undefined) updateData.last_seen_at = user.lastSeenAt
 
-  const { error } = await supabase
-    .from('sys_users')
+  const { error } = await (supabase
+    .from('sys_users') as any)
     .update(updateData)
     .eq('id', parseInt(user.id, 10))
 
@@ -319,8 +319,8 @@ export async function updateUserStatus(userId: string, status: number): Promise<
     return buildResponse(undefined, 404, '用户不存在')
   }
 
-  const { error } = await supabase
-    .from('sys_users')
+  const { error } = await (supabase
+    .from('sys_users') as any)
     .update({ account_status: status })
     .eq('id', userIdNum)
 
@@ -355,8 +355,8 @@ export async function assignRolesToUser(userId: string, roleIds: number[]): Prom
       role_id: roleId,
     }))
 
-    const { error } = await supabase
-      .from('sys_user_role')
+    const { error } = await (supabase
+      .from('sys_user_role') as any)
       .insert(userRoles)
 
     if (error) {
@@ -413,7 +413,7 @@ export async function getCurrentUserMenus(): Promise<ApiResponse<SysMenu[]>> {
     .from('sys_users')
     .select('id')
     .eq('email', userEmail)
-    .maybeSingle()
+    .maybeSingle() as { data: { id: number } | null }
 
   if (!sysUser) {
     console.log('用户不存在，email:', userEmail)
@@ -427,7 +427,7 @@ export async function getCurrentUserMenus(): Promise<ApiResponse<SysMenu[]>> {
   const { data: userRoles } = await supabase
     .from('sys_user_role')
     .select('role_id')
-    .eq('user_id', userId)
+    .eq('user_id', userId) as unknown as { data: { role_id: number }[] | null }
 
   console.log('用户角色关联数据:', userRoles)
 
@@ -443,7 +443,7 @@ export async function getCurrentUserMenus(): Promise<ApiResponse<SysMenu[]>> {
   const { data: roleMenus } = await supabase
     .from('sys_role_menu')
     .select('menu_id')
-    .in('role_id', roleIds)
+    .in('role_id', roleIds) as unknown as { data: { menu_id: number }[] | null; error: any }
 
   console.log('角色菜单关联数据:', roleMenus)
 
@@ -564,7 +564,7 @@ export async function getRoleList(
 ): Promise<ApiResponse<{ records: SysRole[]; total: number; pages: number; current: number; size: number }>> {
   let query = supabase
     .from('sys_role')
-    .select('*', { count: 'exact' })
+    .select('*', { count: 'estimated' })
     .order('create_time', { ascending: false })
 
   // 关键词搜索
@@ -578,7 +578,21 @@ export async function getRoleList(
     return buildResponse(null as any, 500, '获取角色列表失败')
   }
 
-  return buildPageResponse((roles || []) as unknown as SysRole[], count || 0)
+  // snake_case → camelCase 字段映射
+  const mappedRoles: SysRole[] = (roles || []).map((r: any) => ({
+    id: r.id,
+    roleName: r.role_name,
+    roleCode: r.role_code,
+    dataScope: r.data_scope,
+    description: r.description,
+    isSystem: r.is_system,
+    sortOrder: r.sort_order,
+    status: r.status,
+    createTime: r.create_time,
+    updateTime: r.update_time,
+  }))
+
+  return buildPageResponse(mappedRoles, count || 0)
 }
 
 /**
@@ -599,8 +613,8 @@ export async function getRolesByUserId(userId: string | number): Promise<ApiResp
     return buildResponse([], 404, '用户不存在')
   }
 
-  const { data: userRoles, error: userRoleError } = await supabase
-    .from('sys_user_role')
+  const { data: userRoles, error: userRoleError } = await (supabase
+    .from('sys_user_role') as any)
     .select('role_id')
     .eq('user_id', userIdNum)
 
@@ -609,15 +623,15 @@ export async function getRolesByUserId(userId: string | number): Promise<ApiResp
     return buildResponse([], 500, '获取用户角色失败')
   }
 
-  const roleIds = userRoles?.map(ur => ur.role_id) || []
+  const roleIds = (userRoles as { role_id: number }[] | null)?.map(ur => ur.role_id) || []
 
   if (roleIds.length === 0) {
     console.log('用户没有角色关联')
     return buildResponse([])
   }
 
-  const { data: roles, error: roleError } = await supabase
-    .from('sys_role')
+  const { data: roles, error: roleError } = await (supabase
+    .from('sys_role') as any)
     .select('*')
     .in('id', roleIds)
 
@@ -747,8 +761,8 @@ export async function addDictType(data: Partial<SysDictType>): Promise<ApiRespon
   if (data.isSystem !== undefined) insertData.is_system = data.isSystem
   if (data.remark !== undefined) insertData.remark = data.remark
 
-  const { error } = await supabase
-    .from('sys_dict_type')
+  const { error } = await (supabase
+    .from('sys_dict_type') as any)
     .insert([insertData])
 
   if (error) {
@@ -766,9 +780,9 @@ export async function updateDictType(data: Partial<SysDictType>): Promise<ApiRes
     return buildResponse(undefined, 400, '字典类型 ID 不能为空')
   }
 
-  const { error } = await supabase
-    .from('sys_dict_type')
-    .update(data)
+  const { error } = await (supabase
+    .from('sys_dict_type') as any)
+    .update(data as any)
     .eq('id', data.id)
 
   if (error) {
@@ -846,8 +860,8 @@ const insertData: {
   if (data.isDefault !== undefined) insertData.is_default = data.isDefault
   if (data.remark !== undefined) insertData.remark = data.remark
 
-  const { error } = await supabase
-    .from('sys_dict_data')
+  const { error } = await (supabase
+    .from('sys_dict_data') as any)
     .insert([insertData])
 
   if (error) {
@@ -865,9 +879,9 @@ export async function updateDictData(data: Partial<SysDictData>): Promise<ApiRes
     return buildResponse(undefined, 400, '字典数据 ID 不能为空')
   }
 
-  const { error } = await supabase
-    .from('sys_dict_data')
-    .update(data)
+  const { error } = await (supabase
+    .from('sys_dict_data') as any)
+    .update(data as any)
     .eq('id', data.id)
 
   if (error) {
@@ -891,4 +905,35 @@ export async function deleteDictData(dictDataId: number): Promise<ApiResponse<vo
   }
 
   return buildResponse(undefined)
+}
+
+// ======== 系统配置管理 API ========
+
+/**
+ * 获取系统配置
+ */
+export async function getSystemConfig(key: string): Promise<{ data: { id: number; config_key: string; config_value: string; description?: string } | null; error: any }> {
+  const { data, error } = await supabase
+    .from('sys_config')
+    .select('id, config_key, config_value, description')
+    .eq('config_key', key)
+    .single()
+
+  return { data, error }
+}
+
+/**
+ * 更新系统配置
+ */
+export async function updateSystemConfig(key: string, value: string): Promise<{ success: boolean; error: string | null }> {
+  const { error } = await (supabase
+    .from('sys_config') as any)
+    .update({ config_value: value })
+    .eq('config_key', key)
+
+  if (error) {
+    throw error
+  }
+
+  return { success: true, error: null }
 }

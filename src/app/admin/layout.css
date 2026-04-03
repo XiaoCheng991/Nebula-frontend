@@ -134,8 +134,43 @@ html[data-theme="light"] {
   background: transparent;
 }
 
-/* 悬停 - 毛玻璃 */
-.menu-item:hover {
+/* 一级菜单项：去掉方框感，hover 只加背景 */
+.menu-item.is-top-level {
+  border: none;
+  margin: 0;
+  border-radius: 0;
+  padding: 10px var(--space-4);
+}
+
+.menu-item.is-top-level:hover {
+  background: var(--glass-bg-hover);
+  border: none;
+  color: var(--text-primary);
+}
+
+.menu-item.is-top-level.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: none;
+  font-weight: 600;
+  border-radius: 0;
+}
+
+/* 一级激活指示条在左边 */
+.menu-item.is-top-level.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 25%;
+  height: 50%;
+  width: 3px;
+  background: var(--accent);
+  border-radius: 0 3px 3px 0;
+  box-shadow: var(--shadow-glow);
+}
+
+/* 悬停 - 毛玻璃（子菜单保留边框感） */
+.submenu .menu-item:hover {
   background: var(--glass-bg-hover);
   color: var(--text-primary);
   border-color: var(--glass-border);
@@ -209,20 +244,29 @@ html[data-theme="light"] {
 .submenu {
   overflow: hidden;
   max-height: 0;
-  transition: max-height 300ms var(--ease);
+  opacity: 0;
+  transition: max-height 300ms var(--ease), opacity 200ms var(--ease);
 }
 
 .submenu.expanded {
-  max-height: 1000px;
+  max-height: 2000px;
+  opacity: 1;
 }
 
+/* 一级子菜单 */
 .submenu .menu-item {
-  margin-left: var(--space-4);
+  margin-left: 0;
   margin-top: 1px;
   margin-bottom: 1px;
-  padding: 7px var(--space-4);
+  padding: 7px var(--space-4) 7px calc(var(--space-4) + 4px);
   font-size: 13px;
   color: var(--text-tertiary);
+}
+
+/* 二级嵌套子菜单缩进 */
+.submenu .submenu .menu-item {
+  padding-left: calc(var(--space-4) + 12px);
+  font-size: 12px;
 }
 
 .submenu .menu-item:hover {
@@ -231,6 +275,17 @@ html[data-theme="light"] {
 
 .submenu .menu-item.active {
   color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* 父菜单高亮（子项激活时） */
+.menu-item.active-parent {
+  color: var(--text-primary);
+  border-color: var(--glass-border);
+}
+
+.menu-item.is-top-level.active-parent {
+  border: none;
 }
 
 /* ===== 卡片 ===== */

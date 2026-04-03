@@ -6,10 +6,10 @@ import { usePathname } from 'next/navigation';
 import { UserAvatar } from '@/components/ui/user-avatar';
 import { LogoutButton } from '@/components/auth/LogoutButton';
 import { useUser } from '@/lib/user-context';
-import { MessageCircle, Settings, Sparkles, FolderUp, LogOut, Loader2, Moon, Sun, Shield, Zap, BookOpen, User, HelpCircle } from 'lucide-react';
+import { MessageCircle, Settings, Sparkles, FolderUp, LogOut, Loader2, Moon, Sun, Shield, Zap, BookOpen, User, HelpCircle, Compass } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useThemeStore } from '@/hooks/useTheme';
-import { useAdminStore } from '@/hooks/useAdminStore'
+import { useAdminStore, checkHasAdminAccess } from '@/hooks/useAdminStore'
 import { LanguageSwitcher } from '@/components/auth/LanguageSwitcher';
 import {
   DropdownMenu,
@@ -26,7 +26,7 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
   className = '',
 }) => {
   const { user, loading: userLoading } = useUser()
-  const { hasAdminAccess, loadAdminData } = useAdminStore()
+  const { loadAdminData } = useAdminStore()
   const [src, setSrc] = React.useState<string>('/logo_icon.svg');
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
@@ -38,6 +38,8 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
   React.useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  const [adminVisible, setAdminVisible] = useState(false)
 
   // 滚动监听 - 实现透明到玻璃效果的切换（登录/注册页面禁用）
   useEffect(() => {
@@ -51,8 +53,12 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isAuthPage]);
 
+  // 直接从 Supabase 检查管理员权限
   useEffect(() => {
     if (user && !userLoading) {
+      setAdminVisible(false)
+      checkHasAdminAccess().then(ok => setAdminVisible(ok)).catch(() => {})
+      // 同时加载 store 数据（用于后台管理页）
       loadAdminData().catch(() => {})
     }
   }, [user?.username, userLoading, loadAdminData])
@@ -73,7 +79,7 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
       setMounted(true);
     }, []);
 
-    if (!mounted || !hasAdminAccess) {
+    if (!mounted || !adminVisible) {
       return null;
     }
 
@@ -175,15 +181,15 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
         {/* 中间 - 导航 */}
         <div className="flex items-center justify-center">
           <nav className="hidden md:flex items-center space-x-1">
-            {/* 仪表盘 */}
+            {/* 我的空间 */}
             <Link
               href="/dashboard"
               className={`relative flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group ${
                 pathname === "/dashboard" ? "bg-white/[0.06]" : ""
               } ${navTextClasses}`}
             >
-              <Sparkles className="h-5 w-5 text-orange-500 group-hover:scale-110 transition-transform" />
-              <span className={`text-sm hidden sm:block transition-all duration-300 ${pathname === "/dashboard" ? "font-semibold" : "font-medium"}`}>仪表盘</span>
+              <Compass className="h-5 w-5 text-orange-500 group-hover:scale-110 transition-transform" />
+              <span className={`text-sm hidden sm:block transition-all duration-300 ${pathname === "/dashboard" ? "font-semibold" : "font-medium"}`}>我的空间</span>
               {pathname === "/dashboard" && (
                 <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-[2px] rounded-full bg-gradient-to-r from-transparent via-orange-500 to-transparent">
                   <span className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-orange-500 to-transparent blur-[4px] opacity-60" />
@@ -223,7 +229,7 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
               )}
             </Link>
 
-            {/* 我 - 公开页面 */}
+            {/* About - 公开页面 */}
             <Link
               href="/me"
               className={`relative flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/5 group ${
@@ -231,7 +237,7 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
               } ${navTextClasses}`}
             >
               <User className="h-5 w-5 text-purple-500 group-hover:scale-110 transition-transform" />
-              <span className={`text-sm hidden sm:block transition-all duration-300 ${pathname === "/me" ? "font-semibold" : "font-medium"}`}>我</span>
+              <span className={`text-sm hidden sm:block transition-all duration-300 ${pathname === "/me" ? "font-semibold" : "font-medium"}`}>About</span>
               {pathname === "/me" && (
                 <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-[2px] rounded-full bg-gradient-to-r from-transparent via-orange-500 to-transparent">
                   <span className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-orange-500 to-transparent blur-[4px] opacity-60" />

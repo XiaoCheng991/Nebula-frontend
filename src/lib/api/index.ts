@@ -1,12 +1,9 @@
 /**
- * API 模块统一导出
+ * API 模块统一导出（Supabase 模式）
  */
-
-// 核心 HTTP 客户端
-export * from './client'
-
-// 类型定义
-export * from './types'
 
 // API 模块
 export * from './modules'
+
+// 认证适配器
+export { getLocalUserInfo } from './adapters'
