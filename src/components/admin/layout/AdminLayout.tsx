@@ -6,7 +6,8 @@ import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Sidebar } from './Sidebar'
 import { AdminHeader } from './AdminHeader'
-import { useAdminStore, checkHasAdminAccess } from '@/hooks/useAdminStore'
+import { useAdminStore } from '@/hooks/useAdminStore'
+import { useAppStore } from '@/hooks/useAppStore'
 import { useThemeEffect } from '@/hooks/useTheme'
 import '@/app/admin/layout.css'
 import '@/app/admin/page-styles.css'
@@ -18,8 +19,9 @@ interface AdminLayoutProps {
 export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const router = useRouter()
   const { loadAdminData } = useAdminStore()
+  const { refreshPermissions, hasAdminAccess, permissionsLoaded } = useAppStore()
   const [isClient, setIsClient] = useState(false)
-  const [hasAccess, setHasAccess] = useState<boolean | null>(null)
+  const [hasChecked, setHasChecked] = useState(false)
 
   // 激活主题切换功能
   useThemeEffect()
@@ -29,25 +31,32 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     setIsClient(true)
   }, [])
 
-  // 直接从 Supabase 检查权限（快速、可靠）
+  // 使用统一的权限检查，而不是单独调用 checkHasAdminAccess
   useEffect(() => {
-    if (!isClient) return
-    checkHasAdminAccess().then(ok => {
-      setHasAccess(ok)
-      if (ok) loadAdminData().catch(() => {})
-    }).catch(() => setHasAccess(false))
-  }, [isClient])
+    if (!isClient || hasChecked) return
+    setHasChecked(true)
+    refreshPermissions().catch(() => {})
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isClient, hasChecked])
+
+  // 权限检查完成后，如果有管理员权限则加载 admin 数据
+  useEffect(() => {
+    if (hasAdminAccess && isClient) {
+      loadAdminData().catch(() => {})
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasAdminAccess, isClient])
 
   // 权限检查与跳转
   useEffect(() => {
-    if (!isClient || hasAccess === null) return
-    if (!hasAccess) {
+    if (!isClient || !permissionsLoaded) return
+    if (!hasAdminAccess) {
       router.push('/')
     }
-  }, [hasAccess, isClient, router])
+  }, [hasAdminAccess, isClient, permissionsLoaded, router])
 
   // 服务端渲染或权限检查中，显示加载状态
-  if (!isClient || hasAccess === null) {
+  if (!isClient || !permissionsLoaded || !hasAdminAccess) {
     return (
       <div className="flex h-screen items-center justify-center admin-layout">
         <div className="text-center">
@@ -59,7 +68,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   }
 
   // 没有权限则不渲染（等待跳转）
-  if (!hasAccess) {
+  if (!hasAdminAccess) {
     return null
   }
 

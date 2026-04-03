@@ -913,8 +913,8 @@ export async function deleteDictData(dictDataId: number): Promise<ApiResponse<vo
  * 获取系统配置
  */
 export async function getSystemConfig(key: string): Promise<{ data: { id: number; config_key: string; config_value: string; description?: string } | null; error: any }> {
-  const { data, error } = await supabase
-    .from('sys_config')
+  const { data, error } = await (supabase
+    .from('sys_config') as any)
     .select('id, config_key, config_value, description')
     .eq('config_key', key)
     .single()

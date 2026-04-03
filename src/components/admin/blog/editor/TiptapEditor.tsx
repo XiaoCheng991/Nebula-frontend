@@ -59,6 +59,7 @@ export function TiptapEditor({ content, onChange, placeholder = '开始写作...
     extensions: [
       StarterKit.configure({
         codeBlock: false,
+        link: false,
       }),
       Placeholder.configure({
         placeholder: placeholder,

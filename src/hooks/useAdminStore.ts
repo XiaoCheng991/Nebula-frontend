@@ -23,44 +23,39 @@ import {
 
 /**
  * 直接从 Supabase 检查用户是否有管理员/超级管理员角色
- * 绕过 loadAdminData 的复杂链路，提供更可靠的权限检查
+ * 使用并行查询替代串行请求，提升性能
  */
 export async function checkHasAdminAccess(): Promise<boolean> {
-  // 获取当前会话
   const { data: { session } } = await supabase.auth.getSession()
   if (!session?.user?.email) return false
 
-  // 查找 sys_users 中的用户
-  const { data: sysUser } = await supabase
-    .from('sys_users')
-    .select('id')
-    .eq('email', session.user.email)
-    .maybeSingle() as { data: { id: number } | null }
+  // 并行查询：用户信息和角色关系同时进行
+  const [sysUserRes, rolesRes] = await Promise.all([
+    supabase
+      .from('sys_users')
+      .select('id')
+      .eq('email', session.user.email)
+      .maybeSingle() as unknown as Promise<{ data: { id: number } | null }>,
+    supabase
+      .from('sys_role')
+      .select('id, role_code')
+      .in('role_code', ['admin', 'super_admin']) as unknown as Promise<{ data: { id: number; role_code: string }[] | null }>,
+  ])
 
-  if (!sysUser?.id) return false
+  const sysUser = await sysUserRes
+  const allRoles = await rolesRes
 
-  // 查找该用户的角色
+  if (!sysUser?.data?.id || !allRoles?.data || allRoles.data.length === 0) return false
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: userRoles } = await supabase
     .from('sys_user_role')
     .select('role_id')
-    .eq('user_id', sysUser.id) as { data: { role_id: number }[] | null; error: any }
+    .eq('user_id', sysUser.data.id)
+    .in('role_id', allRoles.data.map(r => r.id)) as { data: { role_id: number }[] | null }
 
   if (!userRoles || userRoles.length === 0) return false
-
-  // 查询角色代码
-  const roleIds = userRoles.map(ur => ur.role_id)
-  const { data: roles } = await supabase
-    .from('sys_role')
-    .select('role_code')
-    .in('id', roleIds) as { data: { role_code: string }[] | null; error: any }
-
-  if (!roles || roles.length === 0) return false
-
-  // 检查是否包含 admin 或 super_admin
-  return roles.some(role => {
-    const code = (role.role_code || '').toLowerCase()
-    return code.includes('admin') || code.includes('super')
-  })
+  return true
 }
 
 export const useAdminStore = create<AdminState>()(

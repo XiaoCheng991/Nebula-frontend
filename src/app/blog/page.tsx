@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Calendar,
   Hash,
@@ -37,10 +37,9 @@ import { getLocalUserInfo } from "@/lib/api";
 import { supabase } from "@/lib/supabase/client";
 import { uploadAvatar } from "@/lib/api/modules/file";
 import { toast } from "@/components/ui/use-toast";
-import { checkHasAdminAccess } from "@/hooks/useAdminStore";
+import { usePagePermission } from "@/hooks/useAppStore";
 import { getArticles, getTags as getApiTags } from "@/lib/supabase/modules/blog";
 import { getMemos } from "@/lib/supabase/modules/memo";
-import { useSystemConfig } from "@/hooks/useSystemConfig";
 
 const socialLinks = [
   { icon: SiGithub, href: "https://github.com/XiaoCheng991", label: "GitHub" },
@@ -101,14 +100,13 @@ function formatDateShort(dateStr: string): string {
 
 export default function BlogPage() {
   const { user, loading: userLoading } = useUser();
-  const [hasAdminAccess, setHasAdminAccess] = useState(false);
-  const { value: blogWritePerm } = useSystemConfig('blog_write_permission');
-  const { value: memoWritePerm } = useSystemConfig('memo_write_permission');
+  const { hasAdminAccess, blogWritePerm, memoWritePerm } = usePagePermission();
   const [showCropDialog, setShowCropDialog] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [originalFile, setOriginalFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const dataFetchedRef = React.useRef(false);
   const [starCounts, setStarCounts] = useState<Record<string, number>>({});
   const [memos, setMemos] = useState<any[]>([]);
   const [articles, setArticles] = useState<any[]>([]);
@@ -119,6 +117,9 @@ export default function BlogPage() {
 
   useEffect(() => {
     setIsMounted(true);
+
+    if (dataFetchedRef.current) return;
+    dataFetchedRef.current = true;
 
     (async () => {
       const [memosRes, articlesRes, tagsRes] = await Promise.allSettled([
@@ -183,12 +184,6 @@ export default function BlogPage() {
   const userId = user?.username || localUser?.id?.toString() || null;
   const userNickname = user?.nickname || localUser?.nickname || "用户";
   const userAvatar = user?.avatarUrl || localUser?.avatarUrl || null;
-
-  // 检查管理员权限
-  useEffect(() => {
-    if (!isMounted) return;
-    checkHasAdminAccess().then(setHasAdminAccess);
-  }, [isMounted]);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

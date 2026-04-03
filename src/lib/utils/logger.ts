@@ -2,7 +2,18 @@
  * 请求日志工具（仅开发环境）
  */
 
-import { RequestMetadata } from '@/lib/api/types'
+/**
+ * 请求元数据类型（本地定义，避免外部依赖）
+ */
+interface RequestMetadata {
+  url: string
+  method: string
+  timestamp: number
+  duration?: number
+  success: boolean
+  statusCode?: number
+  errorMessage?: string
+}
 
 const isDevelopment = process.env.NODE_ENV === 'development'
 

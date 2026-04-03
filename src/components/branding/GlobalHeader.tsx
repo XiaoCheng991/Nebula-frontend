@@ -9,7 +9,8 @@ import { useUser } from '@/lib/user-context';
 import { MessageCircle, Settings, Sparkles, FolderUp, LogOut, Loader2, Moon, Sun, Shield, Zap, BookOpen, User, HelpCircle, Compass } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useThemeStore } from '@/hooks/useTheme';
-import { useAdminStore, checkHasAdminAccess } from '@/hooks/useAdminStore'
+import { useAdminStore } from '@/hooks/useAdminStore'
+import { useAppStore } from '@/hooks/useAppStore'
 import { LanguageSwitcher } from '@/components/auth/LanguageSwitcher';
 import {
   DropdownMenu,
@@ -26,6 +27,7 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
   className = '',
 }) => {
   const { user, loading: userLoading } = useUser()
+  const { hasAdminAccess, permissionsLoaded, refreshPermissions } = useAppStore()
   const { loadAdminData } = useAdminStore()
   const [src, setSrc] = React.useState<string>('/logo_icon.svg');
   const [isScrolled, setIsScrolled] = useState(false);
@@ -39,7 +41,6 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
     setIsMounted(true);
   }, []);
 
-  const [adminVisible, setAdminVisible] = useState(false)
 
   // 滚动监听 - 实现透明到玻璃效果的切换（登录/注册页面禁用）
   useEffect(() => {
@@ -53,15 +54,21 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isAuthPage]);
 
-  // 直接从 Supabase 检查管理员权限
+  // 使用统一的权限检查（避免其他组件重复请求）
   useEffect(() => {
-    if (user && !userLoading) {
-      setAdminVisible(false)
-      checkHasAdminAccess().then(ok => setAdminVisible(ok)).catch(() => {})
-      // 同时加载 store 数据（用于后台管理页）
+    if (user && !userLoading && !permissionsLoaded) {
+      refreshPermissions().catch(() => {})
+    }
+  }, [user, userLoading, permissionsLoaded])
+
+  // 有管理员权限时加载 admin store 数据
+  const loadedRef = React.useRef(false)
+  useEffect(() => {
+    if (hasAdminAccess && user && !loadedRef.current) {
+      loadedRef.current = true
       loadAdminData().catch(() => {})
     }
-  }, [user?.username, userLoading, loadAdminData])
+  }, [hasAdminAccess, user])
 
   const handleError = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const img = e.currentTarget;
@@ -72,16 +79,7 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
   };
 
   const AdminEntrance: React.FC = () => {
-    const { hasAdminAccess } = useAdminStore();
-    const [mounted, setMounted] = React.useState(false);
-
-    React.useEffect(() => {
-      setMounted(true);
-    }, []);
-
-    if (!mounted || !adminVisible) {
-      return null;
-    }
+    if (!hasAdminAccess) return null;
 
     return (
       <Link
