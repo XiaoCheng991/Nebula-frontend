@@ -40,6 +40,7 @@ import { toast } from "@/components/ui/use-toast";
 import { usePagePermission } from "@/hooks/useAppStore";
 import { getArticles, getTags as getApiTags } from "@/lib/supabase/modules/blog";
 import { getMemos } from "@/lib/supabase/modules/memo";
+import { MarkdownPreview } from "@/components/ui/markdown-preview";
 
 const socialLinks = [
   { icon: IconGitHub, href: "https://github.com/XiaoCheng991", label: "GitHub" },
@@ -98,8 +99,16 @@ function formatDateShort(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString("zh-CN");
 }
 
+/**
+ * 截断文本，超长部分添加省略号
+ */
+function truncateText(text: string, maxLen: number): string {
+  if (!text || text.length <= maxLen) return text;
+  return text.slice(0, maxLen).trim() + '...';
+}
+
 export default function BlogPage() {
-  const { user, loading: userLoading } = useUser();
+  const { user, loading: userLoading, refreshUser: refreshUserContext } = useUser();
   const { hasAdminAccess, blogWritePerm, memoWritePerm } = usePagePermission();
   const [showCropDialog, setShowCropDialog] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -118,7 +127,6 @@ export default function BlogPage() {
   const [showBookmarkDialog, setShowBookmarkDialog] = useState(false);
   const [bookmarkTitle, setBookmarkTitle] = useState('');
   const [bookmarkUrl, setBookmarkUrl] = useState('');
-
   useEffect(() => {
     setIsMounted(true);
 
@@ -138,7 +146,7 @@ export default function BlogPage() {
         const userIds = [...new Set(memos.map((m: any) => m.user_id))]
         const { data: users } = await supabase
           .from('sys_users')
-          .select('id, nickname, username, avatar_url')
+          .select('id, nickname, username, avatar_url, email')
           .in('id', userIds)
         const userMap = new Map(users?.map((u: any) => [u.id, u]) || [])
         const memosWithUsers = memos.map((memo: any) => ({
@@ -246,14 +254,40 @@ export default function BlogPage() {
       const { data: { user: supabaseUser } } = await supabase.auth.getUser();
       if (supabaseUser) {
         await supabase.auth.updateUser({ data: { avatar_url: publicUrl } });
+
+        // 查找并更新 sys_users 中的头像（按 username 匹配）
+        const userUsername = supabaseUser.user_metadata?.login
+          || supabaseUser.user_metadata?.username
+          || supabaseUser.user_metadata?.name
+          || localUser?.username;
+        if (userUsername) {
+          const { data: existingUser } = await supabase
+            .from('sys_users')
+            .select('id, avatar_url')
+            .eq('username', userUsername)
+            .maybeSingle();
+
+          if (existingUser) {
+            await supabase
+              .from('sys_users')
+              .update({ avatar_url: publicUrl })
+              .eq('id', existingUser.id);
+          }
+        }
       }
 
       if (localUser) {
-        localStorage.setItem('userInfo', JSON.stringify({
+        const newLocalUser = {
           ...localUser,
           avatarUrl: publicUrl,
           avatarName: publicUrl,
-        }));
+        };
+        localStorage.setItem('userInfo', JSON.stringify(newLocalUser));
+      }
+
+      // 刷新顶部导航栏头像
+      if (refreshUserContext) {
+        await refreshUserContext();
       }
 
       window.dispatchEvent(new Event('auth-change'));
@@ -498,6 +532,10 @@ export default function BlogPage() {
               ) : memos.length === 0 ? (
                 <p className="text-xs text-zinc-400">暂无动态</p>
               ) : memos.map((memo) => {
+                // 如果 memo 是当前用户的，用顶部导航栏的最新头像，否则用 sys_users 的
+                const currentUsername = user?.username || localUser?.username
+                const isCurrentUser = memo.sys_users?.username === currentUsername
+                const memoAvatarUrl = isCurrentUser ? (user?.avatarUrl || memo.sys_users?.avatar_url) : memo.sys_users?.avatar_url
                 // Split mood from content
                 const lines = memo.content.split('\n\n')
                 const moodLine = lines.find((l: string) => l.startsWith('心情：'))
@@ -505,9 +543,10 @@ export default function BlogPage() {
                 const textContent = lines.filter((l: string) => !l.startsWith('心情：')).join('\n\n')
 
                 return (
-                  <div
+                  <Link
                     key={memo.id}
-                    className="shrink-0 w-64 flex flex-col rounded-lg border border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 transition-all overflow-hidden bg-white/80 dark:bg-zinc-900/40"
+                    href={`/memo/${memo.id}`}
+                    className="shrink-0 w-64 flex flex-col rounded-lg border border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 transition-all overflow-hidden bg-white/80 dark:bg-zinc-900/40 cursor-pointer no-underline text-inherit"
                   >
                     <div className="flex-1 flex flex-col justify-between p-3 min-h-[144px]">
                       <div className="flex-1 overflow-hidden">
@@ -531,7 +570,7 @@ export default function BlogPage() {
                       {/* Author */}
                       <div className="flex items-center gap-2 mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-700">
                         <UserAvatar
-                          avatarUrl={memo.sys_users?.avatar_url}
+                          avatarUrl={memoAvatarUrl}
                           nickname={memo.sys_users?.nickname}
                           size="sm"
                           className="w-5 h-5"
@@ -544,7 +583,7 @@ export default function BlogPage() {
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 )
               })}
             </div>
@@ -570,7 +609,7 @@ export default function BlogPage() {
                 写博客
               </button>
               <Link
-                href="/blog"
+                href="/blogs"
                 className="text-xs text-zinc-400 hover:text-primary transition-colors flex items-center gap-1"
               >
                 查看全部
@@ -648,9 +687,10 @@ export default function BlogPage() {
                       <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 group-hover:text-primary transition-colors leading-snug mb-2">
                         {latestArticle.title}
                       </h3>
-                      <p className="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-3 mb-3">
-                        {latestArticle.summary || "暂无摘要"}
-                      </p>
+                      <div className="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-3 mb-3">
+                        <MarkdownPreview content={latestArticle.summary || latestArticle.content} maxLen={150} />
+                        {!latestArticle.summary && !latestArticle.content && "暂无摘要"}
+                      </div>
                       <div className="flex items-center gap-2 text-xs text-zinc-400">
                         <Clock className="h-3 w-3" />
                         <span>{latestArticle.view_count || 0} 阅读</span>
@@ -741,9 +781,10 @@ export default function BlogPage() {
                       <h4 className="text-xs font-medium text-zinc-900 dark:text-zinc-100 group-hover:text-primary transition-colors line-clamp-3 mb-1.5">
                         {article.title}
                       </h4>
-                      <p className="text-[11px] text-zinc-400 line-clamp-2 mb-1.5">
-                        {article.summary || "暂无摘要"}
-                      </p>
+                      <div className="text-[11px] text-zinc-400 line-clamp-2 mb-1.5">
+                        <MarkdownPreview content={article.summary || article.content} maxLen={80} />
+                        {!article.summary && !article.content && "暂无摘要"}
+                      </div>
                       <div className="flex items-center gap-2 text-[11px] text-zinc-400">
                         <Calendar className="h-3 w-3" />
                         <span>{article.create_time ? formatDateShort(article.create_time) : ""}</span>
@@ -756,13 +797,6 @@ export default function BlogPage() {
               </div>
             </div>
           )}
-
-          <div className="mt-8 text-center">
-            <Button variant="outline" size="lg" className="gap-2">
-              <BookOpen className="h-4 w-4" />
-              加载更多文章
-            </Button>
-          </div>
         </section>
 
         <footer className="mt-16 py-8 border-t border-zinc-200 dark:border-zinc-800">

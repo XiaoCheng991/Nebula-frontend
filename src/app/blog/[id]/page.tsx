@@ -1,7 +1,11 @@
+'use client'
+
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { useState, useEffect } from 'react'
 import { ArrowLeft, Calendar, Clock, Share2, MessageSquare } from 'lucide-react'
-import { getArticleById, incrementArticleView } from '@/lib/supabase/modules/blog'
+import { getArticleById } from '@/lib/supabase/modules/blog'
+import { useUser } from '@/lib/user-context'
 import { UserAvatar } from '@/components/ui/user-avatar'
 import { IconGitHub } from '@/components/branding/social-icons'
 
@@ -24,22 +28,49 @@ function formatReadingTime(html: string): string {
   return `${minutes} 分钟阅读`
 }
 
-export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
-  const articleId = Number(params.id)
+export default function BlogDetailPage({ params }: BlogDetailPageProps) {
+  const { user } = useUser()
+  const [article, setArticle] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
 
-  if (isNaN(articleId)) {
-    notFound()
+  useEffect(() => {
+    const articleId = Number(params.id)
+    if (isNaN(articleId)) {
+      notFound()
+      return
+    }
+
+    getArticleById(articleId).then(({ data, error }) => {
+      if (error || !data || data.deleted === 1) {
+        notFound()
+        return
+      }
+      setArticle(data)
+      setLoading(false)
+    })
+  }, [params.id])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-transparent to-zinc-100 dark:from-zinc-950 dark:via-zinc-900/50 dark:to-zinc-950 flex items-center justify-center">
+        <div className="text-sm text-zinc-400">加载中...</div>
+      </div>
+    )
   }
 
-  const { data: article, error } = await getArticleById(articleId)
-
-  if (error || !article || article.deleted === 1) {
+  if (!article) {
     notFound()
   }
-
-  incrementArticleView(articleId)
 
   const readingTime = article.content_html ? formatReadingTime(article.content_html) : ''
+
+  // 头像匹配：如果作者是当前用户，用 useUser 中的最新头像
+  const currentUsername = user?.username || ''
+  const isCurrentUserAuthor = article.author_name === currentUsername
+  const authorAvatarUrl = isCurrentUserAuthor
+    ? (user?.avatarUrl || null)
+    : null
+  const authorNickname = article.author_name || '用户'
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-transparent to-zinc-100 dark:from-zinc-950 dark:via-zinc-900/50 dark:to-zinc-950">
@@ -80,7 +111,8 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
         <div className="flex items-center gap-4 mb-8 pb-8 border-b border-zinc-200 dark:border-zinc-800">
           <UserAvatar
             size="md"
-            nickname={article.author_name}
+            avatarUrl={authorAvatarUrl}
+            nickname={authorNickname}
           />
           <div className="flex-1">
             <p className="font-medium text-zinc-900 dark:text-zinc-100">

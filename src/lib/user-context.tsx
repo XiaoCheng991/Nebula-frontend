@@ -6,6 +6,7 @@ import { getLocalUserInfo } from '@/lib/api/adapters/auth-adapter'
 import { useRouter } from 'next/navigation'
 
 interface UserProfile {
+  id?: number | string
   username: string
   nickname: string
   avatarUrl: string | null

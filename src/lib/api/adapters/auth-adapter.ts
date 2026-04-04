@@ -45,7 +45,7 @@ function buildUserInfo(supabaseUser: any, sysData: any): UserProfile {
     username: sysData?.username ?? supabaseUser.user_metadata?.username ?? supabaseUser.email?.split('@')[0] ?? '',
     email: supabaseUser.email,
     nickname: sysData?.nickname ?? supabaseUser.user_metadata?.nickname ?? supabaseUser.user_metadata?.name ?? '',
-    avatarUrl: sysData?.avatar_url ?? supabaseUser.user_metadata?.avatar_url ?? supabaseUser.user_metadata?.avatar ?? null,
+    avatarUrl: sysData?.avatar_url || supabaseUser.user_metadata?.avatar_url || supabaseUser.user_metadata?.avatar || null,
     avatarName: sysData?.avatar_name ?? supabaseUser.user_metadata?.avatar_name ?? null,
     avatarSize: sysData?.avatar_size ?? supabaseUser.user_metadata?.avatar_size ?? null,
   }

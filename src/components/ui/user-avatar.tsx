@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import { useUser } from "@/lib/user-context"
 
 interface UserAvatarProps {
   avatarUrl?: string | null
@@ -20,6 +21,7 @@ export function UserAvatar({
   className = ""
 }: UserAvatarProps) {
   const [imageError, setImageError] = useState(false)
+  const { user: currentUser } = useUser()
 
   const sizeClasses = {
     sm: "w-8 h-8 text-xs",
@@ -49,9 +51,36 @@ export function UserAvatar({
     return `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(seed)}&backgroundColor=c0aede,d4e4ff,c0aede`
   }, [username, email, nickname])
 
+  // 判断是否是当前登录用户，如果是则使用 useUser 中的最新头像
+  const resolvedAvatarUrl = useMemo(() => {
+    const isCurrentUser = currentUser &&
+      username &&
+      username.toLowerCase() === currentUser.username?.toLowerCase()
+
+    // 如果 useUser 匹配成功且有上传头像
+    if (isCurrentUser && currentUser?.avatarUrl) {
+      return currentUser.avatarUrl
+    }
+
+    // fallback: 如果 useUser 数据未就绪，尝试从 localStorage 匹配
+    if (typeof window !== 'undefined' && username) {
+      try {
+        const stored = localStorage.getItem('userInfo')
+        if (stored) {
+          const local = JSON.parse(stored)
+          if (local?.username?.toLowerCase() === username.toLowerCase()) {
+            return local.avatarUrl || avatarUrl || null
+          }
+        }
+      } catch {}
+    }
+
+    return avatarUrl
+  }, [avatarUrl, username, currentUser])
+
   // 有真实头像 URL 就用真实的，没有就用像素风默认头像
-  const hasCustomAvatar = Boolean(avatarUrl)
-  const src = hasCustomAvatar ? (avatarUrl ?? undefined) : pixelAvatarUrl
+  const hasCustomAvatar = Boolean(resolvedAvatarUrl)
+  const src = hasCustomAvatar ? (resolvedAvatarUrl ?? undefined) : pixelAvatarUrl
 
   return (
     <>
