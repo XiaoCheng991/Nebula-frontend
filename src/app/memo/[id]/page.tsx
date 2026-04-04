@@ -12,6 +12,10 @@ import { useUser } from '@/lib/user-context'
 import { toast } from '@/components/ui/use-toast'
 import { Button } from '@/components/ui/button'
 
+type SysUser = { id: number; nickname: string | null; username: string | null; avatar_url: string | null }
+type MemoWithAuthor = Memo & { sys_users?: SysUser | null }
+type CommentWithAuthor = MemoComment & { sys_users?: SysUser | null }
+
 function formatTimeAgo(dateStr: string): string {
   const date = new Date(dateStr)
   const now = new Date()
@@ -30,9 +34,9 @@ export default function MemoDetailPage({ params }: { params: { id: string } }) {
   const { user } = useUser()
   const router = useRouter()
   const memoId = Number(params.id)
-  const [memo, setMemo] = useState<Memo | null>(null)
+  const [memo, setMemo] = useState<MemoWithAuthor | null>(null)
   const [loading, setLoading] = useState(true)
-  const [comments, setComments] = useState<MemoComment[]>([])
+  const [comments, setComments] = useState<CommentWithAuthor[]>([])
   const [commentContent, setCommentContent] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [liked, setLiked] = useState(false)
