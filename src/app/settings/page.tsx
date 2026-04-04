@@ -172,40 +172,33 @@ export default function SettingsPage() {
   return (
     <ProtectedRoute>
       <LayoutWithFullWidth>
-        <div className="bg-gradient-to-br from-zinc-50 via-transparent to-zinc-100 dark:from-zinc-950 dark:to-zinc-900 min-h-screen">
-          <div className="max-w-2xl mx-auto px-4 pt-24 pb-12">
+        <div className="bg-gradient-to-br from-orange-50/50 via-zinc-50 to-amber-50/30 dark:from-zinc-900 dark:via-zinc-950 dark:to-zinc-900 min-h-screen">
+          <div className="max-w-2xl mx-auto px-4 pt-10 pb-12">
             {/* Page Header */}
-            <div className="mb-8">
-              <div className="flex items-center gap-2 mb-2">
+            <div className="mb-5">
+              <div className="flex items-center gap-2 mb-1">
                 <Settings className="h-4 w-4 text-zinc-400" />
-                <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
-                  <span className="tracking-widest text-xs">SETTINGS</span>
-                </span>
+                <span className="text-xs tracking-widest font-medium text-zinc-500 dark:text-zinc-400">SETTINGS</span>
               </div>
-              <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">账号设置</h1>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">管理你的个人信息</p>
+              <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">账号设置</h1>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">管理你的个人信息</p>
             </div>
 
-            {/* Avatar + Profile combined card */}
-            <Card className="border-0 bg-white/90 dark:bg-zinc-900/60 backdrop-blur-xl shadow-lg mb-4">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-2 mb-6 pb-4 border-b border-zinc-200 dark:border-zinc-700">
-                  <User className="h-4 w-4 text-zinc-400" />
-                  <span className="text-xs tracking-widest font-medium text-zinc-500 dark:text-zinc-400">PROFILE</span>
-                </div>
-
+            {/* Card */}
+            <Card className="rounded-xl border border-zinc-200/60 dark:border-zinc-700/30 bg-white/95 dark:bg-zinc-900/70 backdrop-blur-xl shadow-md">
+              <CardContent className="px-5 py-4">
                 {/* Avatar */}
-                <div className="flex items-center gap-5 mb-6">
+                <div className="flex items-center gap-4 mb-5 pb-4 border-b border-zinc-200 dark:border-zinc-700">
                   <div className="relative">
                     <UserAvatar
                       avatarUrl={profile.avatarUrl}
                       nickname={profile.nickname}
                       username={profile.username}
                       size="lg"
-                      className="w-20 h-20 shadow-md ring-2 ring-orange-500/10"
+                      className="w-16 h-16 shadow ring-2 ring-orange-500/10"
                     />
                     <label htmlFor="settings-avatar-upload" className="absolute bottom-0 right-0 bg-gradient-to-br from-orange-500 to-amber-500 rounded-full p-1.5 cursor-pointer hover:from-orange-600 hover:to-amber-600 transition-all shadow-md">
-                      <Camera className="h-4 w-4 text-white" />
+                      <Camera className="h-3 w-3 text-white" />
                       <input
                         id="settings-avatar-upload"
                         type="file"
@@ -220,40 +213,42 @@ export default function SettingsPage() {
                     <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                       {profile.nickname || profile.username}
                     </p>
-                    <p className="text-xs text-zinc-400 mt-0.5">支持 JPG, PNG, GIF · 最大 10MB</p>
+                    <p className="text-[11px] text-zinc-400 mt-0.5">JPG, PNG, GIF · 最大 10MB</p>
                   </div>
                 </div>
 
                 {/* Form fields */}
-                <div className="space-y-4">
-                  <div className="space-y-1.5">
-                    <Label className="text-sm font-medium text-zinc-600 dark:text-zinc-400">用户名</Label>
+                <div className="space-y-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs font-medium text-zinc-600 dark:text-zinc-400">用户名</Label>
                     <Input
                       id="username"
                       value={profile.username}
                       disabled
-                      className="h-10 text-sm bg-zinc-50 dark:bg-zinc-800/60"
+                      className="h-9 text-sm bg-white/60 dark:bg-zinc-800/40 [&:disabled]:cursor-not-allowed"
+                      style={{ borderRadius: '0.5px' }}
                     />
                     <p className="text-[11px] text-zinc-400">用户名唯一且不可修改</p>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <Label className="text-sm font-medium text-zinc-600 dark:text-zinc-400">昵称</Label>
+                  <div className="space-y-1">
+                    <Label className="text-xs font-medium text-zinc-600 dark:text-zinc-400">昵称</Label>
                     <Input
                       id="nickname"
                       value={profile.nickname}
                       onChange={(e) => setProfile(prev => ({ ...prev, nickname: e.target.value }))}
                       placeholder="输入昵称"
                       maxLength={100}
-                      className="h-10 text-sm"
+                      className="h-9 text-sm"
+                      style={{ borderRadius: '0.5px' }}
                     />
                     <div className="text-right text-[11px] text-zinc-400">
                       {profile.nickname?.length || 0}/100
                     </div>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <Label className="text-sm font-medium text-zinc-600 dark:text-zinc-400">个人简介</Label>
+                  <div className="space-y-1">
+                    <Label className="text-xs font-medium text-zinc-600 dark:text-zinc-400">个人简介</Label>
                     <Textarea
                       id="bio"
                       value={profile.bio}
@@ -262,22 +257,23 @@ export default function SettingsPage() {
                       rows={3}
                       maxLength={500}
                       className="text-sm resize-none"
+                      style={{ borderRadius: '0.5px' }}
                     />
                     <div className="text-right text-[11px] text-zinc-400">
                       {profile.bio?.length || 0} / 500
                     </div>
                   </div>
 
-                  <div className="flex justify-end pt-2">
+                  <div className="flex justify-end pt-1">
                     <Button
                       onClick={handleSave}
                       disabled={saving}
                       size="sm"
-                      className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-lg shadow-orange-500/20"
+                      className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-sm text-xs rounded-sm h-8 px-4"
                     >
                       {saving ? (
                         <>
-                          <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
+                          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
                           保存中
                         </>
                       ) : (

@@ -94,6 +94,58 @@ export default function DashboardPage() {
   useEffect(() => { loadAll() }, [loadAll])
 
 
+  const SkeletonCard = () => (
+    <div className="backdrop-blur-xl bg-white/50 dark:bg-white/[0.06] border border-black/[0.06] dark:border-white/[0.10] rounded-xl p-4 animate-pulse">
+      <div className="w-9 h-9 rounded-lg bg-zinc-200 dark:bg-zinc-800 mb-3" />
+      <div className="h-3 w-16 rounded bg-zinc-200 dark:bg-zinc-800 mb-2" />
+      <div className="h-6 w-10 rounded bg-zinc-200 dark:bg-zinc-800" />
+    </div>
+  )
+
+  const SkeletonList = () => (
+    <div className="backdrop-blur-xl bg-white/50 dark:bg-white/[0.06] border border-black/[0.06] dark:border-white/[0.10] rounded-xl p-4 animate-pulse">
+      <div className="h-4 w-24 rounded bg-zinc-200 dark:bg-zinc-800 mb-3" />
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className="flex items-center gap-3 p-2.5 mb-1">
+          <div className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-800 flex-shrink-0" />
+          <div className="flex-1 space-y-2">
+            <div className="h-3 w-full rounded bg-zinc-200 dark:bg-zinc-800" />
+            <div className="h-2 w-20 rounded bg-zinc-200 dark:bg-zinc-800" />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+
+  // 渲染页面骨架（数据加载中）
+  if (loading) {
+    return (
+      <ProtectedRoute>
+        <LayoutWithFullWidth>
+          <div className="relative min-h-screen">
+            <div className="fixed inset-0 overflow-hidden pointer-events-none">
+              <div className="absolute top-[-300px] left-[-200px] w-[700px] h-[700px] rounded-full bg-[radial-gradient(circle,rgba(245,166,35,0.08)_0%,transparent_70%)] blur-3xl" />
+              <div className="absolute top-[40%] right-[-250px] w-[600px] h-[600px] rounded-full bg-[radial-gradient(circle,rgba(251,191,36,0.06)_0%,transparent_70%)] blur-3xl" />
+              <div className="absolute bottom-[-300px] left-1/3 w-[650px] h-[650px] rounded-full bg-[radial-gradient(circle,rgba(245,166,80,0.05)_0%,transparent_70%)] blur-3xl" />
+            </div>
+            <div className="relative z-10 max-w-[1400px] mx-auto px-6 py-8 space-y-8">
+              {/* Page Header */}
+              <div className="h-7 w-32 rounded bg-zinc-200 dark:bg-zinc-800 animate-pulse" />
+              {/* Stats Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <SkeletonCard /><SkeletonCard /><SkeletonCard />
+              </div>
+              {/* Content Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-4">
+                <SkeletonList /><SkeletonList />
+              </div>
+            </div>
+          </div>
+        </LayoutWithFullWidth>
+      </ProtectedRoute>
+    )
+  }
+
   const handleDialogChange = (open: boolean) => {
     setDialogOpen(open)
     if (!open) {
@@ -123,10 +175,6 @@ export default function DashboardPage() {
   const handleDeleteWebsite = async (id: number) => {
     await deleteWebsite(id)
     await loadAll()
-  }
-
-  if (loading) {
-    return <ProtectedRoute><LayoutWithFullWidth><div className="min-h-screen flex items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-orange-500" /></div></LayoutWithFullWidth></ProtectedRoute>
   }
 
   return (

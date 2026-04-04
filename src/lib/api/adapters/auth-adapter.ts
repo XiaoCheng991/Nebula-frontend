@@ -96,6 +96,9 @@ export async function loginWithGithub(redirectUrl?: string): Promise<void> {
 
   const redirectTo = redirectUrl ? `${baseUrl}?redirect=${encodeURIComponent(redirectUrl)}` : baseUrl
 
+  // GitHub OAuth 不支持 metadata，回调后通过 avatar_name 字段标记默认头像
+  const pixelSeed = generatePixelSeed()
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'github',
     options: {

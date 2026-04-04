@@ -11,20 +11,10 @@ import {
   BookOpen,
   MessageSquare,
   Camera,
-  Mail,
-  Link as LinkIcon,
   Star,
   Plus,
 } from "lucide-react";
-import {
-  SiGithub,
-  SiXiaohongshu,
-  SiBilibili,
-  SiTiktok,
-  SiX,
-  SiDiscord,
-  SiInstagram,
-} from "react-icons/si";
+import { IconGitHub, IconBilibili, IconXiaohongshu, IconTiktok, IconX, IconMail, IconLink } from "@/components/branding/social-icons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -42,12 +32,12 @@ import { getArticles, getTags as getApiTags } from "@/lib/supabase/modules/blog"
 import { getMemos } from "@/lib/supabase/modules/memo";
 
 const socialLinks = [
-  { icon: SiGithub, href: "https://github.com/XiaoCheng991", label: "GitHub" },
-  { icon: SiBilibili, href: "https://space.bilibili.com/3546566354798756", label: "Bilibili" },
-  { icon: SiXiaohongshu, href: "https://www.xiaohongshu.com/user/profile/61e822e9000000001000a517", label: "小红书" },
-  { icon: SiTiktok, href: "https://www.douyin.com/user/self?from_tab_name=main&showSubTab=compilation&showTab=favorite_collection", label: "抖音" },
-  { icon: Mail, href: "mailto:17516476723@163.com", label: "Email" },
-  { icon: LinkIcon, href: "https://www.xiaocheng991.site/me", label: "Website" },
+  { icon: IconGitHub, href: "https://github.com/XiaoCheng991", label: "GitHub" },
+  { icon: IconBilibili, href: "https://space.bilibili.com/3546566354798756", label: "Bilibili" },
+  { icon: IconXiaohongshu, href: "https://www.xiaohongshu.com/user/profile/61e822e9000000001000a517", label: "小红书" },
+  { icon: IconTiktok, href: "https://www.douyin.com/user/self?from_tab_name=main&showSubTab=compilation&showTab=favorite_collection", label: "抖音" },
+  { icon: IconMail, href: "mailto:17516476723@163.com", label: "Email" },
+  { icon: IconLink, href: "https://www.xiaocheng991.site/me", label: "Website" },
 ];
 
 const GITHUB_OWNER = "XiaoCheng991";
@@ -376,7 +366,7 @@ export default function BlogPage() {
           </div>
 
           <div className="flex items-center gap-2 mt-3">
-            <SiGithub size={16} className="text-zinc-500 dark:text-zinc-400 flex-shrink-0" />
+            <IconGitHub size={16} className="text-zinc-500 dark:text-zinc-400 flex-shrink-0" />
             <div className="flex items-center gap-1.5 flex-wrap">
               {githubProjects.map((project) => (
                 <a

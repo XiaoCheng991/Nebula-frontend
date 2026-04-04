@@ -42,15 +42,20 @@ export function AuthGuard({
   const router = useRouter()
   const pathname = usePathname()
   const { requireAuth: checkAuth, requireGuest: checkGuest } = useAuthPrompt()
+  // 优先使用同步判断，不阻塞渲染
+  const initialAuth = typeof window !== 'undefined' ? (isAuthenticatedSync() || isUserLoggedIn()) : false
   const [isLoading, setIsLoading] = useState(true)
-  const [isAuth, setIsAuth] = useState(false)
+  const [isAuth, setIsAuth] = useState(initialAuth)
 
   useEffect(() => {
+    // 先用同步结果立即解除阻塞
+    setIsLoading(false)
+
     const checkAuthentication = async () => {
       // 先快速检查 localStorage
       const hasLocalAuth = isAuthenticatedSync()
 
-      // 同时检查 Supabase session
+      // 后台检查 Supabase session（不阻塞渲染）
       const { data: { session } } = await supabase.auth.getSession()
       const hasSupabaseAuth = !!session
 
@@ -70,7 +75,6 @@ export function AuthGuard({
       }
 
       setIsAuth(isAuth)
-      setIsLoading(false)
     }
 
     checkAuthentication()
@@ -78,9 +82,6 @@ export function AuthGuard({
 
   // 检查认证状态（使用 Supabase 实时状态）
   useEffect(() => {
-    // 立即使用同步检查更新状态（用于快速响应）
-    setIsAuth(isUserLoggedIn())
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN') {
         setIsAuth(true)

@@ -117,11 +117,6 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
   return (
     <header className={`w-full fixed top-0 left-0 z-50 bg-transparent ${className}`} aria-label="站点头部">
 
-      {/* 装饰线 - 博客写页面显示 */}
-      {pathname === '/blog/write' && (
-        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-orange-500 to-transparent opacity-60" />
-      )}
-
       {/* 头部内容 - 始终在背景层之上 */}
       <div className="relative z-10 px-6 py-3 grid grid-cols-3 items-center">
         {/* 左侧 - Logo */}
@@ -178,8 +173,8 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
               <FolderUp className="h-5 w-5 text-green-500 group-hover:scale-110 transition-transform" />
               <span className={`text-sm hidden sm:block transition-all duration-300 ${pathname === "/drive" ? "font-semibold" : "font-medium"}`}>文件</span>
               {pathname === "/drive" && (
-                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-[2px] rounded-full bg-gradient-to-r from-transparent via-orange-500 to-transparent">
-                  <span className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-orange-500 to-transparent blur-[4px] opacity-60" />
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-[2px] rounded-full bg-gradient-to-r from-transparent via-green-500 to-transparent">
+                  <span className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-green-500 to-transparent blur-[4px] opacity-60" />
                 </span>
               )}
             </Link>
@@ -194,8 +189,8 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
               <BookOpen className="h-5 w-5 text-blue-500 group-hover:scale-110 transition-transform" />
               <span className={`text-sm hidden sm:block transition-all duration-300 ${pathname === "/blog" ? "font-semibold" : "font-medium"}`}>博客</span>
               {pathname === "/blog" && (
-                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-[2px] rounded-full bg-gradient-to-r from-transparent via-orange-500 to-transparent">
-                  <span className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-orange-500 to-transparent blur-[4px] opacity-60" />
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-[2px] rounded-full bg-gradient-to-r from-transparent via-blue-500 to-transparent">
+                  <span className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-blue-500 to-transparent blur-[4px] opacity-60" />
                 </span>
               )}
             </Link>
@@ -226,8 +221,8 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
               <User className="h-5 w-5 text-purple-500 group-hover:scale-110 transition-transform" />
               <span className={`text-sm hidden sm:block transition-all duration-300 ${pathname === "/me" ? "font-semibold" : "font-medium"}`}>About</span>
               {pathname === "/me" && (
-                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-[2px] rounded-full bg-gradient-to-r from-transparent via-orange-500 to-transparent">
-                  <span className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-orange-500 to-transparent blur-[4px] opacity-60" />
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-[2px] rounded-full bg-gradient-to-r from-transparent via-purple-500 to-transparent">
+                  <span className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-purple-500 to-transparent blur-[4px] opacity-60" />
                 </span>
               )}
             </Link>
