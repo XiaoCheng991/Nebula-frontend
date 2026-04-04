@@ -75,10 +75,11 @@ function GitHubCallbackContent() {
       description: `欢迎回来，${user.user_metadata?.name || userInfo.nickname}！`,
     })
 
-    // 从 URL query string 获取 redirect 参数（不是 hash）
+    // 从 URL query string 获取 redirect 参数
     const params = new URLSearchParams(window.location.search)
     const redirect = params.get('redirect')
-    const redirectPath = redirect ? decodeURIComponent(redirect) : '/dashboard'
+    const decodedRedirect = redirect ? decodeURIComponent(redirect) : '/dashboard'
+    const redirectPath = decodedRedirect.startsWith('/') ? decodedRedirect : decodeURIComponent(decodedRedirect)
 
     setTimeout(() => {
       router.replace(redirectPath)

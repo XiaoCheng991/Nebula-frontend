@@ -89,19 +89,11 @@ export async function loginWithStorage(email: string, password: string): Promise
  * GitHub OAuth 登录
  */
 export async function loginWithGithub(redirectUrl?: string): Promise<void> {
-  const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-  const baseUrl = isDev
-    ? 'http://localhost:3000/auth/github/callback'
-    : 'https://www.xiaocheng991.site/auth/github/callback'
-
-  const redirectTo = redirectUrl ? `${baseUrl}?redirect=${encodeURIComponent(redirectUrl)}` : baseUrl
-
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'github',
     options: {
-      redirectTo,
+      redirectTo: redirectUrl || '/',
       scopes: 'read:user user:email',
-      skipBrowserRedirect: false,
     },
   })
 

@@ -24,7 +24,10 @@ export default function LoginPage() {
     const params = new URLSearchParams(window.location.search)
     const redirect = params.get("redirect")
     if (redirect) {
-      setRedirectUrl(decodeURIComponent(redirect))
+      // Handle double-encoded URLs (e.g., %252F -> %2F -> /)
+      const decoded = decodeURIComponent(redirect)
+      const finalPath = decoded.startsWith('/') ? decoded : decodeURIComponent(decoded)
+      setRedirectUrl(finalPath)
     }
   }, [])
   
@@ -40,7 +43,8 @@ export default function LoginPage() {
       // 登录成功后，重新获取 redirect 参数并跳转
       const params = new URLSearchParams(window.location.search)
       const redirect = params.get("redirect")
-      const targetPath = redirect ? decodeURIComponent(redirect) : "/dashboard"
+      const decoded = redirect ? decodeURIComponent(redirect) : "/dashboard"
+      const targetPath = decoded.startsWith('/') ? decoded : decodeURIComponent(decoded)
 
       // 清除 redirect 参数并跳转
       window.history.replaceState({}, '', window.location.pathname)
@@ -56,13 +60,8 @@ export default function LoginPage() {
   const handleGithubLogin = async () => {
     try {
       setLoading(true)
-      // 获取 redirect 参数
-      const params = new URLSearchParams(window.location.search)
-      const redirect = params.get("redirect")
-      const targetPath = redirect ? decodeURIComponent(redirect) : "/dashboard"
-
-      // Github 登录后会由回调处理 redirect
-      await loginWithGithub(targetPath)
+      // GitHub OAuth 登录后由回调页面默认跳转到 /dashboard
+      await loginWithGithub()
     } catch (error: any) {
       toast({ title: t("login.githubLoginFailed"), description: error?.message || t("login.errorNetworkError"), variant: "destructive" })
       setLoading(false)
