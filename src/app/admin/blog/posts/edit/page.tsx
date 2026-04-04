@@ -207,6 +207,8 @@ export default function PostEditPage() {
             {/* 编辑器 */}
             <div className="flex-1 min-h-0">
               <TiptapEditor
+                title={title}
+                onTitleChange={setTitle}
                 content={content}
                 onChange={setContent}
                 placeholder="开始写作..."
