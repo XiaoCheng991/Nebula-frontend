@@ -88,7 +88,7 @@ export default function PostEditPage() {
         content_html: html,
         content: markdown,
         status: draft ? 'DRAFT' : 'PUBLISHED',
-        author_id: realUserInfo.id,
+        author_id: Number(realUserInfo.id),
         author_name: user.email?.split('@')[0] || '用户',
         publish_time: draft ? null : new Date().toISOString(),
       }
