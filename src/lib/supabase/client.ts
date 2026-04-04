@@ -82,7 +82,7 @@ export const isAuthenticated = async (): Promise<boolean> => {
  */
 export function getAvatarUrl(avatarName: string | null): string | null {
 	if (!avatarName) return null
-	return `${supabaseUrl}/storage/v1/object/public/nebula-hub-avatars/${avatarName}`
+	return `${supabaseUrl}/storage/v1/object/public/user-avatar/${avatarName}`
 }
 
 /**
@@ -95,7 +95,7 @@ export async function uploadAvatar(file: File, userId: string): Promise<{ path: 
 	const filePath = `${fileName}`
 
 	const { data, error } = await supabase.storage
-		.from('nebula-hub-avatars')
+		.from('user-avatar')
 		.upload(filePath, file, {
 			upsert: true,
 		})
@@ -105,7 +105,7 @@ export async function uploadAvatar(file: File, userId: string): Promise<{ path: 
 	}
 
 	const { data: urlData } = supabase.storage
-		.from('nebula-hub-avatars')
+		.from('user-avatar')
 		.getPublicUrl(filePath)
 
 	return {
@@ -120,7 +120,7 @@ export async function uploadAvatar(file: File, userId: string): Promise<{ path: 
  */
 export async function deleteAvatar(filePath: string): Promise<void> {
 	const { error } = await supabase.storage
-		.from('nebula-hub-avatars')
+		.from('user-avatar')
 		.remove([filePath])
 
 	if (error) {

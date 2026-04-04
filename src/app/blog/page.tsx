@@ -13,11 +13,21 @@ import {
   Camera,
   Star,
   Plus,
+  ExternalLink,
+  Link2,
+  Trash2,
+  BookmarkPlus,
 } from "lucide-react";
 import { IconGitHub, IconBilibili, IconXiaohongshu, IconTiktok, IconX, IconMail, IconLink } from "@/components/branding/social-icons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { AvatarCropDialog } from "@/components/ui/avatar-crop-dialog";
@@ -100,10 +110,14 @@ export default function BlogPage() {
   const [starCounts, setStarCounts] = useState<Record<string, number>>({});
   const [memos, setMemos] = useState<any[]>([]);
   const [articles, setArticles] = useState<any[]>([]);
+  const [bookmarks, setBookmarks] = useState<{ title: string; url: string }[]>([]);
   const [tags, setTags] = useState<any[]>([]);
   const [memosLoading, setMemosLoading] = useState(true);
   const [articlesLoading, setArticlesLoading] = useState(true);
   const [tagsLoading, setTagsLoading] = useState(true);
+  const [showBookmarkDialog, setShowBookmarkDialog] = useState(false);
+  const [bookmarkTitle, setBookmarkTitle] = useState('');
+  const [bookmarkUrl, setBookmarkUrl] = useState('');
 
   useEffect(() => {
     setIsMounted(true);
@@ -118,9 +132,29 @@ export default function BlogPage() {
         getApiTags(),
       ]);
 
-      if (memosRes.status === "fulfilled") setMemos(memosRes.value.data || []);
+      if (memosRes.status === "fulfilled") {
+        const memos = memosRes.value.data || []
+        // Fetch user info for memos
+        const userIds = [...new Set(memos.map((m: any) => m.user_id))]
+        const { data: users } = await supabase
+          .from('sys_users')
+          .select('id, nickname, username, avatar_url')
+          .in('id', userIds)
+        const userMap = new Map(users?.map((u: any) => [u.id, u]) || [])
+        const memosWithUsers = memos.map((memo: any) => ({
+          ...memo,
+          sys_users: userMap.get(memo.user_id) || null,
+        }))
+        setMemos(memosWithUsers)
+      }
       if (articlesRes.status === "fulfilled") setArticles(articlesRes.value.data || []);
       if (tagsRes.status === "fulfilled") setTags(tagsRes.value.data || []);
+
+      // Load bookmarks from localStorage
+      try {
+        const stored = localStorage.getItem('blog_bookmarks');
+        if (stored) setBookmarks(JSON.parse(stored));
+      } catch {}
 
       setMemosLoading(false);
       setArticlesLoading(false);
@@ -237,6 +271,34 @@ export default function BlogPage() {
     }
   };
 
+  const saveBookmarks = (newBookmarks: { title: string; url: string }[]) => {
+    setBookmarks(newBookmarks);
+    localStorage.setItem('blog_bookmarks', JSON.stringify(newBookmarks));
+  };
+
+  const handleAddBookmark = () => {
+    if (!bookmarkUrl.trim()) {
+      toast({ title: '提示', description: '请输入链接地址', variant: 'destructive' });
+      return;
+    }
+    const newBookmark = {
+      title: bookmarkTitle.trim() || bookmarkUrl.trim(),
+      url: bookmarkUrl.trim(),
+    };
+    const newBookmarks = [...bookmarks, newBookmark];
+    saveBookmarks(newBookmarks);
+    setBookmarkTitle('');
+    setBookmarkUrl('');
+    setShowBookmarkDialog(false);
+    toast({ title: '已收藏', description: '精选文章已保存' });
+  };
+
+  const handleDeleteBookmark = (index: number) => {
+    const newBookmarks = bookmarks.filter((_, i) => i !== index);
+    saveBookmarks(newBookmarks);
+    toast({ title: '已删除', description: '收藏已移除' });
+  };
+
   const handleWriteBlog = (e: React.MouseEvent) => {
     e.preventDefault();
     if (!userId) {
@@ -260,6 +322,7 @@ export default function BlogPage() {
       toast({ title: "无权限", description: "当前仅管理员可发布动态", variant: "destructive" });
       return;
     }
+    window.location.href = "/memo/write";
   };
 
   // 三列分配：Latest / 我的文章 / OpenClaw的文章
@@ -272,7 +335,7 @@ export default function BlogPage() {
       {/* 主内容区 */}
       <main className="max-w-7xl mx-auto px-4 pt-24 pb-8">
         {/* 自我介绍区 */}
-        <section className="mb-8">
+        <section className="mb-4">
           <Card className="border-0 bg-white/90 dark:bg-zinc-900/60 backdrop-blur-xl shadow-lg">
             <CardContent className="p-6">
           <div className="flex items-center justify-between gap-6">
@@ -390,8 +453,8 @@ export default function BlogPage() {
         </section>
 
         {/* Memo 横向滚动区 */}
-        <section className="mb-8">
-          <div className="flex items-center justify-between mb-4">
+        <section className="mb-4">
+          <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <MessageSquare className="h-4 w-4 text-zinc-400" />
               <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
@@ -418,7 +481,7 @@ export default function BlogPage() {
           </div>
 
           <ScrollArea className="w-full">
-            <div className="flex gap-3 pb-4">
+            <div className="flex gap-3 pb-0">
               {memosLoading ? (
                 Array.from({ length: 4 }).map((_, i) => (
                   <div key={i} className="shrink-0 w-64 flex flex-col rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white/80 dark:bg-zinc-900/40">
@@ -434,41 +497,63 @@ export default function BlogPage() {
                 ))
               ) : memos.length === 0 ? (
                 <p className="text-xs text-zinc-400">暂无动态</p>
-              ) : memos.map((memo) => (
-                <a
-                  key={memo.id}
-                  href={`/memo/${memo.id}`}
-                  className="shrink-0 w-64 flex flex-col rounded-lg border border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 transition-all overflow-hidden bg-white/80 dark:bg-zinc-900/40"
-                >
-                  <div className="flex-1 flex flex-col justify-between p-3 min-h-[144px]">
-                    <div className="flex-1 overflow-hidden max-h-24">
-                      <p className="text-xs text-zinc-700 dark:text-zinc-300 line-clamp-4">
-                        {memo.content}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-700">
-                      <img
-                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${memo.nickname || memo.username || 'default'}`}
-                        alt={memo.nickname || memo.username || '用户'}
-                        className="w-5 h-5 rounded-full"
-                      />
-                      <div className="flex items-center gap-2 text-xs">
-                        <span className="font-medium text-zinc-700 dark:text-zinc-300">
-                          {memo.nickname || memo.username || '用户'}
-                        </span>
-                        <span className="text-zinc-400">{formatTimeAgo(memo.create_time)}</span>
+              ) : memos.map((memo) => {
+                // Split mood from content
+                const lines = memo.content.split('\n\n')
+                const moodLine = lines.find((l: string) => l.startsWith('心情：'))
+                const moodContent = moodLine ? moodLine.replace('心情：', '') : ''
+                const textContent = lines.filter((l: string) => !l.startsWith('心情：')).join('\n\n')
+
+                return (
+                  <div
+                    key={memo.id}
+                    className="shrink-0 w-64 flex flex-col rounded-lg border border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 transition-all overflow-hidden bg-white/80 dark:bg-zinc-900/40"
+                  >
+                    <div className="flex-1 flex flex-col justify-between p-3 min-h-[144px]">
+                      <div className="flex-1 overflow-hidden">
+                        {/* Image */}
+                        {memo.image_urls?.[0] && (
+                          <img
+                            src={memo.image_urls[0]}
+                            alt=""
+                            className="w-full h-20 object-cover rounded-md mb-2"
+                          />
+                        )}
+                        {/* Text */}
+                        <p className="text-xs text-zinc-700 dark:text-zinc-300 line-clamp-3">
+                          {textContent}
+                        </p>
+                        {/* Mood */}
+                        {moodContent && (
+                          <p className="text-[10px] text-orange-500 mt-1">{moodContent}</p>
+                        )}
+                      </div>
+                      {/* Author */}
+                      <div className="flex items-center gap-2 mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-700">
+                        <UserAvatar
+                          avatarUrl={memo.sys_users?.avatar_url}
+                          nickname={memo.sys_users?.nickname}
+                          size="sm"
+                          className="w-5 h-5"
+                        />
+                        <div className="flex items-center gap-2 text-xs">
+                          <span className="font-medium text-zinc-700 dark:text-zinc-300">
+                            {memo.sys_users?.nickname || memo.sys_users?.username || '用户'}
+                          </span>
+                          <span className="text-zinc-400">{formatTimeAgo(memo.create_time)}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </a>
-              ))}
+                )
+              })}
             </div>
           </ScrollArea>
         </section>
 
         {/* 博客列表区 - 三列布局 */}
         <section>
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <BookOpen className="h-4 w-4 text-zinc-400" />
               <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
@@ -593,29 +678,54 @@ export default function BlogPage() {
                 )}
               </div>
 
-              {/* 第二列：我的文章 */}
+              {/* 第二列：我的精选 */}
               <div className="md:px-6 md:border-r border-zinc-200 dark:border-zinc-700 space-y-3">
-                {myArticles.length > 0 ? (
-                  myArticles.map((article) => (
-                    <a
-                      key={article.id}
-                      href={`/blog/${article.slug || article.id}`}
-                      className="group block p-3 rounded hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[10px] font-medium text-orange-400 uppercase tracking-wider">
+                    Bookmarks
+                  </span>
+                  <button
+                    onClick={() => setShowBookmarkDialog(true)}
+                    className="text-zinc-400 hover:text-orange-500 transition-colors"
+                    title="添加精选"
+                  >
+                    <BookmarkPlus className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+                {bookmarks.length > 0 ? (
+                  bookmarks.map((bm, i) => (
+                    <div
+                      key={i}
+                      className="group flex items-start gap-2 p-2.5 rounded hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
                     >
-                      <h4 className="text-xs font-medium text-zinc-900 dark:text-zinc-100 group-hover:text-primary transition-colors line-clamp-3 mb-1.5">
-                        {article.title}
-                      </h4>
-                      <p className="text-[11px] text-zinc-400 line-clamp-2 mb-1.5">
-                        {article.summary || "暂无摘要"}
-                      </p>
-                      <div className="flex items-center gap-2 text-[11px] text-zinc-400">
-                        <Calendar className="h-3 w-3" />
-                        <span>{article.create_time ? formatDateShort(article.create_time) : ""}</span>
-                      </div>
-                    </a>
+                      <a
+                        href={bm.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 min-w-0 group/link"
+                      >
+                        <div className="flex items-center gap-1 mb-1">
+                          <Link2 className="h-3 w-3 text-zinc-400 group-hover/link:text-orange-500 transition-colors flex-shrink-0" />
+                          <span className="text-xs font-medium text-zinc-800 dark:text-zinc-200 group-hover/link:text-primary transition-colors line-clamp-2 truncate">
+                            {bm.title}
+                          </span>
+                          <ExternalLink className="h-3 w-3 text-zinc-300 group-hover/link:text-orange-400 transition-colors flex-shrink-0 ml-auto" />
+                        </div>
+                        <p className="text-[10px] text-zinc-400 truncate">
+                          {bm.url.replace(/^https?:\/\//, '').split('/')[0]}
+                        </p>
+                      </a>
+                      <button
+                        onClick={() => handleDeleteBookmark(i)}
+                        className="text-zinc-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 flex-shrink-0 mt-0.5"
+                        title="删除"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </div>
                   ))
                 ) : (
-                  <p className="text-xs text-zinc-400 py-4">暂无文章</p>
+                  <p className="text-xs text-zinc-400 py-4">暂无精选，点击上方按钮添加</p>
                 )}
               </div>
 
@@ -673,6 +783,44 @@ export default function BlogPage() {
           onCropComplete={handleCropComplete}
         />
       )}
+
+      {/* 添加精选对话框 */}
+      <Dialog open={showBookmarkDialog} onOpenChange={setShowBookmarkDialog}>
+        <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>添加精选文章</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">文章链接</label>
+              <input
+                value={bookmarkUrl}
+                onChange={(e) => setBookmarkUrl(e.target.value)}
+                placeholder="https://..."
+                className="w-full px-3 py-2 text-sm rounded-md border border-zinc-200 dark:border-zinc-700 bg-transparent outline-none focus:border-orange-500 dark:focus:border-orange-500"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">标题（可选）</label>
+              <input
+                value={bookmarkTitle}
+                onChange={(e) => setBookmarkTitle(e.target.value)}
+                placeholder="留空则使用链接地址作为标题"
+                className="w-full px-3 py-2 text-sm rounded-md border border-zinc-200 dark:border-zinc-700 bg-transparent outline-none focus:border-orange-500 dark:focus:border-orange-500"
+              />
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button size="sm" variant="outline" onClick={() => { setShowBookmarkDialog(false); setBookmarkTitle(''); setBookmarkUrl(''); }}>
+                取消
+              </Button>
+              <Button size="sm" onClick={handleAddBookmark}>
+                <Link2 className="h-3.5 w-3.5 mr-1" />
+                收藏
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -70,7 +70,7 @@ export async function uploadAvatar(
   const filePath = `avatars/${session.user.id}/${fileName}`
 
   const { error } = await supabase.storage
-    .from('nebula-hub-avatars')
+    .from('user-avatar')
     .upload(filePath, file, {
       upsert: true,
       cacheControl: '31536000', // 1 年缓存
@@ -81,7 +81,7 @@ export async function uploadAvatar(
   }
 
   const { data: { publicUrl } } = supabase.storage
-    .from('nebula-hub-avatars')
+    .from('user-avatar')
     .getPublicUrl(filePath)
 
   return publicUrl

@@ -19,6 +19,7 @@ import TurndownService from 'turndown'
 import { toast } from '@/components/ui/use-toast'
 import { createArticle, updateArticle, getArticleById } from '@/lib/supabase/modules/blog'
 import { supabase } from '@/lib/supabase/client'
+import { getUserInfo } from '@/lib/api/adapters/auth-adapter'
 import '@/app/admin/blog/editor.css'
 
 const turndown = new TurndownService({
@@ -72,6 +73,9 @@ export default function PostEditPage() {
       return
     }
 
+    // 获取真实的 sys_user id
+    const realUserInfo = await getUserInfo()
+
     setLoading(true)
 
     try {
@@ -84,7 +88,7 @@ export default function PostEditPage() {
         content_html: html,
         content: markdown,
         status: draft ? 'DRAFT' : 'PUBLISHED',
-        author_id: Number(user.id) || 5,
+        author_id: realUserInfo.id,
         author_name: user.email?.split('@')[0] || '用户',
         publish_time: draft ? null : new Date().toISOString(),
       }

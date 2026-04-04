@@ -29,7 +29,7 @@ export async function getMemos(options?: {
 
   let query = supabase
     .from('blog_memo')
-    .select('*', { count: 'estimated' })
+    .select('*')
     .eq('deleted', 0)
     .order('is_pinned', { ascending: false })
     .order('create_time', { ascending: false })
