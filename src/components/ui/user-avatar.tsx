@@ -51,7 +51,7 @@ export function UserAvatar({
 
   // 有真实头像 URL 就用真实的，没有就用像素风默认头像
   const hasCustomAvatar = Boolean(avatarUrl)
-  const src = hasCustomAvatar ? avatarUrl : pixelAvatarUrl
+  const src = hasCustomAvatar ? (avatarUrl ?? undefined) : pixelAvatarUrl
 
   return (
     <>
