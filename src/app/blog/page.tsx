@@ -481,7 +481,7 @@ export default function BlogPage() {
           </div>
 
           <ScrollArea className="w-full">
-            <div className="flex gap-3 pb-0">
+            <div className="flex gap-3 pt-0 pb-0">
               {memosLoading ? (
                 Array.from({ length: 4 }).map((_, i) => (
                   <div key={i} className="shrink-0 w-64 flex flex-col rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white/80 dark:bg-zinc-900/40">

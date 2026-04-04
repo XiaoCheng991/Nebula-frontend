@@ -81,7 +81,7 @@ export default function MemoWritePage() {
       const displayContent = mood ? `${content.trim()}\n\n心情：${mood}` : content.trim()
 
       const postData = {
-        user_id: sysUser.id,
+        user_id: Number(sysUser.id),
         content: displayContent,
         image_urls: imageUrls.length > 0 ? imageUrls : [],
         visibility: 'PUBLIC',
