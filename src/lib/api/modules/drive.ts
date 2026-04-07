@@ -20,7 +20,7 @@ export interface DrivePageData {
 export async function loadAllDriveData(bucketName: string, folderName?: string): Promise<DrivePageData> {
   const { data, error } = await supabase.rpc('get_drive_page_data', {
     p_bucket_name: bucketName,
-    p_folder_name: folderName || null,
+    p_folder_name: folderName || undefined,
   })
 
   if (error || !data) {
@@ -28,13 +28,16 @@ export async function loadAllDriveData(bucketName: string, folderName?: string):
     return { files: [], recentFiles: [], folders: new Set(), storageStats: [], error }
   }
 
-  // Supabase 已自动反序列化 JSONB，无需 JSON.parse
-  const foldersArr = data.folders_json as string[]
+  const filesArr = data.files_json as unknown as Tables<'file_metadata'>[]
+  const recentArr = data.recent_files_json as unknown as Tables<'file_metadata'>[]
+  const foldersArr = data.folders_json
+  const statsArr = data.stats_json as unknown as { bucketName: string; fileCount: number; totalSize: number }[]
+
   return {
-    files: data.files_json as Tables<'file_metadata'>[],
-    recentFiles: data.recent_files_json as Tables<'file_metadata'>[],
-    folders: new Set(foldersArr || []),
-    storageStats: data.stats_json as { bucketName: string; fileCount: number; totalSize: number }[],
+    files: Array.isArray(filesArr) ? filesArr : [],
+    recentFiles: Array.isArray(recentArr) ? recentArr : [],
+    folders: new Set(Array.isArray(foldersArr) ? foldersArr : []),
+    storageStats: Array.isArray(statsArr) ? statsArr : [],
     error: null,
   }
 }

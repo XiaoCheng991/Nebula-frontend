@@ -1247,6 +1247,15 @@ export interface Database {
         Args: { article_id_param: number }
         Returns: void
       }
+      get_drive_page_data: {
+        Args: { p_bucket_name: string; p_folder_name?: string }
+        Returns: {
+          files_json: unknown[]
+          recent_files_json: unknown[]
+          folders_json: string[]
+          stats_json: unknown[]
+        }
+      }
     }
     Enums: Record<string, never>
   }
