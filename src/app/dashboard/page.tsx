@@ -164,11 +164,16 @@ export default function DashboardPage() {
         <div className="relative z-10 max-w-[1400px] mx-auto px-6 py-8 space-y-8 anim-fade-in">
           {/* Page Header */}
           <div className="flex items-center justify-between gap-4">
-            <div>
-              <h1 className="text-[22px] font-bold tracking-tight bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 bg-clip-text text-transparent leading-tight">
-                我的空间
-              </h1>
-              <div className="h-[2px] w-16 mt-2 rounded-full anim-shimmer" />
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-400/20 to-amber-500/20 flex items-center justify-center transition-all duration-300 hover:from-orange-400/30 hover:to-amber-500/30">
+                <Sparkles className="h-5 w-5 text-amber-600 dark:text-amber-400 transition-transform duration-300 hover:rotate-12" />
+              </div>
+              <div>
+                <h1 className="text-[22px] font-bold tracking-tight bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 bg-clip-text text-transparent leading-tight">
+                  我的空间
+                </h1>
+                <div className="h-[2px] w-12 mt-1.5 rounded-full anim-shimmer" />
+              </div>
             </div>
           </div>
 

@@ -60,7 +60,7 @@ export async function middleware(req: NextRequest) {
     return response
   }
 
-  // 通过 Supabase 服务端客户端检查 session
+  // 通过 Supabase 服务端客户端检查 session（会刷新 cookie）
   const { data: { session } } = await supabase.auth.getSession()
   const isLoggedIn = !!session
 
@@ -77,10 +77,10 @@ export async function middleware(req: NextRequest) {
   )
 
   if (isProtectedPath && !isLoggedIn) {
-    const url = req.nextUrl.clone()
-    url.pathname = '/login'
-    url.searchParams.set('redirect', encodeURIComponent(pathname))
-    return NextResponse.redirect(url)
+    const loginUrl = new URL('/login', req.url)
+    // 使用单重编码，避免双重编码问题
+    loginUrl.searchParams.set('redirect', pathname)
+    return NextResponse.redirect(loginUrl)
   }
 
   // 后台管理路径 - 需要登录

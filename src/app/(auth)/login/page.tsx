@@ -24,9 +24,12 @@ export default function LoginPage() {
     const params = new URLSearchParams(window.location.search)
     const redirect = params.get("redirect")
     if (redirect) {
-      // Handle double-encoded URLs (e.g., %252F -> %2F -> /)
-      const decoded = decodeURIComponent(redirect)
-      const finalPath = decoded.startsWith('/') ? decoded : decodeURIComponent(decoded)
+      let finalPath = decodeURIComponent(redirect)
+      // 防止双重编码
+      if (finalPath.includes('%2F')) {
+        finalPath = decodeURIComponent(finalPath)
+      }
+      if (!finalPath.startsWith('/')) finalPath = '/dashboard'
       setRedirectUrl(finalPath)
     }
   }, [])
@@ -40,15 +43,8 @@ export default function LoginPage() {
       await login(account, password)
       toast({ title: t("login.successLogin"), description: t("login.welcomeBack") })
 
-      // 登录成功后，重新获取 redirect 参数并跳转
-      const params = new URLSearchParams(window.location.search)
-      const redirect = params.get("redirect")
-      const decoded = redirect ? decodeURIComponent(redirect) : "/dashboard"
-      const targetPath = decoded.startsWith('/') ? decoded : decodeURIComponent(decoded)
-
-      // 清除 redirect 参数并跳转
-      window.history.replaceState({}, '', window.location.pathname)
-      setTimeout(() => router.push(targetPath), 500)
+      // 登录成功后，跳转到 redirect 参数指定的路径
+      setTimeout(() => router.push(redirectUrl), 500)
     } catch (error: any) {
       const errorMessage = error?.message || t("login.errorLoginFailed")
       toast({ title: t("login.errorLoginFailed"), description: errorMessage, variant: "destructive" })
