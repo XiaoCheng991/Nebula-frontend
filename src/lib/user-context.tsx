@@ -9,6 +9,7 @@ interface UserProfile {
   id?: number | string
   username: string
   nickname: string
+  email: string | null
   avatarUrl: string | null
   avatarName?: string | null
   bio: string
@@ -104,6 +105,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                   supabaseUser.user_metadata?.username ||
                   supabaseUser.email?.split('@')[0] ||
                   '',
+        email: supabaseUser.email || null,
         nickname: supabaseUser.user_metadata?.name ||
                   supabaseUser.user_metadata?.nickname ||
                   supabaseUser.user_metadata?.login ||
@@ -184,6 +186,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       setUser({
         username: localUser.username,
         nickname: localUser.nickname || '',
+        email: localUser.email || null,
         avatarUrl: localUser.avatarUrl || null,
         bio: '',
       })
@@ -212,6 +215,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         setUser({
           username: localUser.username,
           nickname: localUser.nickname || '',
+          email: localUser.email || null,
           avatarUrl: localUser.avatarUrl || null,
           bio: '',
         })

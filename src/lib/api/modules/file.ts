@@ -121,3 +121,73 @@ export async function uploadBlogImage(
 
   return publicUrl
 }
+
+/**
+ * 上传 Drive 文件到指定 Supabase Storage 桶，并写入元数据记录
+ */
+export async function uploadDriveFile(
+  file: File,
+  bucketName: string,
+  folderName: string,
+  userId: number,
+  ownerName: string,
+  onProgress?: (progress: number) => void
+): Promise<{ url: string; error: any }> {
+  const { data: { session } } = await supabase.auth.getSession()
+
+  if (!session) {
+    return { url: '', error: new Error('未登录，无法上传文件') }
+  }
+
+  const fileExt = file.name.split('.').pop() || 'bin'
+  const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
+  // Supabase Storage key 不支持中文等非 ASCII 字符，用 btoa 编码为安全字符串
+  const safeFolderName = btoa(unescape(encodeURIComponent(folderName)))
+  const filePath = `${safeFolderName}/${fileName}`
+
+  const { error: uploadError } = await supabase.storage
+    .from(bucketName)
+    .upload(filePath, file, {
+      upsert: false,
+      cacheControl: '3600',
+    })
+
+  if (uploadError) {
+    return { url: '', error: uploadError }
+  }
+
+  const { data: { publicUrl } } = supabase.storage
+    .from(bucketName)
+    .getPublicUrl(filePath)
+
+  // 确定文件类型
+  const ext = fileExt.toLowerCase()
+  const fileTypeMap: Record<string, string> = {
+    pdf: 'pdf', doc: 'docx', docx: 'docx', xls: 'xlsx', xlsx: 'xlsx',
+    ppt: 'pptx', pptx: 'pptx', txt: 'txt', csv: 'csv', zip: 'zip',
+    rar: 'zip', '7z': 'zip', mp3: 'mp3', wav: 'mp3', flac: 'mp3',
+    jpg: 'jpg', jpeg: 'jpg', png: 'jpg', gif: 'jpg', webp: 'jpg', svg: 'jpg',
+    mp4: 'mp4', avi: 'mp4', mov: 'mp4', mkv: 'mp4',
+  }
+  const fileType = fileTypeMap[ext] || 'other'
+
+  // 写入元数据
+  const { error: metaError } = await supabase
+    .from('file_metadata')
+    .insert({
+      bucket_name: bucketName,
+      file_path: filePath,
+      file_name: file.name,
+      file_size: file.size,
+      file_type: fileType,
+      folder_name: folderName,
+      user_id: userId,
+      owner_name: ownerName,
+    })
+
+  if (metaError) {
+    console.warn('元数据写入失败，但文件已上传:', metaError.message)
+  }
+
+  return { url: publicUrl, error: metaError }
+}

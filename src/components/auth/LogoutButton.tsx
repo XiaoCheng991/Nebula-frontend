@@ -51,18 +51,17 @@ export function LogoutButton({ className, iconOnly }: { className?: string, icon
 
   // 完整按钮模式的样式
   return (
-    <Button
-      variant="outline"
-      className={`w-full justify-start gap-2 rounded-2xl font-medium bg-white/80 dark:bg-gray-700/80 hover:bg-red-50/80 dark:hover:bg-red-950/30 hover:border-red-200 dark:hover:border-red-800 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200 ${className || ''}`}
+    <button
+      className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-colors text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 ${className || ''}`}
       onClick={handleLogout}
       disabled={isLoading}
     >
       {isLoading ? (
-        <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+        <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent shrink-0" />
       ) : (
-        <LogOut className="h-4 w-4" />
+        <LogOut className="h-4 w-4 shrink-0" />
       )}
-      {isLoading ? "退出中..." : "退出登录"}
-    </Button>
+      {isLoading ? '退出中...' : '退出登录'}
+    </button>
   )
 }

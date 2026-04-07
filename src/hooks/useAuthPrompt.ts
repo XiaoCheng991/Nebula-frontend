@@ -110,14 +110,11 @@ export function useAuthPrompt() {
 
   /**
    * 检查未登录状态（用于登录/注册页）
+   * 已登录用户调用时自动跳转到 dashboard
    */
   const requireGuest = useCallback(() => {
     if (isAuthenticatedSync()) {
-      // 已登录用户访问登录/注册页，静默跳转到 dashboard
-      // 不显示 toast 提示，避免打扰用户
-      setTimeout(() => {
-        router.push('/dashboard')
-      }, 100)
+      router.push('/dashboard')
       return false
     }
     return true

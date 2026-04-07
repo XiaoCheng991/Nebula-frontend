@@ -1,36 +1,14 @@
 "use client"
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { isAuthenticatedSync, isUserLoggedIn } from '@/lib/auth/token-manager'
-import { Loader2 } from 'lucide-react'
+import { isAuthenticatedSync } from '@/lib/auth/token-manager'
 import { useAuthPrompt } from '@/hooks/useAuthPrompt'
 import { supabase } from '@/lib/supabase/client'
 
-/**
- * 认证守卫组件（HOC）
- *
- * 用法：
- * 1. 保护需要登录的页面：<AuthGuard><YourPage /></AuthGuard>
- * 2. 保护未登录才能访问的页面：<AuthGuard requireAuth={false}><LoginPage /></AuthGuard>
- *
- * 特性：
- * - 客户端二次验证（配合 middleware.ts 的服务端验证）
- * - Toast 提示而不是强制跳转
- * - 用户体验更好
- */
-
 interface AuthGuardProps {
   children: React.ReactNode
-  /**
-   * 是否需要认证
-   * - true: 需要登录才能访问（默认）
-   * - false: 未登录才能访问（登录/注册页）
-   */
   requireAuth?: boolean
-  /**
-   * 加载时显示的内容
-   */
   fallback?: React.ReactNode
 }
 
@@ -42,79 +20,61 @@ export function AuthGuard({
   const router = useRouter()
   const pathname = usePathname()
   const { requireAuth: checkAuth, requireGuest: checkGuest } = useAuthPrompt()
-  // 优先使用同步判断，不阻塞渲染
-  const initialAuth = typeof window !== 'undefined' ? (isAuthenticatedSync() || isUserLoggedIn()) : false
-  const [isLoading, setIsLoading] = useState(true)
-  const [isAuth, setIsAuth] = useState(initialAuth)
+
+  // 初始认证检查：统一服务端和客户端的初始状态
+  const [isAuth, setIsAuth] = useState(false)
+  const [isChecking, setIsChecking] = useState(true)
+  const resolved = useRef(false)
 
   useEffect(() => {
-    // 先用同步结果立即解除阻塞
-    setIsLoading(false)
-
-    const checkAuthentication = async () => {
-      // 先快速检查 localStorage
-      const hasLocalAuth = isAuthenticatedSync()
-
-      // 后台检查 Supabase session（不阻塞渲染）
-      const { data: { session } } = await supabase.auth.getSession()
-      const hasSupabaseAuth = !!session
-
-      // 只要有一个认证方式就认为已登录
-      const isAuth = hasLocalAuth || hasSupabaseAuth
-
-      if (requireAuth) {
-        // 需要认证的页面
-        if (!isAuth) {
-          checkAuth(pathname)
-        }
-      } else {
-        // 不需要认证的页面（登录/注册）
-        if (isAuth) {
-          checkGuest()
-        }
-      }
-
-      setIsAuth(isAuth)
-    }
-
-    checkAuthentication()
-  }, [requireAuth, pathname, checkAuth, checkGuest])
-
-  // 检查认证状态（使用 Supabase 实时状态）
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN') {
+    const runCheck = async () => {
+      if (isAuthenticatedSync()) {
         setIsAuth(true)
-      } else if (event === 'SIGNED_OUT') {
-        setIsAuth(false)
+        setIsChecking(false)
+        resolved.current = true
+        return
       }
-    })
 
-    return () => {
-      subscription.unsubscribe()
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        const auth = !!session
+        setIsAuth(auth)
+        resolved.current = auth
+
+        if (!auth) {
+          requireAuth ? checkAuth(pathname) : checkGuest()
+        }
+      } catch {
+        /* ignore */
+      }
+      setIsChecking(false)
     }
-  }, [])
 
-  // 如果正在加载，显示 loading
-  if (isLoading && fallback) {
-    return <>{fallback}</>
+    runCheck()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, requireAuth])
+
+  // 已登录用户访问登录/注册页，静默重定向
+  if (!requireAuth && isAuth) {
+    return <></>
   }
 
-  // 认证状态正确，显示内容
+  if (isChecking) {
+    // 受保护路由：显示空白占位（避免 hydration 不匹配）
+    // 公开路由：直接显示 children（用户未登录也正常看到登录页）
+    if (requireAuth) {
+      return <div style={{ minHeight: '100vh' }} />
+    }
+    // 公开路由直接渲染内容，等异步检查完成后自动跳转
+    return <>{children}</>
+  }
+
   return <>{children}</>
 }
 
-/**
- * 高阶组件版本 - 用于包裹页面组件
- *
- * @example
- * // 使用示例
- * export default withAuth(MyDashboardPage)
- * export default withAuth(MyLoginPage, false)
- */
 export function withAuth<P extends object>(
   Component: React.ComponentType<P>,
-  requireAuth: boolean = true
+  requireAuth = true
 ) {
   return function AuthenticatedComponent(props: P) {
     return (
@@ -125,16 +85,10 @@ export function withAuth<P extends object>(
   }
 }
 
-/**
- * 用于受保护页面的简单包装器
- */
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <AuthGuard requireAuth={true}>{children}</AuthGuard>
 }
 
-/**
- * 用于公开页面（登录/注册）的包装器
- */
 export function PublicRoute({ children }: { children: React.ReactNode }) {
   return <AuthGuard requireAuth={false}>{children}</AuthGuard>
 }

@@ -252,33 +252,42 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
                   />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 rounded-2xl border-0 shadow-2xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl p-2">
-                <div className="px-3 py-2 mb-1 border-b border-[var(--glass-border)]">
-                  <p className="text-sm font-medium text-slate-800 dark:text-white">{user.nickname || user.username}</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">@{user.username}</p>
+              <DropdownMenuContent
+                align="end"
+                sideOffset={10}
+                className="z-50 w-64 overflow-hidden rounded-2xl border border-gray-200/50 dark:border-white/10 bg-white/90 dark:bg-[#1a1a1d] backdrop-blur-xl p-2 shadow-[0_8px_32px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
+              >
+                {/* 用户信息区 */}
+                <div className="px-3 py-3 mb-1 rounded-xl bg-gradient-to-r from-orange-500/5 to-amber-500/5 dark:from-orange-500/10 dark:to-amber-500/5">
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{user.nickname || user.username}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">{user.email || `@${user.username}`}</p>
                 </div>
-                <DropdownMenuItem asChild className="flex items-center gap-3 cursor-pointer rounded-xl py-2.5 px-3">
+
+                {/* 菜单项 */}
+                <DropdownMenuItem asChild className="flex items-center gap-3 cursor-pointer rounded-xl px-3 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
                   <Link href="/settings">
-                    <Settings className="h-4 w-4 text-slate-500" />
-                    <span className="font-medium">设置</span>
+                    <Settings className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                    <span className="text-sm font-medium">设置</span>
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild className="flex items-center gap-3 cursor-pointer rounded-xl py-2.5 px-3">
+                <DropdownMenuItem asChild className="flex items-center gap-3 cursor-pointer rounded-xl px-3 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
                   <Link href="/settings">
-                    <User className="h-4 w-4 text-slate-500" />
-                    <span className="font-medium">个人资料</span>
+                    <User className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                    <span className="text-sm font-medium">个人资料</span>
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild className="flex items-center gap-3 cursor-pointer rounded-xl py-2.5 px-3">
+                <DropdownMenuItem asChild className="flex items-center gap-3 cursor-pointer rounded-xl px-3 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
                   <Link href="/help">
-                    <HelpCircle className="h-4 w-4 text-slate-500" />
-                    <span className="font-medium">帮助中心</span>
+                    <HelpCircle className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                    <span className="text-sm font-medium">帮助中心</span>
                   </Link>
                 </DropdownMenuItem>
-                <div className="h-px bg-[var(--glass-border)] my-1" />
-                <DropdownMenuItem className="flex items-center gap-3 cursor-pointer rounded-xl py-2.5 px-3 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30">
-                  <LogoutButton iconOnly={false} />
-                </DropdownMenuItem>
+
+                {/* 分割线 */}
+                <div className="h-px bg-gray-200/60 dark:bg-white/8 mx-3 my-1" />
+
+                {/* 退出登录 */}
+                <LogoutButton iconOnly={false} className="w-full text-red-500" />
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (

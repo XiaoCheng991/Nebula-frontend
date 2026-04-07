@@ -132,7 +132,8 @@ export default function MemosPage() {
       ) : (
         <div className="max-w-3xl mx-auto px-4 space-y-3">
           {memos.map((memo) => {
-            const isCurrentUser = String(memo.user_id) === String(user?.id)
+            const currentUsername = user?.username || getLocalUserInfo()?.username
+            const isCurrentUser = memo.sys_users?.username === currentUsername
             const memoAvatarUrl = isCurrentUser && user?.avatarUrl ? user.avatarUrl : memo.sys_users?.avatar_url
 
             // Extract mood

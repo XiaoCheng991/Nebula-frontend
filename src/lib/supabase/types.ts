@@ -1186,6 +1186,55 @@ export interface Database {
         }
         Relationships: []
       }
+      // 文件元数据表（Drive 页面）
+      file_metadata: {
+        Row: {
+          id: number
+          bucket_name: string
+          file_path: string
+          file_name: string
+          file_size: number
+          file_type: string
+          folder_name: string
+          user_id: number
+          owner_name: string
+          is_shared: boolean
+          created_at: string
+          updated_at: string
+          deleted: number
+        }
+        Insert: {
+          id?: number
+          bucket_name: string
+          file_path: string
+          file_name: string
+          file_size?: number
+          file_type?: string
+          folder_name?: string
+          user_id: number
+          owner_name?: string
+          is_shared?: boolean
+          created_at?: string
+          updated_at?: string
+          deleted?: number
+        }
+        Update: {
+          id?: number
+          bucket_name?: string
+          file_path?: string
+          file_name?: string
+          file_size?: number
+          file_type?: string
+          folder_name?: string
+          user_id?: number
+          owner_name?: string
+          is_shared?: boolean
+          created_at?: string
+          updated_at?: string
+          deleted?: number
+        }
+        Relationships: []
+      }
     }
 
     Views: Record<string, never>

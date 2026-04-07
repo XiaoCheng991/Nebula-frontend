@@ -118,7 +118,7 @@ export default function JsonFormatterPage() {
       </div>
 
       {/* 顶部导航 */}
-      <div className="relative z-10 container mx-auto px-4 pt-6 pb-4">
+      <div className="relative z-10 container mx-auto px-4 pt-[80px] pb-4">
         <Link
           href="/tools"
           className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/70 dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800/50 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-900/70 transition-colors"
