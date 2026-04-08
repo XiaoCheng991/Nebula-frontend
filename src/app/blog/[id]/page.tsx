@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { ArrowLeft, Calendar, Clock, Share2, MessageSquare } from 'lucide-react'
-import { getArticleById, incrementArticleView } from '@/lib/supabase/modules/blog'
+import { getArticleById } from '@/lib/supabase/modules/blog'
 import { useUser } from '@/lib/user-context'
 import { UserAvatar } from '@/components/ui/user-avatar'
 import { IconGitHub } from '@/components/branding/social-icons'
@@ -133,8 +133,7 @@ export default function BlogDetailPage({ params }: BlogDetailPageProps) {
             </div>
           </div>
           <div className="flex items-center gap-3 text-xs text-zinc-400">
-            <span>{article.view_count || 0} 阅读</span>
-          </div>
+                      </div>
         </div>
 
         {/* Article body */}

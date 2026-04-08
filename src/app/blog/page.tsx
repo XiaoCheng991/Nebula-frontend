@@ -38,7 +38,7 @@ import { supabase } from "@/lib/supabase/client";
 import { uploadAvatar } from "@/lib/api/modules/file";
 import { toast } from "@/components/ui/use-toast";
 import { usePagePermission } from "@/hooks/useAppStore";
-import { getArticles, getTags as getApiTags } from "@/lib/supabase/modules/blog";
+import { getArticles, getTags as getApiTags, addWebsiteCollection, deleteWebsiteCollection } from "@/lib/supabase/modules/blog";
 import { getMemos } from "@/lib/supabase/modules/memo";
 import { MarkdownPreview } from "@/components/ui/markdown-preview";
 
@@ -716,7 +716,7 @@ export default function BlogPage() {
                       </div>
                       <div className="flex items-center gap-2 text-xs text-zinc-400">
                         <Clock className="h-3 w-3" />
-                        <span>{latestArticle.view_count || 0} 阅读</span>
+                        <span>{latestArticle.create_time ? formatDateShort(latestArticle.create_time) : ""}</span>
                       </div>
                     </a>
                     {/* 其余按时间 */}
