@@ -15,12 +15,20 @@ export interface DrivePageData {
 
 /**
  * 通过一条 SQL RPC 获取 Drive 页面所有数据
- * ⚠️ 必须先在 Supabase SQL Editor 创建 get_drive_page_data 函数
+ * ⚠️ 必须先在 Supabase SQL Editor 运行 add_user_isolation.sql
+ * @param bucketName 存储桶名称
+ * @param folderName 文件夹名称（可选）
+ * @param userId 当前用户 ID（可选，不传则自动从 JWT 获取）
  */
-export async function loadAllDriveData(bucketName: string, folderName?: string): Promise<DrivePageData> {
+export async function loadAllDriveData(
+  bucketName: string,
+  folderName?: string,
+  userId?: number
+): Promise<DrivePageData> {
   const { data, error } = await supabase.rpc('get_drive_page_data', {
     p_bucket_name: bucketName,
     p_folder_name: folderName || undefined,
+    p_user_id: userId || null,
   })
 
   if (error || !data) {

@@ -29,7 +29,6 @@ function formatReadingTime(html: string): string {
 }
 
 export default function BlogDetailPage({ params }: BlogDetailPageProps) {
-  const { user } = useUser()
   const [article, setArticle] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
@@ -63,14 +62,6 @@ export default function BlogDetailPage({ params }: BlogDetailPageProps) {
   }
 
   const readingTime = article.content_html ? formatReadingTime(article.content_html) : ''
-
-  // 头像匹配：如果作者是当前用户，用 useUser 中的最新头像，否则使用文章自带的作者头像
-  const currentUsername = user?.username || ''
-  const isCurrentUserAuthor = article.author_name === currentUsername
-  const authorAvatarUrl = isCurrentUserAuthor
-    ? (user?.avatarUrl || article.author_avatar_url || null)
-    : (article.author_avatar_url || null)
-  const authorNickname = article.author_name || '用户'
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-transparent to-zinc-100 dark:from-zinc-950 dark:via-zinc-900/50 dark:to-zinc-950">
@@ -111,8 +102,8 @@ export default function BlogDetailPage({ params }: BlogDetailPageProps) {
         <div className="flex items-center gap-4 mb-8 pb-8 border-b border-zinc-200 dark:border-zinc-800">
           <UserAvatar
             size="md"
-            avatarUrl={authorAvatarUrl}
-            nickname={authorNickname}
+            userId={article.author_id}
+            username={article.author_name}
           />
           <div className="flex-1">
             <p className="font-medium text-zinc-900 dark:text-zinc-100">

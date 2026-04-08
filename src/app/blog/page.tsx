@@ -593,8 +593,8 @@ export default function BlogPage() {
                       {/* Author */}
                       <div className="flex items-center gap-2 mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-700">
                         <UserAvatar
-                          avatarUrl={memoAvatarUrl}
-                          nickname={memo.sys_users?.nickname}
+                          userId={memo.user_id}
+                          username={memo.sys_users?.username || memo.sys_users?.nickname}
                           size="sm"
                           className="w-5 h-5"
                         />

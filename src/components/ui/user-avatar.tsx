@@ -1,27 +1,40 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { useUser } from "@/lib/user-context"
+import { useAvatar, getDefaultAvatarUrl } from "@/hooks/useAvatar"
 
 interface UserAvatarProps {
+  /** 用户 ID，用于查询数据库头像 */
+  userId?: number
+  /** 用户名，用于生成默认头像 seed */
+  username?: string | null
+  /** 头像 URL（直接传入） */
   avatarUrl?: string | null
+  /** 昵称 */
   nickname?: string | null
   email?: string | null
-  username?: string | null
   size?: "sm" | "md" | "lg"
   className?: string
 }
 
 export function UserAvatar({
-  avatarUrl,
+  userId,
+  username,
+  avatarUrl: directAvatarUrl,
   nickname,
   email,
-  username,
   size = "md",
   className = ""
 }: UserAvatarProps) {
   const [imageError, setImageError] = useState(false)
-  const { user: currentUser } = useUser()
+
+  // 使用统一的头像获取逻辑
+  const { avatarUrl, displayNickname, isDefaultAvatar } = useAvatar({
+    userId,
+    username: username || undefined,
+    nickname: nickname || undefined,
+    directAvatarUrl,
+  })
 
   const sizeClasses = {
     sm: "w-8 h-8 text-xs",
@@ -33,7 +46,7 @@ export function UserAvatar({
 
   // 获取用于显示的文字
   const displayText = useMemo(() => {
-    const text = nickname || username || email || ""
+    const text = displayNickname || username || email || ""
     if (!text) return "U"
 
     const chars = text.split('')
@@ -43,55 +56,28 @@ export function UserAvatar({
       return chineseChars[0]
     }
     return chars[0].toUpperCase()
-  }, [nickname, username, email])
+  }, [displayNickname, username, email])
 
-  // 根据用户名生成确定性 DiceBear 像素风头像
-  const pixelAvatarUrl = useMemo(() => {
-    const seed = username || email || nickname || 'default'
-    return `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(seed)}&backgroundColor=c0aede,d4e4ff,c0aede`
-  }, [username, email, nickname])
-
-  // 判断是否是当前登录用户，如果是则使用 useUser 中的最新头像
-  const resolvedAvatarUrl = useMemo(() => {
-    const isCurrentUser = currentUser &&
-      username &&
-      username.toLowerCase() === currentUser.username?.toLowerCase()
-
-    // 如果 useUser 匹配成功且有上传头像
-    if (isCurrentUser && currentUser?.avatarUrl) {
-      return currentUser.avatarUrl
+  // 最终使用的头像 URL
+  const finalSrc = (() => {
+    if (imageError || isDefaultAvatar) {
+      // 使用默认像素风头像
+      const seed = username || email || displayNickname || 'default'
+      return getDefaultAvatarUrl(seed)
     }
-
-    // fallback: 如果 useUser 数据未就绪，尝试从 localStorage 匹配
-    if (typeof window !== 'undefined' && username) {
-      try {
-        const stored = localStorage.getItem('userInfo')
-        if (stored) {
-          const local = JSON.parse(stored)
-          if (local?.username?.toLowerCase() === username.toLowerCase()) {
-            return local.avatarUrl || avatarUrl || null
-          }
-        }
-      } catch {}
-    }
-
     return avatarUrl
-  }, [avatarUrl, username, currentUser])
-
-  // 有真实头像 URL 就用真实的，没有就用像素风默认头像
-  const hasCustomAvatar = Boolean(resolvedAvatarUrl)
-  const src = hasCustomAvatar ? (resolvedAvatarUrl ?? undefined) : pixelAvatarUrl
+  })()
 
   return (
     <>
-      {imageError ? (
+      {imageError || isDefaultAvatar ? (
         <div className={`${sizeClass} rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center shadow-lg ${className}`}>
           <span className="text-white font-bold">{displayText}</span>
         </div>
       ) : (
         <img
-          src={src}
-          alt={nickname || "Avatar"}
+          src={finalSrc}
+          alt={displayNickname || "Avatar"}
           className={`${sizeClass} rounded-full object-cover ${className}`}
           onError={() => setImageError(true)}
         />

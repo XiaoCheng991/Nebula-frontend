@@ -92,10 +92,10 @@ export function useDashboardData(userId?: number) {
 
 // ==================== Drive ====================
 
-export function useDriveData(bucket: string, folder?: string, enabled = true) {
+export function useDriveData(bucket: string, folder?: string, userId?: number, enabled = true) {
   return useQuery({
-    queryKey: ['drive', bucket, folder],
-    queryFn: () => require('@/lib/api/modules/drive').loadAllDriveData(bucket, folder),
+    queryKey: ['drive', bucket, folder, userId],
+    queryFn: () => require('@/lib/api/modules/drive').loadAllDriveData(bucket, folder, userId),
     staleTime: 1000 * 30,
     enabled,
   })

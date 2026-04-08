@@ -111,14 +111,32 @@ export default function DrivePage() {
   const [showNewFolderDialog, setShowNewFolderDialog] = useState(false)
   const [uploadFiles, setUploadFiles] = useState<File[]>([])
   const [uploadProgress, setUploadProgress] = useState("")
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null)
   const loadingRef = useRef(false)
+
+  // 获取当前用户的 sys_users ID
+  useEffect(() => {
+    async function fetchCurrentUserId() {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.user?.email) return
+      const { data: sysUser } = await supabase
+        .from("sys_users")
+        .select("id")
+        .eq("email", session.user.email)
+        .single()
+      if (sysUser?.id) {
+        setCurrentUserId(Number(sysUser.id))
+      }
+    }
+    fetchCurrentUserId()
+  }, [])
 
   async function loadAllData() {
     if (loadingRef.current) return
     loadingRef.current = true
     setLoading(true)
     try {
-      const result = await loadAllDriveData(activeBucket, activeFolder || undefined)
+      const result = await loadAllDriveData(activeBucket, activeFolder || undefined, currentUserId || undefined)
       setFiles(result.files)
       setRecentFiles(result.recentFiles)
       setFolders(result.folders)
@@ -131,7 +149,7 @@ export default function DrivePage() {
     }
   }
 
-  useEffect(() => { loadAllData() }, [activeBucket, activeFolder])
+  useEffect(() => { loadAllData() }, [activeBucket, activeFolder, currentUserId])
 
   // 每次打开上传对话框时确保文件夹数据是最新的
   const handleOpenUploadDialog = () => {
