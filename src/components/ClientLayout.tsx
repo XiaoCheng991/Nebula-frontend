@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { UserProvider } from '@/lib/user-context';
 import ScrollTopOnMount from '@/components/ScrollTopOnMount';
 import ThemeProvider from '@/components/ThemeProvider';
+import { QueryProvider } from '@/providers/query-provider';
 import { usePathname } from 'next/navigation';
 
 interface ClientLayoutProps {
@@ -21,7 +22,8 @@ export function ClientLayout({ children, interClassName }: ClientLayoutProps) {
 
     return (
         <ThemeProvider>
-            <UserProvider>
+            <QueryProvider>
+                <UserProvider>
                 {isAdminRoute ? (
                     <div className="min-h-screen">
                         {children}
@@ -45,7 +47,8 @@ export function ClientLayout({ children, interClassName }: ClientLayoutProps) {
                 )}
                 <ScrollTopOnMount />
                 <Toaster />
-            </UserProvider>
+                </UserProvider>
+            </QueryProvider>
         </ThemeProvider>
     )
 }

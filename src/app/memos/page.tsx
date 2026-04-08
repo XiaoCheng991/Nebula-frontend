@@ -1,13 +1,13 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, MessageSquare, Calendar, Clock, HeartIcon, Image as ImageIcon, Loader2 } from 'lucide-react'
 import { UserAvatar } from '@/components/ui/user-avatar'
 import { getMemos } from '@/lib/supabase/modules/memo'
-import { supabase } from '@/lib/supabase/client'
 import { useUser } from '@/lib/user-context'
 import { getLocalUserInfo } from '@/lib/api'
+import { useUsersById } from '@/hooks/useUsersCache'
 
 function formatTimeAgo(dateStr: string): string {
   const date = new Date(dateStr)
@@ -30,13 +30,47 @@ export default function MemosPage() {
   const [hasMore, setHasMore] = useState(true)
   const [page, setPage] = useState(1)
   const [fetching, setFetching] = useState(false)
-  const [isMounted, setIsMounted] = useState(false)
   const observerRef = useRef<HTMLDivElement>(null)
 
+  async function fetchMemos(targetPage: number, reset = false) {
+    if (reset) setLoading(true)
+    else setFetching(true)
+
+    try {
+      const res = await getMemos({ page: targetPage, pageSize: 12, visibility: 'PUBLIC' })
+
+      if (res.data.length === 0) {
+        setHasMore(false)
+        if (!reset) setFetching(false)
+        setLoading(false)
+        return
+      }
+
+      if (reset) {
+        setMemos(res.data)
+        setLoading(false)
+      } else {
+        setMemos(prev => [...prev, ...res.data])
+        setFetching(false)
+      }
+    } catch {
+      setLoading(false)
+      setFetching(false)
+    }
+  }
+
   useEffect(() => {
-    setIsMounted(true)
     fetchMemos(1, true)
   }, [])
+
+  // 从 memos 中提取需要查询的 userId
+  const memoUserIds = useMemo(
+    () => [...new Set(memos.map((m) => m.user_id))],
+    [memos]
+  )
+
+  // 使用 React Query 缓存用户信息，避免每次都重新查询
+  const { data: userMap } = useUsersById(memoUserIds)
 
   // Infinite scroll observer
   useEffect(() => {
@@ -54,41 +88,6 @@ export default function MemosPage() {
     observer.observe(observerRef.current)
     return () => observer.disconnect()
   }, [hasMore, fetching, page])
-
-  async function fetchMemos(targetPage: number, reset = false) {
-    if (reset) setLoading(true)
-    else setFetching(true)
-
-    const res = await getMemos({ page: targetPage, pageSize: 12, visibility: 'PUBLIC' })
-
-    if (res.data.length === 0) {
-      setHasMore(false)
-      if (!reset) setFetching(false)
-      setLoading(false)
-      return
-    }
-
-    // Fetch user avatars
-    const userIds = [...new Set(res.data.map((m: any) => m.user_id))]
-    const { data: users } = await supabase
-      .from('sys_users')
-      .select('id, nickname, username, avatar_url')
-      .in('id', userIds)
-    const userMap = new Map(users?.map((u: any) => [u.id, u]) || [])
-
-    const enriched = res.data.map((memo: any) => ({
-      ...memo,
-      sys_users: userMap.get(memo.user_id) || null,
-    }))
-
-    if (reset) {
-      setMemos(enriched)
-      setLoading(false)
-    } else {
-      setMemos(prev => [...prev, ...enriched])
-      setFetching(false)
-    }
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-transparent to-zinc-100 dark:from-zinc-950 dark:via-zinc-900/50 dark:to-zinc-950">
@@ -132,11 +131,11 @@ export default function MemosPage() {
       ) : (
         <div className="max-w-3xl mx-auto px-4 space-y-3">
           {memos.map((memo) => {
+            const memoUser = userMap?.get(memo.user_id) || null
             const currentUsername = user?.username || getLocalUserInfo()?.username
-            const isCurrentUser = memo.sys_users?.username === currentUsername
-            const memoAvatarUrl = isCurrentUser && user?.avatarUrl ? user.avatarUrl : memo.sys_users?.avatar_url
+            const isCurrentUser = memoUser?.username === currentUsername
+            const memoAvatarUrl = isCurrentUser && user?.avatarUrl ? user.avatarUrl : memoUser?.avatar_url
 
-            // Extract mood
             const lines = memo.content.split('\n\n')
             const moodLine = lines.find((l: string) => l.startsWith('心情：'))
             const moodContent = moodLine ? moodLine.replace('心情：', '') : ''
@@ -151,12 +150,12 @@ export default function MemosPage() {
                 <div className="flex items-center gap-2 mb-2">
                   <UserAvatar
                     avatarUrl={memoAvatarUrl}
-                    nickname={memo.sys_users?.nickname}
+                    nickname={memoUser?.nickname}
                     size="sm"
                     className="w-6 h-6"
                   />
                   <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
-                    {memo.sys_users?.nickname || memo.sys_users?.username || '用户'}
+                    {memoUser?.nickname || memoUser?.username || '用户'}
                   </span>
                   <span className="text-[10px] text-zinc-400">
                     {formatTimeAgo(memo.create_time)}

@@ -1,5 +1,16 @@
 /** @type {import('next').NextConfig} */
+const path = require('path')
+const fs = require('fs')
 const nextConfig = {
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.module.rules.push({
+        test: /\.wasm$/,
+        type: 'asset/resource',
+      })
+    }
+    return config
+  },
   images: {
     remotePatterns: [
       {

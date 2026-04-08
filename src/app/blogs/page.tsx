@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, BookOpen, Calendar, Clock, ArrowRight, Loader2 } from 'lucide-react'
-import { getArticles } from '@/lib/supabase/modules/blog'
+import { useArticles } from '@/hooks/useQueries'
 import { MarkdownPreview } from '@/components/ui/markdown-preview'
 
 function formatDate(dateStr: string): string {
@@ -16,51 +16,47 @@ export default function ArticlesPage() {
   const [hasMore, setHasMore] = useState(true)
   const [page, setPage] = useState(1)
   const [fetching, setFetching] = useState(false)
-  const [isMounted, setIsMounted] = useState(false)
   const observerRef = useRef<HTMLDivElement>(null)
 
+  const { data: result, isLoading, isFetching } = useArticles(page, 10, 'create_time', true)
+
   useEffect(() => {
-    setIsMounted(true)
-    fetchArticles(1, true)
-  }, [])
+    if (!result) return
+    if (result.data.length === 0) {
+      setHasMore(false)
+      setLoading(false)
+      setFetching(false)
+      return
+    }
+    // 首屏加载
+    if (page === 1 && loading) {
+      setArticles(result.data)
+      setLoading(false)
+    } else {
+      // 翻页追加
+      const exists = new Set(articles.map(a => a.id))
+      const newItems = result.data.filter((a: any) => !exists.has(a.id))
+      setArticles(prev => [...prev, ...newItems])
+      setFetching(false)
+    }
+  }, [result, page])
 
   // Infinite scroll
   useEffect(() => {
     if (!observerRef.current) return
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && hasMore && !fetching) {
+        if (entry.isIntersecting && hasMore && !fetching && !isFetching) {
           const nextPage = page + 1
           setPage(nextPage)
-          fetchArticles(nextPage)
+          setFetching(true)
         }
       },
       { rootMargin: '100px' }
     )
     observer.observe(observerRef.current)
     return () => observer.disconnect()
-  }, [hasMore, fetching, page])
-
-  async function fetchArticles(targetPage: number, reset = false) {
-    if (reset) setLoading(true)
-    else setFetching(true)
-
-    const res = await getArticles({ page: targetPage, pageSize: 10, orderBy: 'create_time' })
-    if (res.data.length === 0) {
-      setHasMore(false)
-      if (!reset) setFetching(false)
-      setLoading(false)
-      return
-    }
-
-    if (reset) {
-      setArticles(res.data)
-      setLoading(false)
-    } else {
-      setArticles(prev => [...prev, ...res.data])
-      setFetching(false)
-    }
-  }
+  }, [hasMore, fetching, isFetching, page])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-transparent to-zinc-100 dark:from-zinc-950 dark:via-zinc-900/50 dark:to-zinc-950">

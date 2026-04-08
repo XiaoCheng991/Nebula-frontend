@@ -1,10 +1,9 @@
 "use client"
 
-import React, { useCallback, useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import Link from "next/link"
 import { getLocalUserInfo } from "@/lib/api/adapters"
-import { getMemos } from "@/lib/supabase/modules/memo"
-import { getArticles } from "@/lib/supabase/modules/blog"
+import { useDashboardData } from "@/hooks/useQueries"
 import { PenLine, BookOpen, Link2, ExternalLink, Clock, Sparkles, MessageCircle } from "lucide-react"
 import LayoutWithFullWidth from "@/components/LayoutWithFullWidth"
 import { ProtectedRoute } from "@/components/auth/AuthGuard"
@@ -81,42 +80,27 @@ function AnimationStyles() {
 }
 
 export default function DashboardPage() {
-  const localUser = getLocalUserInfo()
-  const userId = typeof localUser?.id === "number" ? localUser.id : Number(localUser?.id) || undefined
+  const { data: dashboardData, isLoading } = useDashboardData()
+  const memoCount = dashboardData?.memoTotal ?? 0
+  const articleCount = dashboardData?.articleTotal ?? 0
+  const recentMemos: MemoData[] = (dashboardData?.memos as MemoData[]) || []
 
-  const [memoCount, setMemoCount] = useState(0)
-  const [articleCount, setArticleCount] = useState(0)
-  const [bookmarkCount, setBookmarkCount] = useState(0)
-  const [recentMemos, setRecentMemos] = useState<MemoData[]>([])
+  // Read bookmarks from localStorage (client only)
   const [bookmarks, setBookmarks] = useState<BookmarkData[]>([])
-  const [loading, setLoading] = useState(true)
-
-  const loadAll = useCallback(async () => {
+  const [bookmarkCount, setBookmarkCount] = useState(0)
+  const bookmarkLoaded = React.useRef(false)
+  if (!bookmarkLoaded.current) {
+    bookmarkLoaded.current = true
     try {
-      const [memoRes, articleRes] = await Promise.all([
-        getMemos({ page: 1, pageSize: 5, visibility: "PUBLIC" }),
-        getArticles({ page: 1, pageSize: 10 }),
-      ])
-      setMemoCount(memoRes.total)
-      setArticleCount(articleRes.total)
-      setRecentMemos((memoRes.data as MemoData[]) || [])
-
-      // Read bookmarks from localStorage (client only) - same as blog
-      let bmList: BookmarkData[] = []
-      try {
-        const stored = localStorage.getItem("blog_bookmarks")
-        if (stored) bmList = JSON.parse(stored)
-      } catch { /* localStorage may not be available */ }
-      setBookmarkCount(bmList.length)
-      setBookmarks(bmList)
-    } catch (e) {
-      console.error("[我的空间] 加载失败:", e)
-    } finally {
-      setLoading(false)
-    }
-  }, [userId])
-
-  useEffect(() => { loadAll() }, [loadAll])
+      const stored = localStorage.getItem("blog_bookmarks")
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        setBookmarks(parsed)
+        setBookmarkCount(parsed.length)
+      }
+    } catch { /* ignore */ }
+  }
+  const loading = isLoading
 
   const animatedMemoCount = useCountUp(memoCount, 600, !loading)
   const animatedArticleCount = useCountUp(articleCount, 600, !loading)
@@ -164,16 +148,11 @@ export default function DashboardPage() {
         <div className="relative z-10 max-w-[1400px] mx-auto px-6 py-8 space-y-8 anim-fade-in">
           {/* Page Header */}
           <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-400/20 to-amber-500/20 flex items-center justify-center transition-all duration-300 hover:from-orange-400/30 hover:to-amber-500/30">
-                <Sparkles className="h-5 w-5 text-amber-600 dark:text-amber-400 transition-transform duration-300 hover:rotate-12" />
-              </div>
-              <div>
-                <h1 className="text-[22px] font-bold tracking-tight bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 bg-clip-text text-transparent leading-tight">
-                  我的空间
-                </h1>
-                <div className="h-[2px] w-12 mt-1.5 rounded-full anim-shimmer" />
-              </div>
+            <div>
+              <h1 className="text-[22px] font-bold tracking-tight bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 bg-clip-text text-transparent leading-tight">
+                我的空间
+              </h1>
+              <div className="h-[2px] w-16 mt-2 rounded-full anim-shimmer" />
             </div>
           </div>
 

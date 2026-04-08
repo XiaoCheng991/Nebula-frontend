@@ -92,63 +92,6 @@ function formatTimeAgo(dateStr: string): string {
   return date.toLocaleDateString("zh-CN")
 }
 
-/** 数字滚动动画 hook */
-function useCountUp(target: number, duration = 700, start = false) {
-  const [current, setCurrent] = useState(0)
-  useEffect(() => {
-    if (!start) return
-    let startTime: number
-    let frame: number
-    const step = (ts: number) => {
-      if (!startTime) startTime = ts
-      const progress = Math.min((ts - startTime) / duration, 1)
-      const eased = 1 - Math.pow(1 - progress, 3)
-      setCurrent(Math.floor(eased * target))
-      if (progress < 1) frame = requestAnimationFrame(step)
-    }
-    frame = requestAnimationFrame(step)
-    return () => cancelAnimationFrame(frame)
-  }, [target, duration, start])
-  return current
-}
-
-const ANIMATION_STYLES = `
-  @keyframes fadeSlideUp {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  @keyframes shimmerLine {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
-  }
-  .anim-fade-slide-up {
-    opacity: 0;
-    animation: fadeSlideUp 0.45s ease-out forwards;
-  }
-  .anim-fade-in {
-    opacity: 0;
-    animation: fadeIn 0.5s ease-out forwards;
-  }
-  .anim-shimmer {
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      rgba(245, 166, 35, 0.15) 50%,
-      transparent 100%
-    );
-    background-size: 200% 100%;
-    animation: shimmerLine 2.5s infinite;
-  }
-`
-
-function AnimationStyles() {
-  return <style>{ANIMATION_STYLES}</style>
-}
-
 export default function DrivePage() {
   const { user } = useUser()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -190,6 +133,7 @@ export default function DrivePage() {
 
   useEffect(() => { loadAllData() }, [activeBucket, activeFolder])
 
+  // 每次打开上传对话框时确保文件夹数据是最新的
   const handleOpenUploadDialog = () => {
     setUploadFiles([])
     setUploadFolder("")
@@ -287,42 +231,14 @@ export default function DrivePage() {
 
   const handleBucketChange = (bucketKey: string) => { setActiveBucket(bucketKey); setActiveFolder("") }
 
-  const renderFileCard = (file: Tables<"file_metadata">, i: number) => {
-    const iconInfo = getFileIconInfo(file)
-    return (
-      <div
-        key={file.id}
-        className="relative overflow-hidden flex items-center gap-3 p-3 rounded-lg backdrop-blur-xl bg-white/40 dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] hover:border-orange-500/40 dark:hover:border-orange-500/30 hover:shadow-sm hover:shadow-orange-500/5 transition-all duration-200 group"
-        style={{ opacity: 0, animation: `fadeSlideUp 0.35s ease-out ${0.15 + i * 0.05}s forwards` }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-        <div className={`relative w-10 h-10 rounded-lg flex items-center justify-center ${iconInfo.bgColor} group-hover:scale-105 group-hover:shadow-md transition-all duration-200 flex-shrink-0`}>
-          <iconInfo.Component className={`h-5 w-5 ${iconInfo.color} transition-transform duration-200 group-hover:-rotate-6`} />
-        </div>
-        <div className="relative flex-1 min-w-0">
-          <h4 className="text-[13px] font-medium text-foreground group-hover:text-orange-600 dark:group-hover:text-amber-300 transition-colors truncate">{file.file_name}</h4>
-          <p className="text-[11px] text-muted-foreground">{formatFileSize(file.file_size)} · {formatTimeAgo(file.created_at)}</p>
-        </div>
-        <div className="relative flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-          <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 cursor-pointer" onClick={() => handleDownload(file)} title="下载">
-            <Download className="h-3.5 w-3.5 transition-transform duration-200 group-hover/download:scale-110" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-red-500 cursor-pointer" onClick={() => handleDelete(file)} title="删除">
-            <X className="h-3.5 w-3.5 transition-transform duration-200 group-hover/delete:scale-110" />
-          </Button>
-        </div>
-      </div>
-    )
-  }
-
   const renderFileRow = (file: Tables<"file_metadata">) => {
     const iconInfo = getFileIconInfo(file)
     return (
-      <tr key={file.id} className="hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors last:border-b-0 group">
+      <tr key={file.id} className="border-b border-black/[0.06] dark:border-white/[0.08] hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors last:border-b-0 group">
         <td className="py-3.5 px-4">
           <div className="flex items-center gap-2.5">
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${iconInfo.bgColor} group-hover/icon:scale-110 transition-transform duration-200`}>
-              <iconInfo.Component className={`h-4 w-4 ${iconInfo.color} transition-transform duration-200 group-hover/icon:-rotate-6`} />
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${iconInfo.bgColor}`}>
+              <iconInfo.Component className={`h-4 w-4 ${iconInfo.color}`} />
             </div>
             <span className="text-[13px] text-foreground font-medium">{file.file_name}</span>
           </div>
@@ -344,23 +260,42 @@ export default function DrivePage() {
     )
   }
 
-  const renderRecentFile = (file: Tables<"file_metadata">, i: number) => {
+  const renderFileCard = (file: Tables<"file_metadata">) => {
     const iconInfo = getFileIconInfo(file)
     return (
-      <div
-        key={file.id}
-        className="flex items-center gap-3 p-3 rounded-xl hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all cursor-pointer group"
-        style={{ opacity: 0, animation: `fadeSlideUp 0.35s ease-out ${0.3 + i * 0.06}s forwards` }}
-        onClick={() => handleDownload(file)}
-      >
-        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${iconInfo.bgColor} transition-all duration-200 group-hover:scale-105`}>
-          <iconInfo.Component className={`h-5 w-5 ${iconInfo.color} transition-transform duration-200 group-hover:rotate-6`} />
+      <div key={file.id} className="relative overflow-hidden flex items-center gap-3 p-3 rounded-lg backdrop-blur-xl bg-white/40 dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] hover:border-orange-500/40 dark:hover:border-orange-500/30 hover:shadow-sm hover:shadow-orange-500/5 transition-all duration-200 group">
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+        <div className={`relative w-10 h-10 rounded-lg flex items-center justify-center ${iconInfo.bgColor} group-hover:scale-105 group-hover:shadow-md transition-all duration-200 flex-shrink-0`}>
+          <iconInfo.Component className={`h-5 w-5 ${iconInfo.color}`} />
+        </div>
+        <div className="relative flex-1 min-w-0">
+          <h4 className="text-[13px] font-medium text-foreground group-hover:text-orange-600 dark:group-hover:text-amber-300 transition-colors truncate">{file.file_name}</h4>
+          <p className="text-[11px] text-muted-foreground">{formatFileSize(file.file_size)} · {formatTimeAgo(file.created_at)}</p>
+        </div>
+        <div className="relative flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+          <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 cursor-pointer" onClick={() => handleDownload(file)} title="下载">
+            <Download className="h-3.5 w-3.5" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-red-500 cursor-pointer" onClick={() => handleDelete(file)} title="删除">
+            <X className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  const renderRecentFile = (file: Tables<"file_metadata">) => {
+    const iconInfo = getFileIconInfo(file)
+    return (
+      <div key={file.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all cursor-pointer group" onClick={() => handleDownload(file)}>
+        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${iconInfo.bgColor}`}>
+          <iconInfo.Component className={`h-5 w-5 ${iconInfo.color}`} />
         </div>
         <div className="flex-1 min-w-0">
           <h4 className="text-[13px] font-medium text-foreground truncate group-hover:text-orange-600 dark:group-hover:text-amber-300 transition-colors">{file.file_name}</h4>
           <p className="text-[11px] text-muted-foreground mt-0.5">{formatFileSize(file.file_size)} · {file.owner_name}</p>
         </div>
-        <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-all h-8 w-8 text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 cursor-pointer">
+        <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 cursor-pointer">
           <Download className="h-4 w-4" />
         </Button>
       </div>
@@ -370,7 +305,6 @@ export default function DrivePage() {
   return (
     <ProtectedRoute>
       <LayoutWithFullWidth>
-        <AnimationStyles />
         <div className="relative min-h-screen">
           <div className="fixed inset-0 overflow-hidden pointer-events-none">
             <div className="absolute top-[-250px] right-[-200px] w-[650px] h-[650px] rounded-full bg-[radial-gradient(circle,rgba(245,166,35,0.07)_0%,transparent_70%)] blur-3xl" />
@@ -378,100 +312,73 @@ export default function DrivePage() {
             <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(245,200,80,0.04)_0%,transparent_70%)] blur-3xl" />
           </div>
 
-          <div className={`relative z-10 max-w-[1400px] mx-auto px-6 py-8 space-y-8 ${!loading ? "anim-fade-in" : ""}`}>
-            {/* Page Header */}
+          <div className="relative z-10 max-w-[1400px] mx-auto px-6 py-8 space-y-8">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-400/20 to-amber-500/20 flex items-center justify-center transition-all duration-300 hover:from-orange-400/30 hover:to-amber-500/30">
-                  <HardDrive className="h-5 w-5 text-amber-600 dark:text-amber-400 transition-transform duration-300 hover:rotate-12" />
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-400/20 to-amber-500/20 flex items-center justify-center">
+                  <HardDrive className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                 </div>
-                <div>
-                  <h1 className="text-[22px] font-bold tracking-tight bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 bg-clip-text text-transparent leading-tight">文件传输</h1>
-                  <div className="h-[2px] w-12 mt-1.5 rounded-full anim-shimmer" />
-                </div>
+                <h1 className="text-[22px] font-bold tracking-tight bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 bg-clip-text text-transparent leading-tight">文件传输</h1>
               </div>
               <div className="flex gap-3">
                 <Button variant="outline" className="relative overflow-hidden gap-2 rounded-xl backdrop-blur-xl bg-white/50 dark:bg-white/[0.06] border border-black/[0.06] dark:border-white/[0.10] hover:border-orange-500/40 dark:hover:border-orange-500/30 hover:bg-white/80 dark:hover:bg-white/[0.08] transition-all duration-200 h-11 px-5 cursor-pointer group" onClick={handleOpenUploadDialog} disabled={uploading}>
-                  {uploading ? <Loader2 className="h-4 w-4 animate-spin text-amber-600 dark:text-amber-400" /> : <Upload className="h-4 w-4 text-amber-600 dark:text-amber-400 group-hover:text-orange-500 transition-colors" />}
+                  {uploading ? <Loader2 className="h-4 w-4 animate-spin text-amber-600 dark:text-amber-400" /> : <Upload className="h-4 w-4 text-amber-600 dark:text-amber-400 group-hover:text-orange-500" />}
                   <span className="group-hover:text-orange-500 transition-colors">{uploading ? "上传中..." : "上传文件"}</span>
                 </Button>
-                <Button className="gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white h-11 px-5 font-medium shadow-lg shadow-orange-500/25 hover:shadow-orange-500/35 transition-all duration-200 hover:scale-[1.02] cursor-pointer" onClick={() => setShowNewFolderDialog(true)}>
+                <Button className="gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white h-11 px-5 font-medium shadow-lg shadow-orange-500/25 hover:shadow-orange-500/35 transition-shadow duration-200 cursor-pointer" onClick={() => setShowNewFolderDialog(true)}>
                   <FolderPlus className="h-4 w-4" /> 新建文件夹
                 </Button>
               </div>
             </div>
 
-            {/* Bucket Tabs */}
-            <div className="flex gap-2 anim-fade-slide-up" style={{ animationDelay: "0.05s" }}>
-              {STORAGE_BUCKETS.map((bucket) => {
-                const Icon = bucket.icon
-                return (
-                  <button
-                    key={bucket.key}
-                    onClick={() => handleBucketChange(bucket.key)}
-                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 relative overflow-hidden ${
-                      activeBucket === bucket.key
-                        ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/25"
-                        : "bg-white/50 dark:bg-white/[0.06] border border-black/[0.06] dark:border-white/[0.10] text-zinc-600 dark:text-zinc-400 hover:bg-white/80 dark:hover:bg-white/[0.08]"
-                    }`}
-                  >
-                    <Icon className={`h-4 w-4 ${activeBucket === bucket.key ? "text-white transition-transform duration-300 -rotate-6" : bucket.color}`} />
-                    {bucket.label}
-                  </button>
-                )
-              })}
+            <div className="flex gap-2">
+              {STORAGE_BUCKETS.map((bucket) => (
+                <button key={bucket.key} onClick={() => handleBucketChange(bucket.key)} className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeBucket === bucket.key ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/25" : "bg-white/50 dark:bg-white/[0.06] border border-black/[0.06] dark:border-white/[0.10] text-zinc-600 dark:text-zinc-400 hover:bg-white/80 dark:hover:bg-white/[0.08]"}`}>
+                  <bucket.icon className={`h-4 w-4 ${activeBucket === bucket.key ? "text-white" : bucket.color}`} />
+                  {bucket.label}
+                </button>
+              ))}
             </div>
 
-            {/* Search & View Toggle */}
-            <div className="backdrop-blur-xl bg-white/50 dark:bg-white/[0.06] border border-black/[0.06] dark:border-white/[0.10] rounded-xl p-4 transition-all duration-300 hover:border-orange-500/30 overflow-hidden anim-fade-slide-up" style={{ animationDelay: "0.1s" }}>
+            <div className="backdrop-blur-xl bg-white/50 dark:bg-white/[0.06] border border-black/[0.06] dark:border-white/[0.10] rounded-xl p-4 transition-all duration-300 hover:border-orange-500/30">
               <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3">
                 <div className="relative w-full max-w-md">
                   <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground/70" />
                   <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="搜索文件..." className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-black/[0.06] dark:border-white/[0.08] bg-white/30 dark:bg-white/[0.04] backdrop-blur-sm text-[14px] focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/40 transition-all placeholder:text-muted-foreground" />
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="icon" className={`rounded-lg h-10 w-10 backdrop-blur-xl border transition-all duration-200 cursor-pointer ${viewMode === "grid" ? "border-orange-500/40 text-orange-500 bg-orange-500/10" : "bg-white/50 dark:bg-white/[0.06] border-black/[0.06] dark:border-white/[0.10] text-muted-foreground hover:border-orange-500/40"}`} onClick={() => setViewMode("grid")}>
+                  <Button variant="outline" size="icon" className={`rounded-lg h-10 w-10 backdrop-blur-xl border transition-colors cursor-pointer ${viewMode === "grid" ? "border-orange-500/40 text-orange-500 bg-orange-500/10" : "bg-white/50 dark:bg-white/[0.06] border-black/[0.06] dark:border-white/[0.10] text-muted-foreground hover:border-orange-500/40"}`} onClick={() => setViewMode("grid")}>
                     <Grid3X3 className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="icon" className={`rounded-lg h-10 w-10 backdrop-blur-xl border transition-all duration-200 cursor-pointer ${viewMode === "list" ? "border-orange-500/40 text-orange-500 bg-orange-500/10" : "bg-white/50 dark:bg-white/[0.06] border-black/[0.06] dark:border-white/[0.10] text-muted-foreground hover:border-orange-500/40"}`} onClick={() => setViewMode("list")}>
+                  <Button variant="outline" size="icon" className={`rounded-lg h-10 w-10 backdrop-blur-xl border transition-colors cursor-pointer ${viewMode === "list" ? "border-orange-500/40 text-orange-500 bg-orange-500/10" : "bg-white/50 dark:bg-white/[0.06] border-black/[0.06] dark:border-white/[0.10] text-muted-foreground hover:border-orange-500/40"}`} onClick={() => setViewMode("list")}>
                     <List className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
-              {/* 底部指示线 */}
-              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-orange-400/0 to-transparent group-hover:via-orange-400/60 transition-[background] duration-500" />
             </div>
 
-            {/* Folders */}
             {folders.size > 0 && (
-              <div className="backdrop-blur-xl bg-white/50 dark:bg-white/[0.06] border border-black/[0.06] dark:border-white/[0.10] rounded-xl p-4 transition-all duration-300 hover:border-orange-500/30 overflow-hidden anim-fade-slide-up" style={{ animationDelay: "0.15s" }}>
-                <div className="flex items-center gap-2 mb-0">
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-orange-400/20 to-amber-500/20 flex items-center justify-center transition-colors duration-300 hover:from-orange-400/30 hover:to-amber-500/30">
-                      <Folder className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                    </div>
-                    <h3 className="text-[14px] font-semibold text-foreground whitespace-nowrap">{currentBucket.label}</h3>
+              <div className="backdrop-blur-xl bg-white/50 dark:bg-white/[0.06] border border-black/[0.06] dark:border-white/[0.10] rounded-xl p-4 transition-all duration-300 hover:border-orange-500/30">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-orange-400/20 to-amber-500/20 flex items-center justify-center">
+                    <Folder className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                   </div>
-                  <div className="flex items-center gap-1.5 flex-wrap min-h-7">
-                    <button onClick={() => setActiveFolder("")} className={`inline-flex items-center justify-center min-h-[26px] px-3 rounded-full text-xs font-medium border leading-none transition-all ${activeFolder === "" ? "bg-orange-500/20 text-amber-600 dark:text-amber-400 border-orange-500/30" : "bg-orange-500/10 text-amber-600 dark:text-amber-400 border-orange-500/15 hover:bg-orange-500/15"}`}>
-                      全部
+                  <h3 className="text-[14px] font-semibold text-foreground">{currentBucket.label}</h3>
+                  <button onClick={() => setActiveFolder("")} className={`text-[11px] px-2 py-0.5 rounded-full font-medium border transition-all ${activeFolder === "" ? "bg-orange-500/20 text-amber-600 dark:text-amber-400 border-orange-500/30" : "bg-orange-500/10 text-amber-600 dark:text-amber-400 border-orange-500/15 hover:bg-orange-500/15"}`}>
+                    全部
+                  </button>
+                  {Array.from(folders).map((folderName) => (
+                    <button key={folderName} onClick={() => setActiveFolder(activeFolder === folderName ? "" : folderName)} className={`text-[11px] px-2 py-0.5 rounded-full font-medium border transition-all ${activeFolder === folderName ? "bg-orange-500/20 text-amber-600 dark:text-amber-400 border-orange-500/30" : "bg-orange-500/10 text-amber-600 dark:text-amber-400 border-orange-500/15 hover:bg-orange-500/15"}`}>
+                      {folderName}
                     </button>
-                    {Array.from(folders).map((folderName) => (
-                      <button key={folderName} onClick={() => setActiveFolder(activeFolder === folderName ? "" : folderName)} className={`inline-flex items-center justify-center min-h-[26px] px-3 rounded-full text-xs font-medium border leading-none transition-all ${activeFolder === folderName ? "bg-orange-500/20 text-amber-600 dark:text-amber-400 border-orange-500/30" : "bg-orange-500/10 text-amber-600 dark:text-amber-400 border-orange-500/15 hover:bg-orange-500/15"}`}>
-                        {folderName}
-                      </button>
-                    ))}
-                  </div>
+                  ))}
                 </div>
-                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-orange-400/0 to-transparent transition-[background] duration-500" />
               </div>
             )}
 
-            {/* Main Content: Files + Recent */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              {/* File List */}
               <div className="lg:col-span-2">
-                <div className="backdrop-blur-xl bg-white/50 dark:bg-white/[0.06] border border-black/[0.06] dark:border-white/[0.10] rounded-xl p-4 transition-all duration-300 hover:border-orange-500/30 overflow-hidden">
+                <div className="backdrop-blur-xl bg-white/50 dark:bg-white/[0.06] border border-black/[0.06] dark:border-white/[0.10] rounded-xl p-4 transition-all duration-300 hover:border-orange-500/30">
                   <div className="flex items-center gap-2 mb-4">
                     <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-400/15 to-blue-500/15 flex items-center justify-center">
                       <File className="h-5 w-5 text-blue-400" />
@@ -488,7 +395,7 @@ export default function DrivePage() {
                     </div>
                   ) : viewMode === "grid" ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {filteredFiles.map((file, i) => renderFileCard(file, i))}
+                      {filteredFiles.map(renderFileCard)}
                     </div>
                   ) : (
                     <div className="overflow-hidden rounded-xl border border-black/[0.06] dark:border-white/[0.08]">
@@ -506,70 +413,54 @@ export default function DrivePage() {
                       </table>
                     </div>
                   )}
-                  {/* 底部指示线 */}
-                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-orange-400/0 to-transparent transition-[background] duration-500" />
                 </div>
               </div>
 
-              {/* Recent Files */}
               <div>
-                <div className="backdrop-blur-xl bg-white/50 dark:bg-white/[0.06] border border-black/[0.06] dark:border-white/[0.10] rounded-xl p-4 h-full transition-all duration-300 hover:border-orange-500/30 overflow-hidden">
+                <div className="backdrop-blur-xl bg-white/50 dark:bg-white/[0.06] border border-black/[0.06] dark:border-white/[0.10] rounded-xl p-4 h-full transition-all duration-300 hover:border-orange-500/30">
                   <div className="flex items-center gap-2 mb-4">
                     <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-400/15 to-blue-500/15 flex items-center justify-center">
                       <File className="h-5 w-5 text-blue-400" />
                     </div>
                     <h3 className="text-[14px] font-semibold text-foreground">最近文件</h3>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {loading ? Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-16 rounded-lg bg-zinc-100 dark:bg-zinc-800 animate-pulse" />)
                       : recentFiles.length === 0 ? <p className="text-xs text-zinc-400 text-center py-8">暂无最近文件</p>
-                        : recentFiles.map((file, i) => renderRecentFile(file, i))}
+                        : recentFiles.map(renderRecentFile)}
                   </div>
-                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-orange-400/0 to-transparent transition-[background] duration-500" />
                 </div>
               </div>
             </div>
 
-            {/* Storage Stats */}
-            <div className="backdrop-blur-xl bg-white/50 dark:bg-white/[0.06] border border-black/[0.06] dark:border-white/[0.10] rounded-xl p-4 transition-all duration-300 hover:border-orange-500/30 overflow-hidden">
+            <div className="backdrop-blur-xl bg-white/50 dark:bg-white/[0.06] border border-black/[0.06] dark:border-white/[0.10] rounded-xl p-4 transition-all duration-300 hover:border-orange-500/30">
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-orange-400/20 to-amber-500/20 flex items-center justify-center transition-all duration-300 hover:from-orange-400/30 hover:to-amber-500/30">
+                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-orange-400/20 to-amber-500/20 flex items-center justify-center">
                   <HardDrive className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                 </div>
                 <h3 className="text-[14px] font-semibold text-foreground">存储统计</h3>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {STORAGE_BUCKETS.map((bucket, i) => {
+                {STORAGE_BUCKETS.map((bucket) => {
                   const stat = storageStats.find(s => s.bucketName === bucket.key)
                   const fileCount = stat?.fileCount ?? 0
                   const totalSize = stat?.totalSize ?? 0
-                  const Icon = bucket.icon
-                  const animatedFileCount = useCountUp(fileCount, 500, !loading)
                   return (
-                    <div
-                      key={bucket.key}
-                      className="relative rounded-lg border border-black/[0.06] dark:border-white/[0.08] p-4 bg-white/40 dark:bg-white/[0.04] overflow-hidden transition-all duration-200 hover:border-orange-500/20 group/stat"
-                      style={{ opacity: 0, animation: `fadeSlideUp 0.4s ease-out ${i * 0.08}s forwards` }}
-                    >
+                    <div key={bucket.key} className="rounded-lg border border-black/[0.06] dark:border-white/[0.08] p-4 bg-white/40 dark:bg-white/[0.04]">
                       <div className="flex items-center gap-2 mb-2">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${bucket.bgColor} transition-all duration-200 group-hover/stat:scale-110`}>
-                          <Icon className={`h-4 w-4 ${bucket.color} transition-transform duration-200 group-hover/stat:rotate-6`} />
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${bucket.bgColor}`}>
+                          <bucket.icon className={`h-4 w-4 ${bucket.color}`} />
                         </div>
                         <span className="text-[13px] font-medium text-foreground">{bucket.label}</span>
                       </div>
                       <div className="text-xs text-muted-foreground space-y-0.5">
-                        <p>文件: {animatedFileCount}</p>
+                        <p>文件: {fileCount}</p>
                         <p>大小: {formatFileSize(totalSize)}</p>
                       </div>
-                      {/* 底部渐变指示线 */}
-                      <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-transparent to-transparent
-                                      group-hover/stat:via-orange-400/50 transition-[background] duration-500" />
                     </div>
                   )
                 })}
               </div>
-              {/* 底部指示线 */}
-              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-orange-400/0 to-transparent transition-[background] duration-500" />
             </div>
           </div>
         </div>
