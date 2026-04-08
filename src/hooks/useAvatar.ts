@@ -74,15 +74,13 @@ export function useAvatar(options: UseAvatarOptions): UseAvatarReturn {
       .select('avatar_url')
       .eq('id', userId)
       .single()
-      .then(({ data }) => {
+      .then(({ data, error }) => {
         if (mounted) {
-          setDbAvatarUrl(data?.avatar_url || null)
-          setLoading(false)
-        }
-      })
-      .catch(() => {
-        if (mounted) {
-          setDbAvatarUrl(null)
+          if (error) {
+            setDbAvatarUrl(null)
+          } else {
+            setDbAvatarUrl(data?.avatar_url || null)
+          }
           setLoading(false)
         }
       })

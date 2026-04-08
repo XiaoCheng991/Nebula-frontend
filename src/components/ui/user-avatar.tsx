@@ -76,7 +76,7 @@ export function UserAvatar({
         </div>
       ) : (
         <img
-          src={finalSrc}
+          src={finalSrc || undefined}
           alt={displayNickname || "Avatar"}
           className={`${sizeClass} rounded-full object-cover ${className}`}
           onError={() => setImageError(true)}
