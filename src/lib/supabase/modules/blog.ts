@@ -205,7 +205,7 @@ export async function addComment(comment: TablesInsert<'blog_comment'>): Promise
     .insert({
       ...comment,
       parent_id: comment.parent_id || 0,
-      status: 'APPROVED',  // 无需审核
+      status: 'APPROVED', // 无需审核
       like_count: comment.like_count || 0,
       deleted: 0,
     })
@@ -275,6 +275,43 @@ export async function setArticleTags(articleId: number, tagIds: number[]): Promi
   const { error } = await (supabase
     .from('blog_article_tag') as any)
     .insert(inserts)
+
+  return !error
+}
+
+// ==================== 网站精选 (user_website_collection) ====================
+
+export async function getWebsiteCollections(): Promise<{ data: any[]; error: any }> {
+  if (!isSupabaseAvailable()) return { data: [], error: 'Supabase not configured' }
+
+  const { data, error } = await supabase
+    .from('user_website_collection')
+    .select('*')
+    .eq('deleted', 0)
+    .order('create_time', { ascending: false })
+
+  return { data: data || [], error }
+}
+
+export async function addWebsiteCollection(collection: { title: string; url: string; user_id: number }): Promise<{ data: any | null; error: any }> {
+  if (!isSupabaseAvailable()) return { data: null, error: 'Supabase not configured' }
+
+  const { data, error } = await supabase
+    .from('user_website_collection')
+    .insert(collection)
+    .select()
+    .single()
+
+  return { data, error }
+}
+
+export async function deleteWebsiteCollection(id: number): Promise<boolean> {
+  if (!isSupabaseAvailable()) return false
+
+  const { error } = await supabase
+    .from('user_website_collection')
+    .update({ deleted: 1 })
+    .eq('id', id)
 
   return !error
 }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, type ChangeEvent } from 'react'
 import { useRouter } from 'next/navigation'
+import { usePagePermission } from '@/hooks/usePagePermission'
 import { Loader2, Send, ArrowLeft, Smile, X, ImageIcon } from 'lucide-react'
 import { UserAvatar } from '@/components/ui/user-avatar'
 import { useUser } from '@/lib/user-context'

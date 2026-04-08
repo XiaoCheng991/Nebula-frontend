@@ -119,7 +119,7 @@ export default function BlogPage() {
   const [starCounts, setStarCounts] = useState<Record<string, number>>({});
   const [memos, setMemos] = useState<any[]>([]);
   const [articles, setArticles] = useState<any[]>([]);
-  const [bookmarks, setBookmarks] = useState<{ title: string; url: string }[]>([]);
+  const [bookmarks, setBookmarks] = useState<>([]);
   const [tags, setTags] = useState<any[]>([]);
   const [memosLoading, setMemosLoading] = useState(true);
   const [articlesLoading, setArticlesLoading] = useState(true);
@@ -305,32 +305,53 @@ export default function BlogPage() {
     }
   };
 
-  const saveBookmarks = (newBookmarks: { title: string; url: string }[]) => {
+  const saveBookmarks = (newBookmarks: any[]) => {
     setBookmarks(newBookmarks);
-    localStorage.setItem('blog_bookmarks', JSON.stringify(newBookmarks));
   };
 
-  const handleAddBookmark = () => {
+  const handleAddBookmark = async () => {
     if (!bookmarkUrl.trim()) {
       toast({ title: '提示', description: '请输入链接地址', variant: 'destructive' });
       return;
     }
+
+    if (!userId) {
+      toast({ title: '提示', description: '请先登录', variant: 'destructive' });
+      return;
+    }
+
     const newBookmark = {
       title: bookmarkTitle.trim() || bookmarkUrl.trim(),
       url: bookmarkUrl.trim(),
+      user_id: Number(userId),
     };
-    const newBookmarks = [...bookmarks, newBookmark];
-    saveBookmarks(newBookmarks);
-    setBookmarkTitle('');
-    setBookmarkUrl('');
-    setShowBookmarkDialog(false);
-    toast({ title: '已收藏', description: '精选文章已保存' });
+
+    try {
+      const { data, error } = await addWebsiteCollection(newBookmark);
+      if (error) throw error;
+
+      setBookmarks(prev => [...prev, data]);
+      setBookmarkTitle('');
+      setBookmarkUrl('');
+      setShowBookmarkDialog(false);
+      toast({ title: '已收藏', description: '精选文章已保存' });
+    } catch (err: any) {
+      toast({ title: '错误', description: err.message || '保存失败', variant: 'destructive' });
+    }
   };
 
-  const handleDeleteBookmark = (index: number) => {
-    const newBookmarks = bookmarks.filter((_, i) => i !== index);
-    saveBookmarks(newBookmarks);
-    toast({ title: '已删除', description: '收藏已移除' });
+  const handleDeleteBookmark = async (id: number) => {
+    try {
+      const success = await deleteWebsiteCollection(id);
+      if (success) {
+        setBookmarks(prev => prev.filter(bm => bm.id !== id));
+        toast({ title: '已删除', description: '收藏已移除' });
+      } else {
+        throw new Error('删除失败');
+      }
+    } catch (err: any) {
+      toast({ title: '错误', description: err.message || '删除失败', variant: 'destructive' });
+    }
   };
 
   const handleWriteBlog = (e: React.MouseEvent) => {
@@ -535,7 +556,9 @@ export default function BlogPage() {
                 // 如果 memo 是当前用户的，用顶部导航栏的最新头像，否则用 sys_users 的
                 const currentUsername = user?.username || localUser?.username
                 const isCurrentUser = memo.sys_users?.username === currentUsername
-                const memoAvatarUrl = isCurrentUser ? (user?.avatarUrl || memo.sys_users?.avatar_url) : memo.sys_users?.avatar_url
+                const memoAvatarUrl = isCurrentUser
+    ? (user?.avatarUrl || memo.sys_users?.avatar_url || null)
+    : (memo.sys_users?.avatar_url || null)
                 // Split mood from content
                 const lines = memo.content.split('\n\n')
                 const moodLine = lines.find((l: string) => l.startsWith('心情：'))

@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { ArrowLeft, Calendar, Clock, Share2, MessageSquare } from 'lucide-react'
-import { getArticleById } from '@/lib/supabase/modules/blog'
+import { getArticleById, incrementArticleView } from '@/lib/supabase/modules/blog'
 import { useUser } from '@/lib/user-context'
 import { UserAvatar } from '@/components/ui/user-avatar'
 import { IconGitHub } from '@/components/branding/social-icons'
@@ -64,12 +64,12 @@ export default function BlogDetailPage({ params }: BlogDetailPageProps) {
 
   const readingTime = article.content_html ? formatReadingTime(article.content_html) : ''
 
-  // 头像匹配：如果作者是当前用户，用 useUser 中的最新头像
+  // 头像匹配：如果作者是当前用户，用 useUser 中的最新头像，否则使用文章自带的作者头像
   const currentUsername = user?.username || ''
   const isCurrentUserAuthor = article.author_name === currentUsername
   const authorAvatarUrl = isCurrentUserAuthor
-    ? (user?.avatarUrl || null)
-    : null
+    ? (user?.avatarUrl || article.author_avatar_url || null)
+    : (article.author_avatar_url || null)
   const authorNickname = article.author_name || '用户'
 
   return (
