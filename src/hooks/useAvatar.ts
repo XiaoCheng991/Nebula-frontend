@@ -7,7 +7,6 @@
  */
 
 import { useState, useEffect } from 'react'
-import { useUser } from '@/lib/user-context'
 import { supabase } from '@/lib/supabase/client'
 
 export interface UseAvatarOptions {
@@ -54,7 +53,6 @@ export interface UseAvatarReturn {
  */
 export function useAvatar(options: UseAvatarOptions): UseAvatarReturn {
   const { userId, username, nickname, directAvatarUrl } = options
-  const { user: currentUser } = useUser()
 
   const [dbAvatarUrl, setDbAvatarUrl] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -62,9 +60,12 @@ export function useAvatar(options: UseAvatarOptions): UseAvatarReturn {
   // 从数据库查询用户头像
   useEffect(() => {
     if (!userId) {
+      console.log('[useAvatar] 没有 userId，不查询数据库')
       setDbAvatarUrl(null)
       return
     }
+
+    console.log('[useAvatar] 开始查询 userId:', userId)
 
     let mounted = true
     setLoading(true)
@@ -75,10 +76,13 @@ export function useAvatar(options: UseAvatarOptions): UseAvatarReturn {
       .eq('id', userId)
       .single()
       .then(({ data, error }) => {
+        console.log('[useAvatar] 查询结果:', { userId, data, error })
         if (mounted) {
           if (error) {
+            console.log('[useAvatar] 查询出错:', error.message)
             setDbAvatarUrl(null)
           } else {
+            console.log('[useAvatar] 获取到头像:', data?.avatar_url)
             setDbAvatarUrl(data?.avatar_url || null)
           }
           setLoading(false)
@@ -91,27 +95,23 @@ export function useAvatar(options: UseAvatarOptions): UseAvatarReturn {
   }, [userId])
 
   // 计算最终头像 URL
+  // 这里只展示文章/动态作者的头像，不需要判断当前用户
   const avatarUrl = (() => {
+    console.log('[useAvatar] 计算头像:', { directAvatarUrl, dbAvatarUrl, userId })
+
     // 1. 优先使用直接传入的头像 URL
     if (directAvatarUrl) {
       return directAvatarUrl
     }
 
-    // 2. 如果是当前登录用户，使用 useUser 中的最新头像
-    const isCurrentUser = currentUser?.username &&
-      username &&
-      currentUser.username.toLowerCase() === username.toLowerCase()
-
-    if (isCurrentUser && currentUser?.avatarUrl) {
-      return currentUser.avatarUrl
-    }
-
-    // 3. 使用数据库中的头像
+    // 2. 使用数据库中查询到的作者头像（通过 userId 查询）
     if (dbAvatarUrl) {
+      console.log('[useAvatar] 使用数据库头像:', dbAvatarUrl)
       return dbAvatarUrl
     }
 
-    // 4. 没有头像时返回 null
+    // 3. 没有头像时返回 null
+    console.log('[useAvatar] 无头像，返回 null')
     return null
   })()
 

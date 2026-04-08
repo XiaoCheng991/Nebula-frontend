@@ -59,18 +59,23 @@ export function UserAvatar({
   }, [displayNickname, username, email])
 
   // 最终使用的头像 URL
-  const finalSrc = (() => {
-    if (imageError || isDefaultAvatar) {
-      // 使用默认像素风头像
-      const seed = username || email || displayNickname || 'default'
-      return getDefaultAvatarUrl(seed)
-    }
-    return avatarUrl
-  })()
+  // 优先级：用户上传的头像 > 像素风头像 > 用户名首字
+  let finalSrc: string | undefined
+
+  if (avatarUrl) {
+    // 有自定义头像
+    finalSrc = avatarUrl
+  } else {
+    // 没有自定义头像，使用像素风头像
+    finalSrc = getDefaultAvatarUrl(username || email || displayNickname || 'default')
+  }
+
+  // 只有当图片加载失败时，才显示用户名首字
+  const showTextAvatar = imageError
 
   return (
     <>
-      {imageError || isDefaultAvatar ? (
+      {showTextAvatar ? (
         <div className={`${sizeClass} rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center shadow-lg ${className}`}>
           <span className="text-white font-bold">{displayText}</span>
         </div>

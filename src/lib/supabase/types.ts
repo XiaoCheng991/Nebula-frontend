@@ -1261,6 +1261,31 @@ export interface Database {
   }
 }
 
+// 社交媒体账号表
+export interface SocialMediaAccount {
+  id: number
+  user_id: number
+  platform: string
+  profile_url: string
+  display_name: string | null
+  avatar_url: string | null
+  created_at: string
+  updated_at: string
+}
+
+// 社交媒体数据快照表
+export interface SocialMediaSnapshot {
+  id: number
+  account_id: number
+  followers_count: number
+  following_count: number
+  posts_count: number
+  likes_count: number
+  views_count: number
+  notes: string | null
+  captured_at: string
+}
+
 export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row']
 export type TablesInsert<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Insert']
 export type TablesUpdate<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Update']
