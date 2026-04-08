@@ -119,7 +119,7 @@ export default function BlogPage() {
   const [starCounts, setStarCounts] = useState<Record<string, number>>({});
   const [memos, setMemos] = useState<any[]>([]);
   const [articles, setArticles] = useState<any[]>([]);
-  const [bookmarks, setBookmarks] = useState<>([]);
+  const [bookmarks, setBookmarks] = useState<any[]>([]);
   const [tags, setTags] = useState<any[]>([]);
   const [memosLoading, setMemosLoading] = useState(true);
   const [articlesLoading, setArticlesLoading] = useState(true);
