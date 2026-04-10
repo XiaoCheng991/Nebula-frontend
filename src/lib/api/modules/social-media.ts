@@ -3,6 +3,17 @@
  */
 
 import { supabase } from '@/lib/supabase/client'
+import {
+  IconBilibili,
+  IconXiaohongshu,
+  IconTiktok,
+  IconX,
+  IconGitHub,
+  IconCSDN,
+  IconWeibo,
+} from '@/components/branding/social-icons'
+import type { LucideIcon } from 'lucide-react'
+import { Youtube, Link } from 'lucide-react'
 
 // 平台类型定义
 export type SocialPlatform =
@@ -40,18 +51,76 @@ export interface SocialMediaSnapshot {
   captured_at: string
 }
 
-// 平台配置
-export const PLATFORM_CONFIG: Record<SocialPlatform, { name: string; icon: string; color: string }> = {
-  bilibili: { name: 'B站', icon: 'B', color: '#00A1D6' },
-  xiaohongshu: { name: '小红书', icon: '小红书', color: '#FE2C55' },
-  douyin: { name: '抖音', icon: '抖音', color: '#000000' },
-  weibo: { name: '微博', icon: '微博', color: '#E6162D' },
-  youtube: { name: 'YouTube', icon: 'YT', color: '#FF0000' },
-  twitter: { name: 'X (Twitter)', icon: 'X', color: '#000000' },
-  github: { name: 'GitHub', icon: 'GitHub', color: '#333333' },
-  juejin: { name: '掘金', icon: '掘金', color: '#007FFF' },
-  csdn: { name: 'CSDN', icon: 'CSDN', color: '#FC1C13' },
-  other: { name: '其他', icon: '🔗', color: '#666666' },
+// 指标类型定义
+export interface PlatformMetrics {
+  label1: string
+  label2: string
+  label3: string
+  label4?: string
+}
+
+// 平台配置 - 使用真实的平台图标和指标
+export const PLATFORM_CONFIG: Record<SocialPlatform, { name: string; icon: any; color: string; metrics: PlatformMetrics }> = {
+  bilibili: {
+    name: 'B站',
+    icon: IconBilibili,
+    color: '#00A1D6',
+    metrics: { label1: '粉丝', label2: '获赞', label3: '播放', label4: '关注' }
+  },
+  xiaohongshu: {
+    name: '小红书',
+    icon: IconXiaohongshu,
+    color: '#FE2C55',
+    metrics: { label1: '粉丝', label2: '获赞', label3: '收藏', label4: '关注' }
+  },
+  douyin: {
+    name: '抖音',
+    icon: IconTiktok,
+    color: '#000000',
+    metrics: { label1: '粉丝', label2: '获赞', label3: '播放', label4: '关注' }
+  },
+  weibo: {
+    name: '微博',
+    icon: IconWeibo,
+    color: '#E6162D',
+    metrics: { label1: '粉丝', label2: '微博', label3: '阅读', label4: '关注' }
+  },
+  youtube: {
+    name: 'YouTube',
+    icon: Youtube,
+    color: '#FF0000',
+    metrics: { label1: '订阅', label2: '观看', label3: '视频' }
+  },
+  twitter: {
+    name: 'X (Twitter)',
+    icon: IconX,
+    color: '#000000',
+    metrics: { label1: '粉丝', label2: '关注', label3: '推文' }
+  },
+  github: {
+    name: 'GitHub',
+    icon: IconGitHub,
+    color: '#333333',
+    metrics: { label1: '粉丝', label2: '关注', label3: '仓库' }
+  },
+  juejin: {
+    name: '掘金',
+    icon: Link,
+    color: '#007FFF',
+    metrics: { label1: '粉丝', label2: '获赞', label3: '收藏' }
+  },
+  csdn: {
+    name: 'CSDN',
+    icon: IconCSDN,
+    color: '#FC1C13',
+    metrics: { label1: '粉丝', label2: '访问', label3: '原创' }
+  },
+  other: {
+    name: '其他',
+    icon: Link,
+    color: '#666666',
+    metrics: { label1: '粉丝', label2: '获赞', label3: '浏览' }
+  },
 }
 
 /**

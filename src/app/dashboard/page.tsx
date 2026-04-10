@@ -214,8 +214,9 @@ export default function DashboardPage() {
       await refreshAccountStats(account.id, stats)
       toast({ title: "刷新成功", description: `${PLATFORM_CONFIG[account.platform].name} 数据已更新` })
       await loadData()
-    } catch (err) {
-      toast({ title: "刷新失败", description: "请稍后重试", variant: "destructive" })
+    } catch (err: any) {
+      const msg = err?.message || "请稍后重试"
+      toast({ title: "刷新失败", description: msg, variant: "destructive" })
     } finally {
       setRefreshing(false)
     }
@@ -408,10 +409,10 @@ export default function DashboardPage() {
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3">
                           <div
-                            className="w-10 h-10 rounded-lg flex items-center justify-center text-white text-sm font-bold"
+                            className="w-10 h-10 rounded-lg flex items-center justify-center text-white"
                             style={{ backgroundColor: config.color }}
                           >
-                            {config.icon}
+                            <config.icon className="w-5 h-5" />
                           </div>
                           <div>
                             <h3 className="text-[15px] font-semibold text-foreground">{config.name}</h3>
@@ -446,27 +447,27 @@ export default function DashboardPage() {
                       {snapshot ? (
                         <div className="grid grid-cols-2 gap-3">
                           <div className="bg-black/[0.03] dark:bg-white/[0.04] rounded-lg p-2.5">
-                            <div className="text-[10px] text-muted-foreground uppercase mb-1">粉丝</div>
+                            <div className="text-[10px] text-muted-foreground uppercase mb-1">{config.metrics.label1}</div>
                             <div className="text-[14px] font-semibold text-foreground">
                               {formatNumber(snapshot.followers_count)}
                             </div>
                           </div>
                           <div className="bg-black/[0.03] dark:bg-white/[0.04] rounded-lg p-2.5">
-                            <div className="text-[10px] text-muted-foreground uppercase mb-1">获赞</div>
+                            <div className="text-[10px] text-muted-foreground uppercase mb-1">{config.metrics.label2}</div>
                             <div className="text-[14px] font-semibold text-foreground">
                               {formatNumber(snapshot.likes_count)}
                             </div>
                           </div>
                           <div className="bg-black/[0.03] dark:bg-white/[0.04] rounded-lg p-2.5">
-                            <div className="text-[10px] text-muted-foreground uppercase mb-1">播放/阅读</div>
+                            <div className="text-[10px] text-muted-foreground uppercase mb-1">{config.metrics.label3}</div>
                             <div className="text-[14px] font-semibold text-foreground">
                               {formatNumber(snapshot.views_count)}
                             </div>
                           </div>
                           <div className="bg-black/[0.03] dark:bg-white/[0.04] rounded-lg p-2.5">
-                            <div className="text-[10px] text-muted-foreground uppercase mb-1">作品</div>
+                            <div className="text-[10px] text-muted-foreground uppercase mb-1">{config.metrics.label4 || '其他'}</div>
                             <div className="text-[14px] font-semibold text-foreground">
-                              {formatNumber(snapshot.posts_count)}
+                              {formatNumber(config.metrics.label4 ? snapshot.following_count : snapshot.posts_count)}
                             </div>
                           </div>
                         </div>
