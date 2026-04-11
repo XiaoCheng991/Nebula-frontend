@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/use-toast"
 import Tesseract from "tesseract.js"
 import { PDFDocument, rgb } from "pdf-lib"
+import * as PDFLib from "pdf-lib"
 
 interface PdfPage {
   index: number
@@ -196,27 +197,68 @@ export function PdfOcrContent() {
       setResultText(allText.trimEnd())
 
       setSmoothProgress(85, "生成可搜索 PDF...")
-      const newPdfDoc = await PDFDocument.create()
+
+      // 检查是否有页面包含 OCR 结果
+      const pagesWithText = pages.filter(p => p.ocrWords.length > 0)
+      if (pagesWithText.length === 0) {
+        toast({ title: "警告", description: "未能识别到任何文字", variant: "default" })
+      }
+
+      const builder = await PDFLib.PDFDocument.create()
 
       for (const page of pages) {
-        const img = await newPdfDoc.embedPng(page.canvas.toDataURL("image/png"))
-        const pdfPage = newPdfDoc.addPage([img.width, img.height])
-        pdfPage.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height })
+        const canvas = page.canvas
+        const width = canvas.width
+        const height = canvas.height
 
-        for (const word of page.ocrWords) {
-          const pdfY = img.height - word.y - word.h
-          pdfPage.drawText(word.text, {
-            x: word.x,
-            y: pdfY,
-            size: word.h * 0.8,
-            color: rgb(0, 0, 0),
-            opacity: 0,
-          })
+        // 添加图片作为背景
+        const imgData = canvas.toDataURL('image/png')
+        let img
+        try {
+          img = await builder.embedPng(imgData)
+        } catch {
+          const jpegData = canvas.toDataURL('image/jpeg', 0.9)
+          img = await builder.embedJpg(jpegData)
+        }
+
+        const pdfPage = builder.addPage([width, height])
+        pdfPage.drawImage(img, { x: 0, y: 0, width, height })
+
+        // 添加关键词高亮层
+        // 在原图上用半透明黄色背景标记识别出的文字位置
+        if (page.ocrWords.length > 0) {
+          for (const word of page.ocrWords) {
+            const y = height - word.y - word.h
+
+            // 1. 先绘制半透明黄色背景（高亮效果）
+            pdfPage.drawRectangle({
+              x: word.x,
+              y: y,
+              width: word.w,
+              height: word.h,
+              color: PDFLib.rgb(1, 1, 0), // 黄色
+              opacity: 0.3, // 半透明
+            })
+
+            // 2. 然后绘制文字（保持可见，方便搜索和查看）
+            const fontSize = Math.max(word.h * 0.8, 6)
+            pdfPage.drawText(word.text, {
+              x: word.x,
+              y: y,
+              size: fontSize,
+              color: PDFLib.rgb(0, 0, 0),
+              opacity: 0.85, // 接近不透明，清晰可见
+            })
+          }
         }
       }
 
-      const pdfBytes = await newPdfDoc.save()
+      const pdfBytes = await builder.save()
       const blob = new Blob([new Uint8Array(pdfBytes)], { type: "application/pdf" })
+      // 清理之前的 URL
+      if (resultPdfUrl) {
+        URL.revokeObjectURL(resultPdfUrl)
+      }
       const resultUrl = URL.createObjectURL(blob)
       setResultPdfUrl(resultUrl)
 
