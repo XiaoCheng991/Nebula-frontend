@@ -204,21 +204,31 @@ export function WatermarkSection() {
     isPainting.current = true
     applyBrush(e)
   }
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (isPainting.current) {
-      applyBrush(e)
-    }
-    // 更新光标位置（canvas 上绘制）
-    const canvas = displayCanvasRef.current
-    if (!canvas) return
-    const rect = canvas.getBoundingClientRect()
-    const displayScale = getDisplayScale()
-    const dispBrush = Math.round(brushSize * displayScale)
-    setCursorX(e.clientX - rect.left)
-    setCursorY(e.clientY - rect.top)
-    setCursorSize(dispBrush)
-    setShowCursor(true)
+const handlePointerMove = (e: React.PointerEvent) => {
+  const canvas = displayCanvasRef.current
+  if (!canvas) return
+  const rect = canvas.getBoundingClientRect()
+
+  // 计算显示尺寸到内部像素的缩放比例
+  const scaleX = canvas.width / rect.width
+  const brushSizeInternal = brushSize * scaleX
+
+  // 光标大小：内部像素 / 显示比例 = 显示层的大小
+  const dispBrush = brushSize / scaleX
+
+  // 光标位置（相对于 canvas 显示区域）
+  const cursorX = e.clientX - rect.left
+  const cursorY = e.clientY - rect.top
+  setCursorX(cursorX)
+  setCursorY(cursorY)
+  setCursorSize(dispBrush)
+  setShowCursor(true)
+
+  // 继续处理绘画
+  if (isPainting.current) {
+    applyBrush(e)
   }
+}
   const lastPaintPos = useRef<{ x: number; y: number } | null>(null)
 
   const handlePointerUp = () => { isPainting.current = false; lastPaintPos.current = null }
@@ -231,6 +241,7 @@ export function WatermarkSection() {
 
     const rect = canvas.getBoundingClientRect()
     const scaleX = canvas.width / rect.width
+  const brushSizeInternal = brushSize * scaleX
     const scaleY = canvas.height / rect.height
     const x = (e.clientX - rect.left) * scaleX
     const y = (e.clientY - rect.top) * scaleY
@@ -242,7 +253,7 @@ export function WatermarkSection() {
       const dx = x - prev.x
       const dy = y - prev.y
       const dist = Math.sqrt(dx * dx + dy * dy)
-      const step = Math.max(1, brushSize * 0.25)
+      const step = Math.max(1, brushSizeInternal * 0.25)
       const steps = Math.max(1, Math.ceil(dist / step))
 
       for (let i = 0; i <= steps; i++) {
@@ -250,7 +261,7 @@ export function WatermarkSection() {
         const px = prev.x + dx * t
         const py = prev.y + dy * t
         maskCtx.beginPath()
-        maskCtx.arc(px, py, brushSize, 0, Math.PI * 2)
+        maskCtx.arc(px, py, brushSizeInternal, 0, Math.PI * 2)
         if (eraseMode === "paint") {
           maskCtx.globalCompositeOperation = "source-over"
           maskCtx.fillStyle = "rgba(255,255,255,1)"
@@ -262,7 +273,7 @@ export function WatermarkSection() {
       }
     } else {
       maskCtx.beginPath()
-      maskCtx.arc(x, y, brushSize, 0, Math.PI * 2)
+      maskCtx.arc(x, y, brushSizeInternal, 0, Math.PI * 2)
       if (eraseMode === "paint") {
         maskCtx.globalCompositeOperation = "source-over"
         maskCtx.fillStyle = "rgba(255,255,255,1)"
