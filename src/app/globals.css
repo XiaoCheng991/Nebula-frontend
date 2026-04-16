@@ -69,150 +69,9 @@
  *:focus-visible {
  outline: none !important;
  }
-}
 
-@layer utilities {
- .text-balance {
- text-wrap: balance;
- }
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
- width: 8px;
- height: 8px;
-}
-
-::-webkit-scrollbar-track {
- background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
- background: hsl(var(--muted-foreground) / 0.3);
- border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
- background: hsl(var(--muted-foreground) / 0.5);
-}
-
-/* Glassmorphism effect */
-.glass {
- @apply bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl;
-}
-
-/* 液态毛玻璃变量 - 全局可用 */
-:root {
- --glass-bg: rgba(255, 255, 255, 0.7);
- --glass-bg-hover: rgba(255, 255, 255, 0.85);
- --glass-border: rgba(0, 0, 0, 0.08);
- --glass-blur: blur(24px);
-}
-
-.dark {
- --glass-bg: rgba(28, 28, 30, 0.85);
- --glass-bg-hover: rgba(38, 38, 40, 0.9);
- --glass-border: rgba(255, 255, 255, 0.10);
- --glass-blur: blur(24px);
-}
-
-/* 暗色模式 body 背景 */
-.dark body {
- background-color: #1c1c1e;
-}
-
-/* Bento grid layout */
-.bento-grid {
- @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6;
-}
-
-/* Card hover effect */
-.card-hover {
- @apply transition-all duration-300 ease-out;
-}
-
-.card-hover:hover {
- @apply transform -translate-y-1 shadow-lg;
-}
-
-/* Gradient text */
-.gradient-text {
- @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500;
-}
-
-/* NebulaHub brand gradient */
-.brand-gradient {
- @apply bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent;
-}
-
-/* Glass card with border */
-.glass-card {
- @apply bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl border border-white/40 dark:border-gray-700/40 rounded-3xl shadow-xl;
-}
-
-/* Soft shadow with color tint */
-.shadow-blue-lg {
- @apply shadow-xl shadow-blue-500/10;
-}
-
-.shadow-purple-lg {
- @apply shadow-xl shadow-purple-500/10;
-}
-
-.shadow-indigo-lg {
- @apply shadow-xl shadow-indigo-500/10;
-}
-
-/* Loading skeleton */
-@keyframes shimmer {
- 0% {
- transform: translateX(-100%);
- }
- 100% {
- transform: translateX(100%);
- }
-}
-
-.skeleton {
- @apply relative overflow-hidden bg-gray-200 dark:bg-gray-800;
-}
-
-.skeleton::after {
- content: '';
- @apply absolute inset-0;
- background: linear-gradient(
- 90deg,
- transparent,
- rgba(255, 255, 255, 0.2),
- transparent
- );
- animation: shimmer 2s infinite;
-}
-
-/* Code block styling */
-pre {
- @apply rounded-xl bg-gray-900 p-4 overflow-x-auto;
-}
-
-code {
- @apply text-sm font-mono;
-}
-
-/* Chat message bubbles */
-.chat-message-user {
- @apply bg-primary text-primary-foreground rounded-2xl rounded-br-sm;
-}
-
-.chat-message-assistant {
- @apply bg-muted text-foreground rounded-2xl rounded-bl-sm;
-}
-
-body {
- font-family: Arial, sans-serif;
-}
-
-/* H1 渐变分割线：左渐隐 → 左30%最亮 → 右渐隐 */
-.prose h1.h1-divider::after {
+ /* H1 渐变分割线 */
+ .prose h1.h1-divider::after {
  content: '';
  display: block;
  margin-top: 4px;
@@ -225,13 +84,9 @@ body {
   hsl(24.6 95% 53.1% / 0.6) 40%,
   transparent 60%
  );
-}
+ }
 
-/* Hide scrollbar */
-.hide-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-.hide-scrollbar::-webkit-scrollbar {
-  display: none;
+ body {
+ font-family: Arial, sans-serif;
+ }
 }
