@@ -58,12 +58,13 @@ const experiences = [
     period: "2025.07 ~ 至今",
     role: "IT 研发总部 · 商品研发中心 · 全栈开发工程师",
     descriptions: [
-      "作为集团管培生，8 个月内完成全链路岗位培训，荣获 2025 年度<strong>优秀员工奖</strong>（全部门 TOP10%）",
+      "作为集团管培生，10 个月内完成全链路岗位培训，荣获 2025 年度<strong>优秀员工奖</strong>（全部门 TOP10%）",
       "驻场国际知名快餐企业总部参与货品和货品供应商主数据数据中台项目，获得甲方领导书面认可",
-      "设计 OpenClaw 多 Agent 分工体系，采购订单导出效率提升 60%",
+      "参与某知名家电品牌的洗护营销数字化二期项目的后期维护",
       "直连商品中台提供实时库存/价格查询，响应时间 ≤500ms",
+      "空余时间个人自学和使用 OpenClaw、LangChain 等AI方向的工具和框架，不断提升自己"
     ],
-    tags: ["Java", "OpenClaw", "LangChain"],
+    tags: ["Java", "LangChain", "OpenClaw"],
     tagColors: ["tag-blue", "tag-green", "tag-purple"],
   },
   {
@@ -75,6 +76,7 @@ const experiences = [
       "运用 EasyExcel + MinIO 处理文件导出 5000+ 次，导出效率提升 40%",
       "重构核心模块，响应速度提升 20%，代码可读性提升 50%",
       "交付健壮接口 80+ 个，接口调用成功率 99.9%，项目按期交付率 100%",
+      "负责测试环境的Docker部署和半自动化脚本的编写"
     ],
     tags: ["SpringBoot", "MyBatis", "Docker"],
     tagColors: ["tag-blue", "tag-green", "tag-orange"],
@@ -96,7 +98,7 @@ const projects = [
     status: "已上线",
     statusType: "active",
     description:
-      "AI 科技企业自主研发的高校教育综合平台，覆盖 20+ 所高校，用户 5000+ 人。负责智能组卷、在线考试、数据可视化大屏等核心模块，支撑 5000+ 人次在线考试，稳定性 99.9%。",
+      "某互联网科技企业自主研发的高校教育综合平台，覆盖 20+ 所高校，用户 5000+ 人。负责智能组卷、在线考试、数据可视化大屏等核心模块，支撑 5000+ 人次在线考试，稳定性 99.9%。",
     tags: ["SpringCloud", "Redis", "RabbitMQ", "Quartz"],
     tagColors: ["tag-blue", "tag-green", "tag-orange", "tag-purple"],
   },
