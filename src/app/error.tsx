@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { apiLogger } from '@/lib/utils/logger'
 import { useRouter } from 'next/navigation';
 import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
 
@@ -14,7 +15,7 @@ export default function Error({
   const router = useRouter();
 
   useEffect(() => {
-    console.error('Global error caught:', error);
+    apiLogger.error('Global error caught:', error);
   }, [error]);
 
   return (

@@ -209,7 +209,7 @@ export default function MePage() {
           </p>
           <p className="text-[16px] text-[--text3] max-w-[560px] leading-relaxed mb-6">
             河南工业大学 · 数据科学与大数据技术<br />
-            曾就职于 AI 科技企业，目前在大型零售业集团做全栈开发<br />
+            有大型互联网科技企业实习经历，目前于一家大型零售业集团做全栈开发<br />
             正在从 Java 向 AI 迈进，目标：让代码不只是代码
           </p>
           <div className="flex gap-3 flex-wrap mt-2">

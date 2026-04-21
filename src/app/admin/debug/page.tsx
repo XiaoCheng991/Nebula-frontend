@@ -1,8 +1,9 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { apiLogger } from '@/lib/utils/logger';
 
 const Card = dynamic(() => import('@/components/ui/card').then(mod => mod.Card), { ssr: false });
 const CardContent = dynamic(() => import('@/components/ui/card').then(mod => mod.CardContent), { ssr: false });
@@ -20,24 +21,23 @@ export default function DebugPage() {
   const [loading, setLoading] = useState(false);
   const { menus, loadAdminData } = useAdminStore();
 
-  // 添加认证检查
   useEffect(() => {
     const token = document.cookie.split(', ').find(row => row.startsWith('satoken='));
     if (!token) {
       router.push('/login');
     }
-  }, [router])
+  }, [router]);
 
   const testMenuApi = async () => {
     setLoading(true);
     setError(null);
     try {
-      console.log('[Debug] 测试菜单API...');
+      apiLogger.debug('[Debug] 测试菜单API');
       const result = await getCurrentUserMenus();
-      console.log('[Debug] 菜单API结果:', result);
+      apiLogger.debug('[Debug] 菜单API结果', { result });
       setApiResult(result);
     } catch (err) {
-      console.error('[Debug] API调用失败:', err);
+      apiLogger.error('[Debug] API调用失败', err);
       setError(err instanceof Error ? err.message : '未知错误');
     } finally {
       setLoading(false);
@@ -64,7 +64,7 @@ export default function DebugPage() {
       await loadAdminData();
       setApiResult(useAdminStore.getState().menus);
     } catch (err) {
-      console.error('[Debug] 加载失败:', err);
+      apiLogger.error('[Debug] 加载失败', err);
       setError(err instanceof Error ? err.message : '未知错误');
     } finally {
       setLoading(false);

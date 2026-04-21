@@ -39,7 +39,7 @@ function formatRequestMetadata(metadata: RequestMetadata): string {
 /**
  * 输出日志（仅开发环境）
  */
-function log(level: LogLevel, message: string, ...args: any[]) {
+function outputLog(level: LogLevel, message: string, ...args: any[]) {
   if (!isDevelopment) return
 
   const timestamp = new Date().toISOString()
@@ -71,7 +71,7 @@ export const apiLogger = {
   requestStart(url: string, method: string, config?: RequestInit) {
     if (!isDevelopment) return
 
-    log('debug', `→ ${method} ${url}`, {
+    outputLog('debug', `→ ${method} ${url}`, {
       headers: config?.headers,
       body: config?.body,
     })
@@ -83,7 +83,7 @@ export const apiLogger = {
   requestSuccess(metadata: RequestMetadata) {
     if (!isDevelopment) return
 
-    log('debug', formatRequestMetadata(metadata))
+    outputLog('debug', formatRequestMetadata(metadata))
   },
 
   /**
@@ -92,7 +92,7 @@ export const apiLogger = {
   requestError(metadata: RequestMetadata) {
     if (!isDevelopment) return
 
-    log('error', formatRequestMetadata(metadata))
+    outputLog('error', formatRequestMetadata(metadata))
   },
 
   /**
@@ -102,9 +102,9 @@ export const apiLogger = {
     if (!isDevelopment) return
 
     if (success) {
-      log('info', 'Token refreshed successfully')
+      outputLog('info', 'Token refreshed successfully')
     } else {
-      log('error', 'Token refresh failed', error)
+      outputLog('error', 'Token refresh failed', error)
     }
   },
 
@@ -114,34 +114,41 @@ export const apiLogger = {
   auth(event: 'login' | 'logout' | 'token_expired', details?: any) {
     if (!isDevelopment) return
 
-    log('info', `Auth: ${event}`, details)
+    outputLog('info', `Auth: ${event}`, details)
   },
 
   /**
    * 通用信息日志
    */
   info(message: string, ...args: any[]) {
-    log('info', message, ...args)
+    outputLog('info', message, ...args)
   },
 
   /**
    * 通用警告日志
    */
   warn(message: string, ...args: any[]) {
-    log('warn', message, ...args)
+    outputLog('warn', message, ...args)
   },
 
   /**
    * 通用错误日志
    */
   error(message: string, ...args: any[]) {
-    log('error', message, ...args)
+    outputLog('error', message, ...args)
   },
 
   /**
    * 通用调试日志
    */
   debug(message: string, ...args: any[]) {
-    log('debug', message, ...args)
+    outputLog('debug', message, ...args)
+  },
+
+  /**
+   * 通用日志（alias for info）
+   */
+  log(message: string, ...args: any[]) {
+    outputLog('info', message, ...args)
   },
 }

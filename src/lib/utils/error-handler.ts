@@ -2,6 +2,8 @@
  * 统一错误处理
  */
 
+import { apiLogger } from './logger'
+
 /**
  * 从错误中提取用户友好的消息
  */
@@ -26,7 +28,7 @@ export function handleAuthExpired(): void {
  */
 export function handleApiError(error: unknown, _context?: { url?: string; method?: string; silent?: boolean }): never {
   const errorMessage = getErrorMessage(error)
-  console.error('[API Error]', errorMessage, error)
+  apiLogger.error('[API Error]', errorMessage, error)
   throw error
 }
 

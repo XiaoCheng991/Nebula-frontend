@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
+import { apiLogger } from '@/lib/utils/logger'
 import {
   Calendar,
   Hash,
@@ -293,7 +294,7 @@ export default function BlogPage() {
       window.dispatchEvent(new Event('auth-change'));
       toast({ title: "上传成功", description: "头像已更新" });
     } catch (error: any) {
-      console.error('Avatar upload error:', error);
+      apiLogger.error('Avatar upload error:', error);
       toast({ title: "上传失败", description: error.message || "无法上传头像", variant: "destructive" });
     } finally {
       setUploading(false);

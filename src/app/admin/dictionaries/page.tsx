@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { BookOpen, Plus, Edit, Trash2, RefreshCw } from 'lucide-react'
+import { apiLogger } from '@/lib/utils/logger'
 import { useToast } from '@/components/ui/use-toast'
 import { useConfirm } from '@/components/ui/confirm-dialog'
 import {
@@ -387,7 +388,7 @@ export default function DictionariesPage() {
         })
       }
     } catch (error) {
-      console.error('Failed to fetch dict types:', error)
+      apiLogger.error('Failed to fetch dict types:', error)
       toast({
         title: '获取字典类型列表失败',
         description: '网络错误，请稍后重试',
@@ -514,7 +515,7 @@ export default function DictionariesPage() {
         })
       }
     } catch (error) {
-      console.error('Failed to fetch dict data:', error)
+      apiLogger.error('Failed to fetch dict data:', error)
       toast({
         title: '获取字典数据列表失败',
         description: '网络错误，请稍后重试',

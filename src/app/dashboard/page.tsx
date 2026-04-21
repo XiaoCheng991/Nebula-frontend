@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
+import { apiLogger } from '@/lib/utils/logger'
 import { supabase } from "@/lib/supabase/client"
 import {
   getUserAccounts,
@@ -154,7 +155,7 @@ export default function DashboardPage() {
       const stats = await getLatestStats(currentUserId)
       setAccounts(stats)
     } catch (err) {
-      console.error("加载数据失败:", err)
+      apiLogger.error("加载数据失败:", err)
     } finally {
       setLoading(false)
     }

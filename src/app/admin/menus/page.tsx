@@ -15,6 +15,7 @@ import {
   SheetDescription,
 } from '@/components/ui/sheet';
 import { ResizableTable } from '@/app/admin/_components/table/ResizableTable';
+import { apiLogger } from '@/lib/utils/logger';
 
 interface MenuDetailDrawerProps {
   menu: AdminMenu | null;
@@ -353,7 +354,7 @@ export default function MenusPage() {
         });
       }
     } catch (error) {
-      console.error('Failed to fetch menus:', error);
+      apiLogger.error('Failed to fetch menus:', error);
       toast({
         title: '获取菜单列表失败',
         description: '网络错误，请稍后重试',
@@ -389,7 +390,7 @@ export default function MenusPage() {
       variant: 'danger',
     });
     if (confirmed) {
-      console.log('Delete menu:', menu.id);
+      apiLogger.debug('Delete menu', { id: menu.id });
       toast({
         title: '删除成功',
         description: `菜单「${menu.name}」已删除`,
@@ -399,13 +400,13 @@ export default function MenusPage() {
 
   const handleSave = (data: Partial<AdminMenu>) => {
     if (isEditMode && editingMenu) {
-      console.log('Edit menu:', editingMenu.id, data);
+      apiLogger.debug('Edit menu', { id: editingMenu.id, data });
       toast({
         title: '保存成功',
         description: '菜单信息已更新',
       });
     } else {
-      console.log('Add menu:', data);
+      apiLogger.debug('Add menu', { data });
       toast({
         title: '创建成功',
         description: '新菜单已添加',

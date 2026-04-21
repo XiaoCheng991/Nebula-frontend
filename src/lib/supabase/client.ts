@@ -8,12 +8,13 @@
 
 import { createBrowserClient } from '@supabase/ssr'
 import type { Database } from './types'
+import { apiLogger } from '@/lib/utils/logger'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 if (!supabaseUrl || !supabaseAnonKey) {
-	console.warn('[Supabase] 环境变量未配置，Supabase 功能将不可用')
+	apiLogger.warn('[Supabase] 环境变量未配置，Supabase 功能将不可用')
 }
 
 /**
@@ -124,6 +125,6 @@ export async function deleteAvatar(filePath: string): Promise<void> {
 		.remove([filePath])
 
 	if (error) {
-		console.warn('删除头像失败:', error.message)
+		apiLogger.warn('删除头像失败:', error.message)
 	}
 }

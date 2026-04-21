@@ -7,6 +7,7 @@
 
 import { supabase } from '@/lib/supabase/client'
 import type { ApiResponse } from '../types'
+import { apiLogger } from '@/lib/utils/logger'
 
 // ======== 类型定义 ========
 
@@ -192,7 +193,7 @@ export async function getUserById(userId: string): Promise<ApiResponse<SysUser>>
     .maybeSingle()
 
   if (error) {
-    console.error('获取用户失败:', error)
+    apiLogger.error('获取用户失败:', error)
     return buildResponse(null as any, 500, '获取用户失败')
   }
 
@@ -416,12 +417,12 @@ export async function getCurrentUserMenus(): Promise<ApiResponse<SysMenu[]>> {
     .maybeSingle() as { data: { id: number } | null }
 
   if (!sysUser) {
-    console.log('用户不存在，email:', userEmail)
+    apiLogger.debug('用户不存在，email:', { email: userEmail })
     return buildResponse([], 404, '用户不存在')
   }
 
   const userId = sysUser.id
-  console.log('当前用户 ID:', userId)
+  apiLogger.debug('当前用户 ID:', { userId })
 
   // 3. 获取用户的所有角色 ID（通过 sys_user_role 表）
   const { data: userRoles } = await supabase
@@ -429,15 +430,15 @@ export async function getCurrentUserMenus(): Promise<ApiResponse<SysMenu[]>> {
     .select('role_id')
     .eq('user_id', userId) as unknown as { data: { role_id: number }[] | null }
 
-  console.log('用户角色关联数据:', userRoles)
+  apiLogger.log('用户角色关联数据:', userRoles)
 
   if (!userRoles || userRoles.length === 0) {
-    console.log('用户没有角色关联')
+    apiLogger.log('用户没有角色关联')
     return buildResponse([], 200) // 用户没有角色，返回空菜单
   }
 
   const roleIds = userRoles.map(ur => ur.role_id)
-  console.log('角色 ID 列表:', roleIds)
+  apiLogger.log('角色 ID 列表:', roleIds)
 
   // 4. 获取角色关联的所有菜单 ID（通过 sys_role_menu 表）
   const { data: roleMenus } = await supabase
@@ -445,15 +446,15 @@ export async function getCurrentUserMenus(): Promise<ApiResponse<SysMenu[]>> {
     .select('menu_id')
     .in('role_id', roleIds) as unknown as { data: { menu_id: number }[] | null; error: any }
 
-  console.log('角色菜单关联数据:', roleMenus)
+  apiLogger.log('角色菜单关联数据:', roleMenus)
 
   if (!roleMenus || roleMenus.length === 0) {
-    console.log('角色没有关联菜单')
+    apiLogger.log('角色没有关联菜单')
     return buildResponse([], 200) // 角色没有关联菜单，返回空菜单
   }
 
   const menuIds = [...new Set(roleMenus.map(rm => rm.menu_id))] // 去重
-  console.log('菜单 ID 列表:', menuIds)
+  apiLogger.log('菜单 ID 列表:', menuIds)
 
   // 5. 获取所有菜单详情
   const { data: allMenus, error: menusError } = await supabase
@@ -463,10 +464,10 @@ export async function getCurrentUserMenus(): Promise<ApiResponse<SysMenu[]>> {
     .eq('is_visible', true)
     .order('sort_order', { ascending: true })
 
-  console.log('获取到的菜单数据:', allMenus, '错误:', menusError)
+  apiLogger.log('获取到的菜单数据:', allMenus, '错误:', menusError)
 
   if (menusError) {
-    console.error('获取菜单失败:', menusError)
+    apiLogger.error('获取菜单失败:', menusError)
     return buildResponse([], 500, '获取菜单失败')
   }
 
@@ -495,11 +496,11 @@ export async function getMenuList(): Promise<ApiResponse<SysMenu[]>> {
     .order('sort_order', { ascending: true })
 
   if (error) {
-    console.error('获取菜单列表失败:', error)
+    apiLogger.error('获取菜单列表失败:', error)
     return buildResponse([], 500, '获取菜单列表失败')
   }
 
-  console.log('获取到的菜单数据:', menus)
+  apiLogger.log('获取到的菜单数据:', menus)
   return buildResponse((menus || []) as unknown as SysMenu[])
 }
 
@@ -513,11 +514,11 @@ export async function getMenuTree(): Promise<ApiResponse<SysMenu[]>> {
     .order('sort_order', { ascending: true })
 
   if (error) {
-    console.error('获取菜单树失败:', error)
+    apiLogger.error('获取菜单树失败:', error)
     return buildResponse([], 500, '获取菜单树失败')
   }
 
-  console.log('获取到的菜单数据:', menus)
+  apiLogger.log('获取到的菜单数据:', menus)
 
   const menuList = (menus || []) as unknown as { id: number; parentId: number | null; menuName: string; menuType: string; path?: string; component?: string; permission?: string; icon?: string; sortOrder?: number; isVisible?: boolean; isSystem?: boolean; parentName?: string; children?: any[]; createTime?: string; updateTime?: string }[]
 
@@ -546,11 +547,11 @@ export async function getAllRoles(): Promise<ApiResponse<SysRole[]>> {
     .order('sort_order', { ascending: true })
 
   if (error) {
-    console.error('获取角色列表失败:', error)
+    apiLogger.error('获取角色列表失败:', error)
     return buildResponse([], 500, '获取角色列表失败')
   }
 
-  console.log('获取到的角色数据:', roles)
+  apiLogger.log('获取到的角色数据:', roles)
   return buildResponse((roles || []) as unknown as SysRole[])
 }
 
@@ -609,7 +610,7 @@ export async function getRolesByUserId(userId: string | number): Promise<ApiResp
   }
 
   if (!userIdNum) {
-    console.log('用户不存在，userIdNum:', userIdNum)
+    apiLogger.log('用户不存在，userIdNum:', userIdNum)
     return buildResponse([], 404, '用户不存在')
   }
 
@@ -619,14 +620,14 @@ export async function getRolesByUserId(userId: string | number): Promise<ApiResp
     .eq('user_id', userIdNum)
 
   if (userRoleError) {
-    console.error('获取用户角色失败:', userRoleError)
+    apiLogger.error('获取用户角色失败:', userRoleError)
     return buildResponse([], 500, '获取用户角色失败')
   }
 
   const roleIds = (userRoles as { role_id: number }[] | null)?.map(ur => ur.role_id) || []
 
   if (roleIds.length === 0) {
-    console.log('用户没有角色关联')
+    apiLogger.log('用户没有角色关联')
     return buildResponse([])
   }
 
@@ -636,7 +637,7 @@ export async function getRolesByUserId(userId: string | number): Promise<ApiResp
     .in('id', roleIds)
 
   if (roleError) {
-    console.error('获取角色详情失败:', roleError)
+    apiLogger.error('获取角色详情失败:', roleError)
     return buildResponse([], 500, '获取角色详情失败')
   }
 

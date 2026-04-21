@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Users, Plus, Search, Edit, Trash2, Shield, RefreshCw } from 'lucide-react';
+import { apiLogger } from '@/lib/utils/logger';
 import { useToast } from '@/components/ui/use-toast';
 import { useConfirm } from '@/components/ui/confirm-dialog';
 import { getUserList, updateUserStatus, deleteUser } from '@/lib/api/modules/admin';
@@ -40,7 +41,7 @@ export default function UserManagementPage() {
         });
       }
     } catch (error) {
-      console.error('Failed to fetch users:', error);
+      apiLogger.error('Failed to fetch users:', error);
       toast({
         title: '获取用户列表失败',
         description: '网络错误，请稍后重试',

@@ -8,8 +8,14 @@ import {
   TriangleAlertIcon,
 } from "lucide-react"
 import { useTheme } from "next-themes"
-// @ts-ignore
-import { Toaster as Sonner, type ToasterProps } from "sonner"
+import { Toaster as Sonner } from "sonner"
+
+type ToasterProps = {
+  theme?: "light" | "dark" | "system"
+  className?: string
+  icons?: Record<string, React.ReactNode>
+  style?: React.CSSProperties
+}
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = "system" } = useTheme()

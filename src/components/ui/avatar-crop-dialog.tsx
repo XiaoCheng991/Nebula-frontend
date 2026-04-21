@@ -125,7 +125,7 @@ export function AvatarCropDialog({
       onCropComplete(croppedImageBlob)
       onOpenChange(false)
     } catch (error) {
-      console.error('裁剪失败:', error)
+      apiLogger.error('裁剪失败:', error)
     } finally {
       setIsCropping(false)
     }

@@ -134,7 +134,7 @@ export async function getUserAccounts(userId: number): Promise<SocialMediaAccoun
     .order('created_at', { ascending: false })
 
   if (error) {
-    console.error('获取社交账号失败:', error)
+    apiLogger.error('获取社交账号失败:', error)
     return []
   }
 
@@ -196,7 +196,7 @@ export async function getSnapshots(
     .limit(limit)
 
   if (error) {
-    console.error('获取快照失败:', error)
+    apiLogger.error('获取快照失败:', error)
     return []
   }
 

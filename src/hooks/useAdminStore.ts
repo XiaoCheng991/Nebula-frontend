@@ -20,6 +20,7 @@ import {
  getAllRoles,
  getCurrentUserMenus,
 } from '@/lib/api/modules/admin'
+import { apiLogger } from '@/lib/utils/logger'
 
 /**
  * 直接从 Supabase 检查用户是否有管理员/超级管理员角色
@@ -140,7 +141,7 @@ export const useAdminStore = create<AdminState>()(
       isLoading: false,
      })
     } catch (error) {
-     console.error('Failed to load admin data:', error)
+     apiLogger.error('Failed to load admin data:', error)
      set({
       user: null,
       roles: [],

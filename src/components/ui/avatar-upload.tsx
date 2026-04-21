@@ -96,7 +96,7 @@ export function AvatarUpload({
         description: "头像已更新",
       })
     } catch (error: any) {
-      console.error('Avatar upload error:', error)
+      apiLogger.error('Avatar upload error:', error)
       toast({
         title: "上传失败",
         description: error.message || "无法上传头像",

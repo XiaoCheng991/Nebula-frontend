@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Shield, Plus, Search, Edit, Trash2, Users, RefreshCw } from 'lucide-react';
+import { apiLogger } from '@/lib/utils/logger';
 import { useToast } from '@/components/ui/use-toast';
 import { getRoleList } from '@/lib/api/modules/admin';
 import type { SysRole } from '@/lib/api/modules/admin';
@@ -38,7 +39,7 @@ export default function RoleManagementPage() {
         });
       }
     } catch (error) {
-      console.error('Failed to fetch roles:', error);
+      apiLogger.error('Failed to fetch roles:', error);
       toast({
         title: '获取角色列表失败',
         description: '网络错误，请稍后重试',

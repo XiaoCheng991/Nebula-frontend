@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "@/components/ui/use-toast"
 import { CheckCircle, XCircle } from "lucide-react"
+import { apiLogger } from '@/lib/utils/logger'
 import { supabase } from "@/lib/supabase/client"
 
 function GitHubCallbackLoading() {
@@ -34,7 +35,7 @@ function GitHubCallbackContent() {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession()
 
       if (sessionError) {
-        console.error("Session error:", sessionError)
+        apiLogger.error("Session error:", sessionError)
         setError("获取会话失败：" + sessionError.message)
         setStatus("error")
         return
@@ -48,7 +49,7 @@ function GitHubCallbackContent() {
 
       await processSession(session)
     } catch (err: any) {
-      console.error("GitHub callback error:", err)
+      apiLogger.error("GitHub callback error:", err)
       setError(err.message || "登录失败，请稍后重试")
       setStatus("error")
     }

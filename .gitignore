@@ -34,8 +34,10 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files - IMPORTANT: 所有 .env 文件都不提交到 git
+# 生产环境请使用部署平台的环境变量功能（如 Vercel/Railway 控制台）
 .env*
+!.env.example
 
 # vercel
 .vercel

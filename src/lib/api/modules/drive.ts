@@ -4,6 +4,7 @@
 
 import { supabase } from '@/lib/supabase/client'
 import type { Tables, TablesInsert } from '@/lib/supabase/types'
+import { apiLogger } from '@/lib/utils/logger'
 
 export interface DrivePageData {
   files: Tables<'file_metadata'>[]
@@ -32,7 +33,7 @@ export async function loadAllDriveData(
   })
 
   if (error || !data) {
-    console.error('RPC get_drive_page_data 失败:', error?.message || '返回空数据')
+    apiLogger.error('RPC get_drive_page_data 失败:', error?.message || '返回空数据')
     return { files: [], recentFiles: [], folders: new Set(), storageStats: [], error }
   }
 

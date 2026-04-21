@@ -25,7 +25,7 @@ export function useSystemConfig(key: string) {
     if (success) {
       setValue(newValue)
     } else {
-      console.error('更新配置失败:', error)
+      apiLogger.error('更新配置失败:', error)
     }
     return success
   }

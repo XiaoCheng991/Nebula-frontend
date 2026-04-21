@@ -236,7 +236,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
     // 同时监听 Supabase 的认证状态变化
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Supabase auth event:', event)
+      apiLogger.debug('Supabase auth event:', event)
       if (event === 'SIGNED_IN' && session) {
         refreshUser(true)
       } else if (event === 'SIGNED_OUT') {

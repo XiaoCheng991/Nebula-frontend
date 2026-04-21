@@ -268,7 +268,7 @@ export function PdfOcrContent() {
         description: `共处理 ${totalPages} 页，可下载可搜索 PDF`,
       })
     } catch (error: any) {
-      console.error("PDF OCR 失败:", error)
+      apiLogger.error("PDF OCR 失败:", error)
       toast({
         title: "处理失败",
         description: error?.message || "请稍后重试",

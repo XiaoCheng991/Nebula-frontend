@@ -186,7 +186,7 @@ export async function uploadDriveFile(
     })
 
   if (metaError) {
-    console.warn('元数据写入失败，但文件已上传:', metaError.message)
+    apiLogger.warn('元数据写入失败，但文件已上传:', metaError.message)
   }
 
   return { url: publicUrl, error: metaError }

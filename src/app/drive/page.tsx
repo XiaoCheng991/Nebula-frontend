@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useEffect, useRef } from "react"
+import { apiLogger } from '@/lib/utils/logger'
 import { Button } from "@/components/ui/button"
 import {
   Folder,
@@ -142,7 +143,7 @@ export default function DrivePage() {
       setFolders(result.folders)
       setStorageStats(result.storageStats)
     } catch (err) {
-      console.error("加载文件列表失败:", err)
+      apiLogger.error("加载文件列表失败:", err)
     } finally {
       setLoading(false)
       loadingRef.current = false
@@ -201,7 +202,7 @@ export default function DrivePage() {
         setUploadProgress(`正在上传 ${i + 1}/${uploadFiles.length}...`)
         const folder = uploadFolder || "默认"
         const result = await uploadDriveFile(file, activeBucket, folder, currentUserId, currentUserName)
-        if (result.error) { console.error(`上传失败 ${file.name}:`, result.error); failCount++ }
+        if (result.error) { apiLogger.error(`上传失败 ${file.name}:`, result.error); failCount++ }
         else { successCount++ }
       }
       setUploadProgress(successCount > 0 ? `${successCount} 个文件上传成功` : "全部失败")

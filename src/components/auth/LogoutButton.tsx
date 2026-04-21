@@ -24,7 +24,7 @@ export function LogoutButton({ className, iconOnly }: { className?: string, icon
       router.push('/login')
       router.refresh()
     } catch (error) {
-      console.error('Logout error:', error)
+      apiLogger.error('Logout error:', error)
     } finally {
       setIsLoading(false)
     }

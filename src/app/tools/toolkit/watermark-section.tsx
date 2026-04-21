@@ -451,7 +451,7 @@ const handlePointerMove = (e: React.PointerEvent) => {
       setSmoothProgress(100, "处理完成！")
       toast({ title: "水印去除完成", description: "可以下载处理后的图片" })
     } catch (error: any) {
-      console.error("LaMa 推理失败:", error)
+      apiLogger.error("LaMa 推理失败:", error)
       toast({
         title: "去除失败",
         description: error?.message || "模型加载或推理出错",

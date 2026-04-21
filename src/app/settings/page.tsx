@@ -118,7 +118,7 @@ export default function SettingsPage() {
 
       toast({ title: "上传成功", description: "头像已更新" })
     } catch (error: any) {
-      console.error('Avatar upload error:', error)
+      apiLogger.error('Avatar upload error:', error)
       toast({ title: "上传失败", description: error.message || "无法上传头像", variant: "destructive" })
     } finally {
       setUploading(false)
@@ -152,7 +152,7 @@ export default function SettingsPage() {
 
       toast({ title: "保存成功", description: "个人信息已更新" })
     } catch (error: any) {
-      console.error('Error saving:', error)
+      apiLogger.error('Error saving:', error)
       toast({ title: "保存失败", description: error.message || "无法保存信息", variant: "destructive" })
     } finally {
       setSaving(false)
