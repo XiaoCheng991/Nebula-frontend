@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback, use
 import { supabase } from '@/lib/supabase/client'
 import { getLocalUserInfo } from '@/lib/api/adapters/auth-adapter'
 import { useRouter } from 'next/navigation'
+import { apiLogger } from "@/lib/utils/logger"
 
 interface UserProfile {
   id?: number | string

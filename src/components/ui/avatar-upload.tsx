@@ -8,6 +8,7 @@ import { toast } from "./use-toast"
 import { supabase } from "@/lib/supabase/client"
 import { getLocalUserInfo } from "@/lib/api"
 import { uploadAvatar } from "@/lib/api/modules/file"
+import { apiLogger } from "@/lib/utils/logger"
 
 interface AvatarUploadProps {
   userId: string | number | null

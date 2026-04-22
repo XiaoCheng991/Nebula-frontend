@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense, useCallback, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { TiptapEditor } from '@/components/admin/blog/editor/TiptapEditor'
+import dynamic from 'next/dynamic'
 import { toast } from '@/components/ui/use-toast'
 import { createArticle, updateArticle, getArticleById, getArticles } from '@/lib/supabase/modules/blog'
 import { useUser } from '@/lib/user-context'
@@ -24,6 +24,19 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
+
+// Dynamic import for TiptapEditor - heavy editor with lowlight
+const TiptapEditor = dynamic(
+  () => import('@/components/admin/blog/editor/TiptapEditor').then((m) => m.TiptapEditor),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-[50vh] items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-orange-500" />
+      </div>
+    ),
+  }
+)
 
 const STORAGE_KEY = 'nebula_drafts'
 

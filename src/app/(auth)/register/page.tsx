@@ -101,7 +101,7 @@ export default function RegisterPage() {
               </form>
 
               <p className="mt-6 text-sm text-center text-white/50">
-                {t("register.alreadyHaveAccount")} <Link to="/login" className="font-medium text-blue-400 hover:text-blue-300 transition-colors">{t("register.signIn")}</Link>
+                {t("register.alreadyHaveAccount")} <Link href="/login" className="font-medium text-blue-400 hover:text-blue-300 transition-colors">{t("register.signIn")}</Link>
               </p>
             </div>
           </div>

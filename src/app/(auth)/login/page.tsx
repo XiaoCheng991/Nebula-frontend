@@ -3,8 +3,8 @@
 import { useState } from "react"
 import Link from "next/link"
 import { toast } from "@/components/ui/use-toast"
-import { login } from "@/lib/api/adapters"
-import { Github } from "lucide-react"
+import { login, loginWithGithub } from "@/lib/api/adapters"
+import { Github, Eye, EyeOff, ArrowRight } from "lucide-react"
 import { PublicRoute } from "@/components/auth/AuthGuard"
 import { useLanguage } from "@/hooks/useLanguage"
 
@@ -12,6 +12,7 @@ export default function LoginPage() {
   const { t } = useLanguage()
   const [account, setAccount] = useState("")
   const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const handleEmailLogin = async (e: React.FormEvent) => {
@@ -80,7 +81,7 @@ export default function LoginPage() {
               </form>
 
               <p className="mt-6 text-sm text-center text-white/50">
-                {t("login.newToNebulaHub")} <Link to="/register" className="font-medium text-blue-400 hover:text-blue-300 transition-colors">{t("login.createAccount")}</Link>
+                {t("login.newToNebulaHub")} <Link href="/register" className="font-medium text-blue-400 hover:text-blue-300 transition-colors">{t("login.createAccount")}</Link>
               </p>
             </div>
           </div>

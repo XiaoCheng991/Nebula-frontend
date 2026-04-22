@@ -1,13 +1,12 @@
-import { useRef, useCallback, useState, useEffect } from 'react'
+import { useRef, useCallback, useState, useEffect, useMemo } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
 import NextLink from 'next/link'
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
+import dynamic from 'next/dynamic'
 import { Table, TableRow, TableHeader, TableCell } from '@tiptap/extension-table'
-import { common, createLowlight } from 'lowlight'
 import {
   Bold,
   Italic,
@@ -40,7 +39,22 @@ import { uploadBlogImage } from '@/lib/api/modules/file'
 import { toast } from '@/components/ui/use-toast'
 import { UserAvatar } from '@/components/ui/user-avatar'
 
-const lowlight = createLowlight(common)
+// Lazy-loaded lowlight instance cache
+let lowlightCache: any = null
+let lowlightPromise: Promise<any> | null = null
+
+async function loadLowlight() {
+  if (lowlightCache) return lowlightCache
+  if (lowlightPromise) return lowlightPromise
+
+  lowlightPromise = (async () => {
+    const { common, createLowlight } = await import('lowlight')
+    lowlightCache = createLowlight(common)
+    return lowlightCache
+  })()
+
+  return lowlightPromise
+}
 
 interface TiptapEditorProps {
   title: string
@@ -72,19 +86,33 @@ export function TiptapEditor({ title, onTitleChange, content, onChange, onPublis
   const [uploading, setUploading] = useState(false)
   const [publishing, setPublishing] = useState(false)
   const [localEditTime, setLocalEditTime] = useState<string | null>(null)
+  const [lowlightReady, setLowlightReady] = useState(false)
+  const [lowlightInstance, setLowlightInstance] = useState<any>(null)
+  const [editorReady, setEditorReady] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const { user } = useUser()
 
+  // Load lowlight dynamically on mount
   useEffect(() => {
     setLocalEditTime(
       new Date().toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
     )
+
+    loadLowlight().then(async (lowlight) => {
+      // Dynamically import CodeBlockLowlight after lowlight is loaded
+      const { default: CodeBlockLowlight } = await import('@tiptap/extension-code-block-lowlight')
+      setLowlightInstance({ lowlight, CodeBlockLowlight })
+      setLowlightReady(true)
+      setEditorReady(true)
+    })
   }, [])
 
-  const editor = useEditor({
-    immediatelyRender: typeof window !== 'undefined',
-    extensions: [
+  // Memoize extensions to avoid recreating them
+  const extensions = useMemo(() => {
+    if (!lowlightInstance || !lowlightInstance.lowlight || !lowlightInstance.CodeBlockLowlight) return []
+
+    return [
       StarterKit.configure({
         codeBlock: false,
         link: false,
@@ -101,8 +129,8 @@ export function TiptapEditor({ title, onTitleChange, content, onChange, onPublis
           class: 'text-orange-500 underline decoration-orange-500/30 underline-offset-4',
         },
       }),
-      CodeBlockLowlight.configure({
-        lowlight,
+      lowlightInstance.CodeBlockLowlight.configure({
+        lowlight: lowlightInstance.lowlight,
         HTMLAttributes: {
           class: 'bg-zinc-950 dark:bg-zinc-900 p-4 overflow-x-auto border border-zinc-300 dark:border-zinc-700',
         },
@@ -113,7 +141,12 @@ export function TiptapEditor({ title, onTitleChange, content, onChange, onPublis
       TableRow,
       TableHeader,
       TableCell,
-    ],
+    ]
+  }, [lowlightReady, lowlightInstance, placeholder])
+
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions,
     content: content,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML())

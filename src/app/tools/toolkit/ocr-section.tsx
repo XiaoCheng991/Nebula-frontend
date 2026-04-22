@@ -2,11 +2,24 @@
 
 import { useState, useRef } from "react"
 import Image from "next/image"
-import Tesseract from "tesseract.js"
 import { Upload, Loader2, Copy, FileText, RotateCcw, Scan } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/use-toast"
+// tesseract.js is loaded dynamically when needed
+
+// Lazy-loaded Tesseract instance cache
+let tesseractCache: typeof import("tesseract.js") | null = null
+let tesseractPromise: Promise<typeof import("tesseract.js")> | null = null
+
+async function getTesseract() {
+  if (tesseractCache) return tesseractCache
+  if (tesseractPromise) return tesseractPromise
+
+  tesseractPromise = import("tesseract.js")
+  tesseractCache = await tesseractPromise
+  return tesseractCache
+}
 
 export function OcrSection() {
   const [image, setImage] = useState<string | null>(null)
@@ -51,6 +64,7 @@ export function OcrSection() {
     setProgress(0)
 
     try {
+      const Tesseract = await getTesseract()
       const { data } = await Tesseract.recognize(image, "chi_sim+eng", {
         logger: (m) => {
           if (m.progress) {

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { TiptapEditor } from '@/components/admin/blog/editor/TiptapEditor'
+import dynamic from 'next/dynamic'
 import { TableOfContents } from '@/components/admin/blog/editor/TableOfContents'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -21,6 +21,22 @@ import { createArticle, updateArticle, getArticleById } from '@/lib/supabase/mod
 import { supabase } from '@/lib/supabase/client'
 import { getUserInfo } from '@/lib/api/adapters/auth-adapter'
 import '@/app/admin/blog/editor.css'
+
+// Dynamic import for TiptapEditor - heavy editor with lowlight
+const TiptapEditor = dynamic(
+  () => import('@/components/admin/blog/editor/TiptapEditor').then((m) => m.TiptapEditor),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-96 items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">加载编辑器...</p>
+        </div>
+      </div>
+    ),
+  }
+)
 
 const turndown = new TurndownService({
   headingStyle: 'atx',

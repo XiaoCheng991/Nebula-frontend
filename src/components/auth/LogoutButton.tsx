@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { logout } from "@/lib/api/modules/auth"
 import { useAdminStore } from "@/hooks/useAdminStore"
+import { apiLogger } from "@/lib/utils/logger"
 
 export function LogoutButton({ className, iconOnly }: { className?: string, iconOnly?: boolean }) {
   const router = useRouter()

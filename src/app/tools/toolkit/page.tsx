@@ -2,13 +2,27 @@
 
 import { useState, useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
+import dynamic from "next/dynamic"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { OcrSection } from "./ocr-section"
-import { WatermarkSection } from "./watermark-section"
-import { PdfOcrSection } from "./pdf-ocr-section"
 import { ProtectedRoute } from "@/components/auth/AuthGuard"
 import { ArrowLeft, ImagePlus, Scan, Eraser } from "lucide-react"
 import Link from "next/link"
+
+// Dynamic imports for heavy tool components
+const OcrSection = dynamic(() => import("./ocr-section").then((m) => ({ default: m.OcrSection })), {
+  ssr: false,
+  loading: () => <div className="h-64 flex items-center justify-center text-muted-foreground">加载中...</div>,
+})
+
+const WatermarkSection = dynamic(() => import("./watermark-section").then((m) => ({ default: m.WatermarkSection })), {
+  ssr: false,
+  loading: () => <div className="h-64 flex items-center justify-center text-muted-foreground">加载中...</div>,
+})
+
+const PdfOcrSection = dynamic(() => import("./pdf-ocr-section").then((m) => ({ default: m.PdfOcrSection })), {
+  ssr: false,
+  loading: () => <div className="h-64 flex items-center justify-center text-muted-foreground">加载中...</div>,
+})
 
 function ToolkitTabs() {
   const searchParams = useSearchParams()

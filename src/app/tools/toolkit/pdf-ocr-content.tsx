@@ -5,9 +5,23 @@ import { Upload, Loader2, RotateCcw, FileText, Download, Scan, Info } from "luci
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/use-toast"
-import Tesseract from "tesseract.js"
-import { PDFDocument, rgb } from "pdf-lib"
-import * as PDFLib from "pdf-lib"
+import { apiLogger } from "@/lib/utils/logger"
+import dynamic from "next/dynamic"
+
+// Lazy-loaded Tesseract cache
+let tesseractCache: typeof import("tesseract.js") | null = null
+let tesseractPromise: Promise<typeof import("tesseract.js")> | null = null
+
+async function getTesseract() {
+  if (tesseractCache) return tesseractCache
+  if (tesseractPromise) return tesseractPromise
+  tesseractPromise = import("tesseract.js")
+  tesseractCache = await tesseractPromise
+  return tesseractCache
+}
+
+// Dynamic import for pdf-lib - heavy PDF library
+const PDFLibPromise = import("pdf-lib")
 
 interface PdfPage {
   index: number
@@ -125,6 +139,7 @@ export function PdfOcrContent() {
 
   const ocrPage = async (canvas: HTMLCanvasElement): Promise<{ text: string; words: Array<{ text: string; x: number; y: number; w: number; h: number }> }> => {
     const imageUrl = canvas.toDataURL("image/png")
+    const Tesseract = await getTesseract()
     const { data } = await Tesseract.recognize(imageUrl, "chi_sim+eng", {
       logger: () => {},
     })
@@ -173,6 +188,7 @@ export function PdfOcrContent() {
     try {
       setSmoothProgress(5, "加载 PDF...")
       const pdfjs = await ensurePdfJs()
+      const PDFLib = await PDFLibPromise
       const arrayBuffer = await pdfFile.arrayBuffer()
       const pdf = await pdfjs.getDocument({ data: arrayBuffer.slice(0) }).promise
       const totalPages = pdf.numPages
@@ -323,9 +339,11 @@ export function PdfOcrContent() {
 
   // 预加载 Tesseract 语言模型
   useEffect(() => {
-    Tesseract.createWorker("chi_sim", 1, {
-      logger: () => {},
-    }).catch(() => {})
+    getTesseract().then(Tesseract => {
+      Tesseract.createWorker("chi_sim", 1, {
+        logger: () => {},
+      }).catch(() => {})
+    })
   }, [])
 
   return (

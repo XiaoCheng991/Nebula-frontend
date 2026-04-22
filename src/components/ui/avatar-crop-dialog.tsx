@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import { ZoomIn, ZoomOut, RotateCw } from "lucide-react"
+import { apiLogger } from "@/lib/utils/logger"
 
 interface AvatarCropDialogProps {
   open: boolean

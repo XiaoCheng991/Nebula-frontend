@@ -15,6 +15,11 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { toast } from "@/components/ui/use-toast"
+import { apiLogger } from "@/lib/utils/logger"
+import dynamic from "next/dynamic"
+
+// Dynamic import for onnxruntime-web - heavy ML library (loaded via script tag)
+// Note: The actual loading is done via loadOrtScript() which loads /ort.wasm.min.js
 
 // onnxruntime-web 全局类型
 interface OrtSession {

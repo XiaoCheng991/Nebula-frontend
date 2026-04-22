@@ -3,6 +3,7 @@
  */
 
 import { supabase } from '@/lib/supabase/client'
+import { apiLogger } from "@/lib/utils/logger"
 
 /**
  * 文件上传响应

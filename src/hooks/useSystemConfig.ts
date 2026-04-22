@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { getSystemConfig, updateSystemConfig } from '@/lib/api/modules/admin'
+import { apiLogger } from "@/lib/utils/logger"
 
 export function useSystemConfig(key: string) {
   const [value, setValue] = useState<string | null>(null)

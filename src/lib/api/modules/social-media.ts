@@ -14,6 +14,7 @@ import {
 } from '@/components/branding/social-icons'
 import type { LucideIcon } from 'lucide-react'
 import { Youtube, Link } from 'lucide-react'
+import { apiLogger } from "@/lib/utils/logger"
 
 // 平台类型定义
 export type SocialPlatform =
