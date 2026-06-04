@@ -3,90 +3,170 @@
 @tailwind utilities;
 
 @layer base {
- :root {
- --background: 0 0% 100%;
- --foreground: 222.2 84% 4.9%;
- --card: 0 0% 100%;
- --card-foreground: 222.2 84% 4.9%;
- --popover: 0 0% 100%;
- --popover-foreground: 222.2 84% 4.9%;
- --primary: 24.6 95% 53.1%;
- --primary-foreground: 210 40% 98%;
- --secondary: 210 40% 96.1%;
- --secondary-foreground: 222.2 47.4% 11.2%;
- --muted: 210 40% 96.1%;
- --muted-foreground: 215.4 16.3% 46.9%;
- --accent: 0 0% 93.1%;
- --accent-foreground: 222.2 47.4% 11.2%;
- --destructive: 0 84.2% 60.2%;
- --destructive-foreground: 210 40% 98%;
- --border: 214.3 31.8% 91.4%;
- --input: 214.3 31.8% 91.4%;
- --ring: 221.2 83.2% 53.3%;
- --radius: 0.5rem;
- }
-
- .dark {
- --background: 0 0% 8%;
- --foreground: 210 40% 98%;
- --card: 0 0% 10%;
- --card-foreground: 210 40% 98%;
- --popover: 0 0% 12%;
- --popover-foreground: 210 40% 98%;
- --primary: 24.6 95% 53.1%;
- --primary-foreground: 222.2 47.4% 11.2%;
- --secondary: 217.2 32.6% 17.5%;
- --secondary-foreground: 210 40% 98%;
- --muted: 217.2 32.6% 17.5%;
- --muted-foreground: 215 20.2% 65.1%;
- --accent: 0 0% 21.2%;
- --accent-foreground: 210 40% 98%;
- --destructive: 0 62.8% 30.6%;
- --destructive-foreground: 210 40% 98%;
- --border: 217.2 32.6% 17.5%;
- --input: 217.2 32.6% 17.5%;
- --ring: 224.3 76.3% 48%;
- }
+  :root {
+    --background: 0 0% 2%;
+    --foreground: 180 100% 95%;
+    --card: 240 10% 4%;
+    --card-foreground: 180 100% 95%;
+    --primary: 180 100% 50%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 270 100% 65%;
+    --secondary-foreground: 180 100% 95%;
+    --muted: 240 5% 12%;
+    --muted-foreground: 240 5% 55%;
+    --accent: 330 100% 55%;
+    --accent-foreground: 180 100% 95%;
+    --border: 240 5% 15%;
+    --radius: 0px;
+  }
 }
 
 @layer base {
- * {
- @apply border-border;
- }
- html {
- scroll-behavior: smooth;
- overflow-y: scroll;
- }
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
 
- body {
- @apply bg-background text-foreground;
- font-feature-settings: "rlig" 1, "calt" 1;
- margin: 0;
- padding: 0;
- }
+  html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
 
- /* 移除全局 focus-visible outline 效果 */
- *:focus-visible {
- outline: none !important;
- }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Space Mono', 'Fira Code', 'Courier New', monospace;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    background: #050505;
+  }
 
- /* H1 渐变分割线 */
- .prose h1.h1-divider::after {
- content: '';
- display: block;
- margin-top: 4px;
- height: 1px;
- background: linear-gradient(
-  to right,
-  transparent 0%,
-  hsl(24.6 95% 53.1% / 0.6) 20%,
-  hsl(24.6 95% 53.1% / 0.8) 30%,
-  hsl(24.6 95% 53.1% / 0.6) 40%,
-  transparent 60%
- );
- }
+  ::selection {
+    background: hsl(var(--primary) / 0.3);
+    color: hsl(var(--foreground));
+  }
 
- body {
- font-family: Arial, sans-serif;
- }
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0a0a0a;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary) / 0.3);
+    border-radius: 0;
+  }
+}
+
+@layer utilities {
+  .text-glow {
+    text-shadow: 0 0 10px hsl(var(--primary) / 0.5), 0 0 20px hsl(var(--primary) / 0.3);
+  }
+  .text-glow-accent {
+    text-shadow: 0 0 10px hsl(var(--accent) / 0.5), 0 0 20px hsl(var(--accent) / 0.3);
+  }
+  .text-glow-secondary {
+    text-shadow: 0 0 10px hsl(var(--secondary) / 0.5), 0 0 20px hsl(var(--secondary) / 0.3);
+  }
+  .border-glow {
+    box-shadow: 0 0 5px hsl(var(--primary) / 0.2), inset 0 0 5px hsl(var(--primary) / 0.05);
+  }
+
+  /* Scanline effect */
+  .scanlines::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.03) 2px,
+      rgba(0, 0, 0, 0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* Grid background */
+  .grid-bg {
+    background-image:
+      linear-gradient(hsl(var(--primary) / 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--primary) / 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .grid-bg-fine {
+    background-image:
+      linear-gradient(hsl(var(--primary) / 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--primary) / 0.02) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  /* Glitch animation */
+  @keyframes glitch {
+    0% { transform: translate(0); }
+    20% { transform: translate(-2px, 2px); }
+    40% { transform: translate(-2px, -2px); }
+    60% { transform: translate(2px, 2px); }
+    80% { transform: translate(2px, -2px); }
+    100% { transform: translate(0); }
+  }
+
+  @keyframes glitch-subtle {
+    0% { transform: translate(0); filter: hue-rotate(0deg); }
+    2% { transform: translate(-1px, 1px); filter: hue-rotate(90deg); }
+    4% { transform: translate(-1px, -1px); filter: hue-rotate(180deg); }
+    6% { transform: translate(1px, 1px); filter: hue-rotate(270deg); }
+    8% { transform: translate(1px, -1px); filter: hue-rotate(360deg); }
+    10% { transform: translate(0); filter: hue-rotate(0deg); }
+    100% { transform: translate(0); filter: hue-rotate(0deg); }
+  }
+
+  .glitch-hover:hover {
+    animation: glitch-subtle 0.3s ease-in-out;
+  }
+
+  /* Blink cursor */
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+  .cursor-blink::after {
+    content: '█';
+    animation: blink 1s step-end infinite;
+    color: hsl(var(--primary));
+    margin-left: 2px;
+  }
+
+  /* Neon pulse */
+  @keyframes neon-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+  .neon-pulse {
+    animation: neon-pulse 2s ease-in-out infinite;
+  }
+
+  /* Slide in */
+  @keyframes slide-in-left {
+    from { transform: translateX(-20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  .slide-in-left {
+    animation: slide-in-left 0.3s ease-out;
+  }
+
+  /* Terminal typing effect */
+  @keyframes typing {
+    from { width: 0; }
+    to { width: 100%; }
+  }
+  .typewriter {
+    overflow: hidden;
+    white-space: nowrap;
+    animation: typing 2s steps(40, end);
+  }
 }

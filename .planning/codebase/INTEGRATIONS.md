@@ -1,196 +1,86 @@
 # External Integrations
 
-**Analysis Date:** 2026-04-20
+**Analysis Date:** 2026/06-03
+**Last Updated:** 2026/06-03
 
-## APIs & External Services
+## Supabase（核心后端）
 
-### Supabase (Primary Backend)
+- SDK: @supabase/supabase-js + @supabase/ssr
+- Auth: Email/password + GitHub OAuth
+- Database: PostgreSQL
+- Storage: 头像等文件存储
+- Client 文件:
+  - src/lib/supabase/client.ts — 浏览器端
+  - src/lib/supabase/server.ts — 服务端
+  - src/lib/supabase/types.ts — 类型定义
+- 功能模块:
+  - src/lib/supabase/modules/blog.ts
+  - src/lib/supabase/modules/memo.ts
+  - src/lib/supabase/modules/website.ts
 
-**Purpose:** Authentication, database, storage, and real-time subscriptions
-- **SDK:** `@supabase/supabase-js` 2.100.0, `@supabase/ssr` 0.10.0
-- **Auth:** Email/password + GitHub OAuth (see below)
-- **Database:** PostgreSQL via Supabase
-- **Storage:** Supabase Storage for user avatars
-- **Client Files:**
-  - `src/lib/supabase/client.ts` - Browser client (createBrowserClient)
-  - `src/lib/supabase/server.ts` - Server client (createServerClient)
-  - `src/lib/supabase/types.ts` - Database type definitions
-- **Modules:**
-  - `src/lib/supabase/modules/blog.ts`
-  - `src/lib/supabase/modules/memo.ts`
-  - `src/lib/supabase/modules/website.ts`
+## 认证
 
-### GitHub OAuth
+- Supabase Auth — Email/password + GitHub OAuth
+- 路由保护: src/middleware.ts
+- 部分旧 auth 文件已被移除（src/lib/auth.ts, src/lib/api/adapters/auth-adapter.ts 等）
 
-**Purpose:** Social login via GitHub
-- **Provider:** Supabase auth with GitHub provider
-- **Configuration:** Via Supabase dashboard (environment variables)
-- **Callback:** `src/app/auth/github/callback/page.tsx`
-- **Scope:** `read:user user:email`
-- **Implementation:** `src/lib/api/adapters/auth-adapter.ts` - `loginWithGithub()`
+## 外部 API
 
-### MinIO Object Storage
+### GitHub API（首页 star 计数）
+- GET api.github.com/users/{owner}/repos?per_page=100 — 批量 star
+- GET api.github.com/repos/{owner}/{repo} — 单仓库 fallback
+- 无认证，rate limit 60 req/hr
+- 文件: src/app/blog/page.tsx 内直接 fetch
 
-**Purpose:** File storage for user uploads (separate from Supabase Storage)
-- **SDK:** `minio` 8.0.6
-- **Client File:** `src/lib/minio.ts`
-- **Configuration:** Environment variables (MINIO_ENDPOINT, MINIO_PORT, etc.)
-- **Features:**
-  - Automatic bucket creation
-  - Public access policy
-  - File upload/delete operations
+### Bilibili API（抓取）
+- api.bilibili.com/x/relation/stat — 粉丝数
+- api.bilibili.com/x/space/acc/info — 用户信息
+- JSONP 跨域
 
-### AI Services
+### 社交平台（agent-reach.ts）
+- ✅ GitHub — 真实 API
+- ✅ Bilibili — 真实 API
+- ❌ 小红书/抖音/微博/YouTube/Twitter — Mock 数据
 
-**OpenAI:**
-- **SDK:** `@ai-sdk/openai` 0.0.66, `openai` 4.68.4
-- **Usage:** AI chat functionality
-- **Configuration:** Via environment variables
+## 对象存储
 
-**Anthropic:**
-- **SDK:** `@anthropic-ai/sdk` 0.39.0
-- **Usage:** AI chat functionality
-- **Configuration:** Via environment variables
+### Supabase Storage
+- Bucket: user-avatar（推测）
+- 规则: public read, auth write
+- 文件: src/lib/supabase/client.ts 调用
 
-**Vercel AI SDK:**
-- **SDK:** `ai` 3.3.0
-- **Purpose:** Unified streaming interface for AI providers
+### MinIO
+- 旧版 SDK minio 8.0.6 已从依赖剔除
+- 代码 src/lib/minio.ts 理论上还在但未被引用
+- 环境变量 MINIO_* 已不需要
 
-**MiniMax (Chinese AI):**
-- **API:** Custom integration via `MINIMAX_API_KEY`, `MINIMAX_API_URL`
-- **Model:** `MINIMAX_MODEL=abab6.5s-chat`
-- **Purpose:** Additional AI chat capability
+## 缓存
 
-### Social Media Data (Agent Reach)
+- TanStack Query — 浏览器内存，服务端状态缓存
+- localStorage — 用户信息、主题、语言
+- 无外部缓存层（Redis 等）
 
-**Purpose:** Fetch social media profile statistics
-- **Client File:** `src/lib/agent-reach.ts`
-- **Platforms Supported:**
-  - GitHub (real API)
-  - Bilibili (JSONP API)
-  - Xiaohongshu, Douyin, Weibo, YouTube, Twitter (mock data)
-  - Juejin, CSDN (not supported)
-- **Features:**
-  - URL validation and normalization
-  - Username extraction
-  - Platform statistics (followers, posts, likes, views)
+## 监控
 
-### Public APIs
+- src/lib/utils/logger.ts — 结构化日志（dev only）
+- babel-plugin-transform-remove-console — 构建时移除
+- 无 Sentry / LogRocket 等生产监控
 
-**GitHub API:**
-- Endpoint: `https://api.github.com/users/{username}`
-- Auth: None (public)
-- Purpose: Fetch GitHub profile stats
+## CI / CD
 
-**Bilibili API:**
-- Endpoints: `api.bilibili.com/x/relation/stat`, `api.bilibili.com/x/space/acc/info`
-- Auth: None (public, JSONP)
-- Purpose: Fetch Bilibili follower counts
+- vercel.json — Vercel 部署
+- 无 GitHub Actions
+- lint: next lint（仅静态检查）
 
-## Data Storage
+## 环境变量（必需）
 
-### Databases
+- NEXT_PUBLIC_SUPABASE_URL
+- NEXT_PUBLIC_SUPABASE_ANON_KEY
+- NEXT_PUBLIC_APP_URL
+- NEXT_PUBLIC_APP_NAME
 
-**Supabase PostgreSQL:**
-- Connection: Via `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- ORM: Direct Supabase client (no Prisma)
-- Tables: `sys_users`, blogs, memos, etc.
-
-**Local Storage (Browser):**
-- User preferences (language, permissions)
-- User info cache
-- Session data
-
-### File Storage
-
-**Dual Storage Approach:**
-
-1. **Supabase Storage:**
-   - Bucket: `user-avatar` (profile pictures)
-   - Access: Public read, authenticated write
-   - Client: `src/lib/supabase/client.ts`
-
-2. **MinIO (S3-compatible):**
-   - Default bucket: `user-uploads`
-   - Purpose: General file storage (drive feature)
-   - Configuration: `MINIO_ENDPOINT`, `MINIO_PORT`, `MINIO_ACCESS_KEY`, etc.
-
-### Caching
-
-**Client-side:**
-- React Query (TanStack Query) - Server state caching
-- Zustand - In-memory state with localStorage/persist
-
-**No external cache service configured**
-
-## Authentication & Identity
-
-**Provider:** Supabase Auth
-- **Methods:**
-  - Email/Password registration and login
-  - GitHub OAuth (social login)
-- **Files:**
-  - `src/lib/auth.ts` - Auth utilities entry point
-  - `src/lib/api/adapters/auth-adapter.ts` - Supabase auth implementation
-  - `src/lib/server-auth.ts` - Server-side auth helpers
-  - `src/lib/auth/token-manager.ts` - Token management
-  - `src/middleware.ts` - Route protection
-- **Route Protection:** Middleware-based auth guards
-
-## Monitoring & Observability
-
-**Error Tracking:**
-- None configured
-- Console logging in development
-- Console removal plugin in production (babel-plugin-transform-remove-console)
-
-**Logs:**
-- Custom logger: `src/lib/utils/logger.ts`
-- Console.log statements throughout codebase
-
-## CI/CD & Deployment
-
-**Hosting:**
-- Not specified (supports Next.js standard targets)
-- Compatible with Vercel, Netlify, or self-hosted
-
-**CI Pipeline:**
-- None configured
-
-## Environment Configuration
-
-**Required environment variables:**
-
-| Variable | Purpose | Required |
-|----------|---------|----------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | Yes |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key | Yes |
-| `NEXT_PUBLIC_GITHUB_CLIENT_ID` | GitHub OAuth client ID | For GitHub login |
-| `MINIO_ENDPOINT` | MinIO server hostname | For file storage |
-| `MINIO_PORT` | MinIO server port | For file storage |
-| `MINIO_ACCESS_KEY` | MinIO access key | For file storage |
-| `MINIO_SECRET_KEY` | MinIO secret key | For file storage |
-| `MINIO_BUCKET` | MinIO bucket name | For file storage |
-| `MINIO_PUBLIC_URL` | MinIO public URL | For file storage |
-| `MINIMAX_API_KEY` | MiniMax API key | For AI features |
-| `MINIMAX_API_URL` | MiniMax API endpoint | For AI features |
-| `MINIMAX_MODEL` | MiniMax model name | For AI features |
-| `NEXT_PUBLIC_APP_URL` | Application URL | Yes |
-| `NEXT_PUBLIC_APP_NAME` | Application name | Yes |
-
-**Configuration Mode:**
-- `NEXT_PUBLIC_API_MODE=supabase` - API mode selector
-- Supports `java-backend` or `supabase` modes
-
-## Webhooks & Callbacks
-
-**Incoming:**
-- Supabase auth callbacks (`/auth/callback`, `/auth/github/callback`)
-- OAuth redirect handling
-
-**Outgoing:**
-- None configured
+旧版（已移除）: MINIO_*, MINIMAX_*, NEXT_PUBLIC_GITHUB_CLIENT_ID
 
 ---
 
-*Integration audit: 2026-04-20*
+*Integration audit: 2026/06/03*

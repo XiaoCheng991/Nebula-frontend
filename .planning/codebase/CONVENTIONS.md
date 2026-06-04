@@ -1,296 +1,129 @@
-# Coding Conventions
+# Code Conventions
 
-**Analysis Date:** 2026-04-20
+**Analysis Date:** 2026/06/03
+**Last Updated:** 2026/06-03
 
-## Naming Patterns
+## 文件/目录命名
 
-### Files
-- React components: PascalCase (`Button.tsx`, `MessageItem.tsx`, `ResizableTable.tsx`)
-- Utility files: camelCase (`utils.ts`, `error-handler.ts`)
-- Type files: camelCase with `.types.ts` suffix or singular (`types.ts`, `admin/types.ts`)
-- API modules: camelCase within `modules/` directory (`user.ts`, `auth.ts`)
-- Hooks: camelCase with `use` prefix (`usePermission.ts`, `useTheme.ts`)
-- Page routes: kebab-case or route-style (`admin/users/page.tsx`, `blog/[id]/page.tsx`)
+| 类型 | 规范 | 示例 |
+|------|------|------|
+| React 组件 | PascalCase | `Button.tsx`, `AvatarCropDialog.tsx` |
+| 工具函数/文件 | camelCase | `utils.ts`, `cn()`, `logger.ts` |
+| 路由目录 | kebab-case / 单数 | `src/app/blog/[slug]/` |
+| 类型文件 | 与模块同名 | `types.ts` |
+| API 模块 | 与资源同名 | `src/lib/api/modules/blog.ts` |
+| Hooks | `use` 前缀 + camelCase | `useTheme.ts`, `usePagePermission.ts` |
 
-### Functions
-- React components: PascalCase (exported) or camelCase (internal)
-- Custom hooks: camelCase with `use` prefix
-- Utility functions: camelCase
-- Event handlers: camelCase with `handle` prefix (`handleDelete`, `handleStatusToggle`)
-- API functions: camelCase, verb-first (`getUserList`, `updateUserStatus`, `deleteUser`)
+## 导入约定
 
-### Variables
-- State variables: camelCase with descriptive names (`searchQuery`, `pagination`)
-- Props: camelCase
-- Constants: camelCase or SCREAMING_SNAKE_CASE for true constants
-- TypeScript types: PascalCase
+- **路径别名**: `@/*` → `./src/*` (tsconfig `paths` 对齐 `components.json` `aliases`)
+- **Radix 组件**: `@radix-ui/react-*`
+- **shadcn 组件**: `@/components/ui/*`
+- **桶导出**: 无显式 `index.ts`，按路径直入
+- **排序**: React → Next → 第三方 → `@/` 内部 → 相对路径
 
-### Types
 ```typescript
-// Use type or interface for objects
-export type Message = {
-  id: string;
-  content: string;
-  sender_name: string;
-};
-
-// Use interface for component props
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {}
-
-// Use VariantProps from class-variance-authority
-export interface ButtonProps extends VariantProps<typeof buttonVariants> {}
+import * as React from "react"
+import { Slot } from "@radix-ui/react-slot"
+import { cn } from "@/lib/utils"
 ```
 
-## Code Style
+## 组件模式
 
-### Formatting
-- Tool: ESLint + TypeScript (via `eslint-config-next/core-web-vitals`)
-- Configuration: `eslint.config.mjs` using flat config
-- Tab style: 2 spaces (Next.js default)
-- Semicolons: Required
+### Client Component (当前主流)
+```tsx
+"use client"
+import { useState, useEffect } from 'react'
 
-### Linting
-- ESLint with typescript-eslint integration
-- Key rules enforced:
-  - `no-console`: Warning in production (allows `warn`, `error`)
-  - `@typescript-eslint/no-explicit-any`: Warning
-  - `@typescript-eslint/no-unused-vars`: Error (allows `_` prefix for intentionally unused)
-  - `@typescript-eslint/ban-types`: Error
-
-### Import Organization
-1. React and framework imports
-2. Third-party libraries (Radix UI, Lucide, etc.)
-3. Internal imports (`@/` path alias)
-4. Type imports
-
-```typescript
-import * as React from "react";
-import { Slot } from "@radix-ui/react-slot";
-import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "@/lib/utils";
-```
-
-### Path Aliases
-- `@/*` maps to `./src/*` (configured in `tsconfig.json`)
-- Use `@/` for all internal imports
-
-## Component Structure Patterns
-
-### Client vs Server Components
-- Use `'use client'` directive for client-side interactivity
-- Default to server components when possible
-
-### UI Components (`src/components/ui/`)
-Follow shadcn/ui pattern:
-```typescript
-import * as React from "react";
-import { cn } from "@/lib/utils";
-
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
-
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, ...props }, ref) => {
-    return (
-      <input
-        type={type}
-        className={cn("base classes", className)}
-        ref={ref}
-        {...props}
-      />
-    );
-  }
-);
-Input.displayName = "Input";
-
-export { Input };
-```
-
-### Page Components (`src/app/`)
-```typescript
-'use client';
-
-import { useState, useEffect, useCallback } from 'react';
-import { useToast } from '@/components/ui/use-toast';
-
-export default function PageName() {
-  const [state, setState] = useState<Type>();
-  const { toast } = useToast();
-
-  // useCallback for async operations
-  const fetchData = useCallback(async () => {
-    // implementation
-  }, [dependencies]);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  return <div>...</div>;
+export default function BlogPage() {
+  const [starCounts, setStarCounts] = useState<Record<string, string>>({})
 }
 ```
 
-## Error Handling
-
-### Pattern: Error Handler Utility
-Location: `src/lib/utils/error-handler.ts`
-
-```typescript
-// Get user-friendly error message
-export function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  if (typeof error === 'string') return error;
-  return '发生未知错误，请稍后重试';
+### Props + forwardRef
+```tsx
+interface UserAvatarProps {
+  userId?: number
+  username?: string
+  size?: 'sm' | 'md' | 'lg'
+  className?: string
 }
 
-// Handle auth expiration
-export function handleAuthExpired(): void {
-  if (typeof window === 'undefined') return;
-  localStorage.removeItem('userInfo');
-  window.location.href = '/login';
-}
-
-// Check error types
-export function isNetworkError(error: unknown): boolean {
-  return error instanceof TypeError && error.message.includes('fetch');
-}
-export function isAuthError(error: unknown): boolean {
-  return error instanceof Error && (error.message.includes('401') || ...);
-}
+export const UserAvatar = React.forwardRef<HTMLDivElement, UserAvatarProps>(
+  ({ size = 'md', className, ...props }, ref) => { /* ... */ }
+)
+UserAvatar.displayName = 'UserAvatar'
 ```
 
-### Pattern: Try-Catch with Toast
+## 样式约定
+
+- **主力**: Tailwind CSS + `tailwind-merge` + `clsx` → `cn()` (src/lib/utils.ts)
+- **类名排序**: 布局 → 尺寸 → 间距 → 颜色 → 边框 → 动画 → 交互
+- **响应式**: mobile-first, `sm:` `md:` `lg:` `xl:` `2xl:`
+- **暗色模式**: 全量 `dark:` 前缀
+- **CSS 变量**: shadcn/ui HSL 主题 (`hsl(var(--xxx))`)
+- **主题切换**: `next-themes` + `class` 策略 + `localStorage('theme')` + 防闪白内联脚本
+- **CVA**: `class-variance-authority` 管理组件变体
+
+## TypeScript
+
+- `strict: true`, `target: ES2017`, `module: bundler`
+- `any`: warn 级别，部分 Supabase 回调仍用
+- `enum`: 未使用，替代为联合类型/const 对象
+- 泛型: `debounce<T>`, `throttle<T>` 等工具函数广泛使用
+
+## 错误处理
+
 ```typescript
+// toast 通知
+toast({ title: "错误", description: err.message, variant: "destructive" })
+
+// API try/catch
 try {
-  const response = await apiCall();
-  if (response.code === 200) {
-    toast({ title: 'Success', description: 'Operation completed' });
-  } else {
-    toast({ title: 'Failed', description: response.message, variant: 'destructive' });
-  }
-} catch (error) {
-  console.error('Failed to fetch:', error);
-  toast({ title: 'Error', description: 'Network error', variant: 'destructive' });
+  const { data, error } = await supabase.from('posts').select()
+  if (error) throw error
+} catch (error: any) {
+  apiLogger.error('Context:', error)
 }
+
+// 多请求
+const [memosRes, articlesRes] = await Promise.allSettled([getMemos(), getArticles()])
 ```
 
-## Styling Approach
+- 日志: `apiLogger` (src/lib/utils/logger.ts)
+- 生产构建: `babel-plugin-transform-remove-console` 移除 console
+- 错误边界: `src/app/error.tsx` + `src/app/global-error.tsx`
 
-### Tailwind CSS
-- Primary styling method
-- CSS variables for theming (defined in `tailwind.config.ts`)
-- Custom animations defined in config
+## 状态管理
 
-### CSS Variables Pattern
-```typescript
-colors: {
-  border: "hsl(var(--border))",
-  primary: {
-    DEFAULT: "hsl(var(--primary))",
-    foreground: "hsl(var(--primary-foreground))",
-  },
-}
+| 范围 | 方案 |
+|------|------|
+| 服务数据 | TanStack Query |
+| 全局认证 | React Context (src/lib/user-context.tsx) |
+| 页面权限 | src/hooks/useAppStore.ts |
+| 局部 | useState / useReducer |
+
+无 Redux/Zustand/MobX。
+
+## Git
+
+```
+cf894c0  perf: 首屏加载优化
+550b544  feature：账号自媒体数据抓取
+c09c9ed  fix：头像
 ```
 
-### Custom Animations
-```typescript
-keyframes: {
-  "accordion-down": {
-    from: { height: "0" },
-    to: { height: "var(--radix-accordion-content-height)" },
-  },
-  "fade-in": {
-    from: { opacity: "0" },
-    to: { opacity: "1" },
-  },
-},
-animation: {
-  "accordion-down": "accordion-down 0.2s ease-out",
-  "fade-in": "fade-in 0.3s ease-out",
-}
-```
+简洁单行，冒号混用中英文。直接在 main 提交，无 feature 分支。
 
-### Class Utility
-Use `cn()` from `lib/utils.ts` for conditional classes:
-```typescript
-import { cn } from "@/lib/utils";
+## ESLint
 
-className={cn(
-  "base-classes",
-  isActive && "active-classes",
-  className
-)}
-```
-
-### CVA (Class Variance Authority)
-For component variants in UI components:
-```typescript
-import { cva, type VariantProps } from "class-variance-authority";
-
-const buttonVariants = cva("base classes", {
-  variants: {
-    variant: {
-      default: "bg-primary text-primary-foreground",
-      destructive: "bg-destructive text-destructive-foreground",
-    },
-    size: {
-      default: "h-10 px-4 py-2",
-      sm: "h-9 px-3",
-    },
-  },
-  defaultVariants: {
-    variant: "default",
-    size: "default",
-  },
-});
-```
-
-## TypeScript Usage
-
-### Strict Mode
-Enabled in `tsconfig.json`: `"strict": true`
-
-### Common Patterns
-```typescript
-// Generic constraints
-function debounce<T extends (...args: unknown[]) => unknown>(func: T, wait: number): (...args: Parameters<T>) => void;
-
-// Optional props with defaults
-const Button = ({ asChild = false, ...props }) => { ... };
-
-// Forward ref pattern
-const Component = React.forwardRef<HTMLButtonElement, Props>(({ }, ref) => { ... });
-Component.displayName = "Component";
-
-// React.FC vs direct function
-// Use direct function for simpler components
-export const MessageItem: React.FC<MessageItemProps> = ({ ... }) => { ... };
-```
-
-### API Response Types
-```typescript
-interface ApiResponse<T> {
-  code: number;
-  data?: T;
-  message?: string;
-}
-```
-
-## Logging Patterns
-
-- Use `console.error` for API errors and unexpected failures
-- Include context in error messages
-- Avoid `console.log` in production code (warn-only via ESLint)
-
-```typescript
-console.error('[API Error]', errorMessage, error);
-```
-
-## Comments
-
-- Chinese comments for business logic (project is Chinese-focused)
-- English for technical patterns
-- JSDoc for exported functions when helpful
+`eslint.config.mjs` (flat config, ESLint v9):
+- 继承: `eslint-config-next/core-web-vitals` + typescript-eslint
+- `no-console: warn` (允许 warn/error)
+- `no-explicit-any: warn`
+- `no-unused-vars: error` (忽略 `_` 前缀)
+- `ban-types: error`
 
 ---
 
-*Convention analysis: 2026-04-20*
+*Convention analysis: 2026/06/03*

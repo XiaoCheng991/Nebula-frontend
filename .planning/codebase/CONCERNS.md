@@ -1,108 +1,82 @@
 # Codebase Concerns
 
-**Analysis Date:** 2026-04-20
-**Last Updated:** 2026-04-20 (Initial fixes applied)
+**Analysis Date:** 2026/06-03
+**Last Updated:** 2026/06-03
 
-## Security Considerations
+## 🔴 严重
 
-### ✅ FIXED: Exposed Credentials in .env.example
+### 零测试覆盖
+无一个测试文件。Auth、文件上传、权限校验全部裸奔。
+建议: 优先 vitest + @testing-library/react，覆盖 utils.ts + 关键 API。
 
-**Status:** Fixed on 2026-04-20
+### 死链 redirect / → /home
+src/app/page.tsx 硬编码 redirect('/home')，但 /home 路由不存在。
+访问 / 直接 404。实际内容在 /blog、/about。
 
-All real production credentials have been replaced with placeholder values:
-- `MINIO_SECRET_KEY=<YOUR_MINIO_SECRET_KEY>`
-- `MINIMAX_API_KEY=<YOUR_MINIMAX_API_KEY>`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY=<YOUR_SUPABASE_ANON_KEY>`
-- `NEXT_PUBLIC_GITHUB_CLIENT_ID=<YOUR_GITHUB_CLIENT_ID>`
+### GitHub API Rate Limit
+首页无认证 fetch api.github.com（60 req/hr 匿名限制）。
+开几个标签页就超限 → star 数拉不到，catch 兜底逻辑不完善。
 
-### ✅ FIXED: MinIO Public Bucket Access
+### import 已删除模块（构建失败）
+src/app/blog/page.tsx 顶部 import 了多个已不存在的模块:
+- @/lib/user-context（useUser 不存在）
+- @/lib/api（getLocalUserInfo 不存在）
+- @/lib/api/modules/file（uploadAvatar 不存在）
+- @/hooks/useAppStore（usePagePermission 不存在）
+- @/lib/supabase/modules/blog（getArticles/getTags/addWebsiteCollection/deleteWebsiteCollection）
+- @/lib/supabase/modules/memo（getMemos）
+这些文件已被 git 从代码库中删除，但 blog/page.tsx 的 import 还没有清理。**当前项目应该构建失败**——除非这些文件在 git 状态中被标记为 D（deleted from working tree）但仍存在于最近一次 commit。
 
-**Status:** Fixed on 2026-04-20
+验证: `grep -r "from.*@/lib/user-context" src/` 确认无文件匹配。
 
-The MinIO bucket policy has been removed. The bucket now operates with:
-- Private access (no public read policy)
-- Server-side authentication required for uploads
-- Note: For production, consider implementing signed URLs for file access
+## 🟠 高
 
-## Tech Debt - Fixed
+### 巨型组件（885 行）
+src/app/blog/page.tsx 整页 Client Component:
+- fetch GitHub API
+- CRUD 书签
+- 头像上传 + 裁剪
+- 权限判断
+- 多个 Dialog 状态
+全在一个文件。任何 state 变更都导致整页 re-render。
 
-### ✅ FIXED: Deprecated Empty Auth Module
+### 浏览器直连 Supabase（SQL 注入面）
+blog/page.tsx 直接在浏览器调用 supabase.from('sys_users').select().in('id', userIds)。
+虽然 Supabase 参数化查询，但表名暴露给客户端 = 信息泄露。推荐 Server Action 隔离。
 
-**Status:** Fixed on 2026-04-20
+### 权限仅前端校验
+hasAdminAccess / blogWritePerm / memoWritePerm 都在前端 store。没有服务端二次校验。直接 curl API 即可绕过。
 
-Removed `src/lib/auth.ts` - all functionality migrated to Supabase SDK.
+### 头像上传无服务端校验
+handleAvatarUpload 只检查 file.type.startsWith('image/')（可伪造）和 size（10MB）。无 mime 校验、无病毒扫描、无尺寸限制。
 
-### ✅ FIXED: Deprecated API Client Module
+## 🟡 中
 
-**Status:** Fixed on 2026-04-20
+### 暗色模式防闪白脚本用 dangerouslySetInnerHTML
+layout.tsx 中内联 <script dangerouslySetInnerHTML={{ __html: themeScript }}>。在 CSP 模式下可能被拦截。
 
-Removed `src/lib/api/client.ts` - no longer needed with Supabase mode.
+### 无错误监控
+生产无 Sentry。用户 bug 只能靠复现。
 
-### ✅ FIXED: @ts-ignore Directives
+### 国际化方案简陋
+src/lib/i18n/locales/ 只有 zh.json/en.json，无复数/插值/类型安全。大部分 UI 硬编码中文。
 
-**Status:** Fixed on 2026-04-20
+## 🟢 低
 
-Removed 3 `@ts-ignore` directives:
-- `src/lib/agent-reach.ts` - Added proper type definitions for JSONP callbacks
-- `src/components/ui/sonner.tsx` - Added type declaration for Sonner Toaster
+### 图片懒加载
+next/image 默认 lazy，但 memo 图片 <img> 标签无 loading="lazy"。
 
-### ✅ FIXED: Console Logging Throughout Codebase
+### 无 PWA
+无 manifest、无 service worker、无离线支持。
 
-**Status:** Fixed on 2026-04-20
+## 依赖健康
 
-Replaced `console.log/error/warn` with `apiLogger` utility across:
-- 92+ console statements removed from 30+ files
-- Now uses structured logging via `src/lib/utils/logger.ts`
-- Logs only output in development mode (`NODE_ENV === 'development'`)
+### 已过期（package.json 已移除）
+Zustand, Tiptap, Monaco, pdf-lib, tesseract.js, @anthropic-ai/sdk, @ai-sdk/openai, openai, ai, minio, onnxruntime-web, react-easy-crop
 
-## Remaining Technical Debt
-
-### ⚠️ INCOMPLETE: Social Media Data Fetching
-
-**Status:** Not changed - requires backend integration
-
-Only GitHub and Bilibili platforms use real APIs. Other platforms fall back to mock data.
-
-### ⚠️ INCOMPLETE: YouTube Data API Not Implemented
-
-**Status:** Not changed - requires API key
-
-YouTube stats always show as 0 or mock data. Requires YouTube Data API v3 key.
-
-### ⚠️ Missing Test Coverage
-
-**Status:** Not changed - user requested no tests
-
-Critical flows without tests:
-- Authentication flow (login, logout, token refresh)
-- File upload/download operations
-- Admin role/permission system
-
-## Performance Notes
-
-### Large Files Requiring Code Splitting
-
-**Files:**
-- `src/lib/supabase/types.ts` - 1291 lines (consider splitting by table groups)
-- `src/lib/api/modules/admin.ts` - 939 lines (consider splitting by feature)
-- Various admin pages - 800+ lines each
-
-### GitHub API Rate Limit Risk
-
-The blog page fetches all repos (up to 100) per page load, risking rate limit.
-
-## Dependencies Notes
-
-### Multiple AI SDK Versions
-
-The project uses multiple AI SDK families:
-- `@anthropic-ai/sdk` - Anthropic API
-- `@ai-sdk/openai` + `openai` - OpenAI API
-- `ai` - Vercel AI SDK
-
-Consider standardizing on one AI SDK family for consistency.
+### 当前主力版本（健康）
+Next.js 14.2.35 / React 18.3.1 / TypeScript 5.6.3 / Tailwind 3.4.13 — 各系列最新 patch
 
 ---
 
-*Concerns audit: 2026-04-20*
-*Status: Major security and tech debt issues resolved*
+*Concerns audit: 2026/06/03*
