@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "NebulaHub // blog",
-  description: "凌星晚的个人博客 — 代码、想法与技术笔记",
+  description: "Kyon's Blog — 代码、想法与技术笔记",
 };
 
 export default function RootLayout({

@@ -136,7 +136,7 @@ export default function HomePage() {
           <span className="flex-1 h-[1px] bg-border" />
         </div>
         <p className="text-sm text-foreground/50 max-w-xl">
-          这里是凌星晚的技术博客，记录学习、工作和一些有趣的项目。
+          这里是 Kyon 的技术博客，记录学习、工作和一些有趣的项目。
           <br />
           <Link href="/about" className="text-primary hover:text-glow inline-flex items-center gap-1 transition-colors mt-2">
             查看完整简介

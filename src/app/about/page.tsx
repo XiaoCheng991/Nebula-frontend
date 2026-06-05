@@ -1,11 +1,10 @@
 export default function AboutPage() {
   const profile = {
-    name: "凌星晚",
-    alias: "程永强",
+    name: "Kyon",
+    alias: "小橙991",
     github: "https://github.com/XiaoCheng991",
-    email: "17516476723@163.com",
-    phone: "17516476723",
-    location: "江苏南京",
+    email: "kyon991@proton.me",
+    location: "East Asia",
     csdn: "https://blog.csdn.net/qq_60985619",
     gitee: "https://gitee.com/XiaoCheng991",
   };
@@ -45,7 +44,7 @@ export default function AboutPage() {
 
   const experiences = [
     {
-      company: "大型零售电商集团",
+      company: "某大型零售电商集团",
       period: "2025.07 ~ 至今",
       role: "全栈开发工程师",
       points: [
@@ -56,7 +55,7 @@ export default function AboutPage() {
       ],
     },
     {
-      company: "互联网科技企业",
+      company: "某互联网科技企业",
       period: "2024.05 ~ 2024.11",
       role: "Java 开发工程师",
       points: [
@@ -95,8 +94,8 @@ export default function AboutPage() {
               {`// 全栈 + AI 开发`}
             </p>
             <p className="text-sm text-foreground/40 max-w-lg leading-relaxed">
-              河南工业大学 · 数据科学与大数据技术 · 2025届<br />
-              有大型互联网科技企业实习经历，目前在一家大型零售业集团做全栈开发。<br />
+              数据科学与大数据技术 · 2025届<br />
+              有互联网科技企业实习经历，目前在一家大型零售业集团做全栈开发。<br />
               正在从 Java 向 AI 迈进，目标：让代码不只是代码。
             </p>
           </div>
@@ -119,13 +118,8 @@ export default function AboutPage() {
           />
           <ContactItem
             label="EMAIL"
-            value="17516476723@163.com"
+            value="kyon991@proton.me"
             href={`mailto:${profile.email}`}
-          />
-          <ContactItem
-            label="PHONE"
-            value={profile.phone}
-            href={`tel:${profile.phone}`}
           />
           <ContactItem
             label="LOCATION"
@@ -213,7 +207,7 @@ export default function AboutPage() {
         </div>
         <div className="border border-border bg-card/30 p-4 flex items-center justify-between flex-wrap gap-3">
           <div>
-            <div className="text-sm font-semibold text-foreground">河南工业大学</div>
+            <div className="text-sm font-semibold text-foreground">某工业大学</div>
             <div className="text-xs font-mono text-foreground/40 mt-1">
               数据科学与大数据技术 · 本科 · 2021.09 ~ 2025.06
             </div>

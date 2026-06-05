@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/ai-code-mentor.iml" filepath="$PROJECT_DIR$/.idea/ai-code-mentor.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/Nebula-frontend.iml" filepath="$PROJECT_DIR$/.idea/Nebula-frontend.iml" />
     </modules>
   </component>
 </project>
