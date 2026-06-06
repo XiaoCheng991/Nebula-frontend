@@ -9,7 +9,7 @@ type Props = {
 };
 
 export async function generateStaticParams() {
-  return getDocsList().map((doc) => ({ docSlug: doc.slug }));
+  return getDocsList().map((doc) => ({ docSlug: doc.urlSlug }));
 }
 
 export async function generateMetadata(

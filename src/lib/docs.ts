@@ -5,6 +5,7 @@ const DOCS_DIR = path.join(process.cwd(), "public", "docs");
 
 export interface DocFile {
   slug: string;
+  urlSlug: string;
   filename: string;
   title: string;
   summary: string;
@@ -144,6 +145,7 @@ export function getDocsList(): DocFile[] {
     const filePath = path.join(DOCS_DIR, filename);
     const content = fs.readFileSync(filePath, "utf-8");
     const slug = filename.replace(/\.md$/, "");
+    const urlSlug = `doc-${index}`;
     const fm = parseFrontmatter(content);
     const title = extractTitle(content, fm);
     const summary = extractSummary(content, title);
@@ -153,7 +155,7 @@ export function getDocsList(): DocFile[] {
     const rawDate = fm.time || fm.date || fm.published || "";
     const date = normalizeDate(String(rawDate));
 
-    return { slug, filename, title, summary, tags, readTime, date, order: index };
+    return { slug, urlSlug, filename, title, summary, tags, readTime, date, order: index };
   });
 }
 
@@ -161,8 +163,11 @@ export function getDocsList(): DocFile[] {
  * Get raw markdown content (with frontmatter stripped for rendering).
  */
 export function getDocContent(slug: string): string | null {
-  const decoded = decodeURIComponent(slug);
-  const filePath = path.join(DOCS_DIR, `${decoded}.md`);
+  // Try matching by urlSlug first, then by slug (filename without .md)
+  const list = getDocsList();
+  const doc = list.find((d) => d.urlSlug === slug || d.slug === slug);
+  if (!doc) return null;
+  const filePath = path.join(DOCS_DIR, doc.filename);
   if (!fs.existsSync(filePath)) return null;
   const content = fs.readFileSync(filePath, "utf-8");
 
@@ -201,7 +206,6 @@ export function getDocContent(slug: string): string | null {
 }
 
 export function getDocMeta(slug: string): DocFile | null {
-  const decoded = decodeURIComponent(slug);
   const list = getDocsList();
-  return list.find((d) => d.slug === decoded) || null;
+  return list.find((d) => d.urlSlug === slug || d.slug === slug) || null;
 }

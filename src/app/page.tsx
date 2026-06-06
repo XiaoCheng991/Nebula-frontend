@@ -26,7 +26,7 @@ export default function HomePage() {
     tags: doc.tags.length > 0 ? doc.tags : ["笔记"],
     readTime: doc.readTime || 0,
     isDoc: true,
-    href: `/blog/docs/${doc.slug}`,
+    href: `/blog/docs/${doc.urlSlug}`,
   }));
 
   const postItems = posts.map((p) => ({
