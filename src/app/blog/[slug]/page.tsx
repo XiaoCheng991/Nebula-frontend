@@ -28,7 +28,7 @@ export async function generateMetadata(
   const post = getPostBySlug(slug);
   if (!post) return { title: "Not Found" };
   return {
-    title: `${post.title} // NebulaHub Blog`,
+    title: `${post.title} // Kyon Blog`,
     description: post.summary,
   };
 }
@@ -73,14 +73,22 @@ export default async function PostPage({ params }: Props) {
         <MarkdownRenderer content={post.content} />
       </article>
 
-      <div className="mt-16 pt-6 border-t border-border flex items-center justify-between text-xs font-mono text-foreground/30">
-        <span>{`/* end of document */`}</span>
-        <Link
-          href="/"
-          className="text-primary/50 hover:text-primary transition-colors"
-        >
-          {`[ return to index ] →`}
-        </Link>
+      <div className="mt-20 pt-8 flex flex-col items-center gap-4 text-xs font-mono text-foreground/25">
+        <div className="flex items-center gap-3">
+          <span className="h-[1px] w-8 bg-border" />
+          <span className="text-primary/40">◆</span>
+          <span className="h-[1px] w-8 bg-border" />
+        </div>
+        <div className="flex items-center gap-4">
+          <Link
+            href="/"
+            className="text-foreground/30 hover:text-primary transition-colors"
+          >
+            返回列表
+          </Link>
+          <span className="text-foreground/15">|</span>
+          <span>Kyon Blog</span>
+        </div>
       </div>
     </div>
   );

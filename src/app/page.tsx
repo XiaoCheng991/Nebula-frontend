@@ -3,7 +3,9 @@ import { posts } from "@/lib/posts";
 import { getDocsList } from "@/lib/docs";
 
 function formatDate(dateStr: string): string {
+  if (!dateStr) return "";
   const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return "";
   return d.toLocaleDateString("zh-CN", {
     year: "numeric",
     month: "2-digit",
@@ -20,7 +22,7 @@ export default function HomePage() {
     slug: `docs/${doc.slug}`,
     title: doc.title,
     summary: doc.summary,
-    date: "",  // docs don't have dates
+    date: doc.date,  // doc date (may be empty)
     tags: doc.tags.length > 0 ? doc.tags : ["笔记"],
     readTime: doc.readTime || 0,
     isDoc: true,
@@ -44,7 +46,7 @@ export default function HomePage() {
           <span className="cursor-blink" />
         </div>
         <h1 className="text-4xl font-bold tracking-tight mb-3 text-foreground">
-          NebulaHub{' '}
+          Kyon{' '}
           <span className="text-secondary text-glow-secondary">Blog</span>
         </h1>
         <p className="text-foreground/50 font-mono text-sm max-w-xl">

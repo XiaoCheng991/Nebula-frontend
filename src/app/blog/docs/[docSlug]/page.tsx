@@ -19,7 +19,7 @@ export async function generateMetadata(
   const meta = getDocMeta(docSlug);
   if (!meta) return { title: "Not Found" };
   return {
-    title: `${meta.title} // NebulaHub Blog`,
+    title: `${meta.title} // Kyon Blog`,
     description: meta.summary,
   };
 }
@@ -45,24 +45,57 @@ export default async function DocPage({ params }: Props) {
         <span className="px-1.5 py-0.5 border border-secondary/40 text-secondary/70 text-[10px]">
           DOCS
         </span>
+        {meta.date && (
+          <>
+            <span className="text-foreground/20">|</span>
+            <span>{meta.date}</span>
+          </>
+        )}
+        {meta.readTime > 0 && (
+          <>
+            <span className="text-foreground/20">|</span>
+            <span>{meta.readTime} min read</span>
+          </>
+        )}
       </div>
 
       <h1 className="text-2xl font-bold tracking-tight mb-3 text-foreground text-glow">
         {meta.title}
       </h1>
 
+      {meta.tags.length > 0 && (
+        <div className="flex items-center gap-2 mb-8">
+          {meta.tags.map((tag) => (
+            <span
+              key={tag}
+              className="px-2 py-0.5 border border-border text-xs font-mono text-foreground/40"
+            >
+              #{tag}
+            </span>
+          ))}
+        </div>
+      )}
+
       <article className="prose prose-sm max-w-none">
         <MarkdownRenderer content={content} />
       </article>
 
-      <div className="mt-16 pt-6 border-t border-border flex items-center justify-between text-xs font-mono text-foreground/30">
-        <span>{`/* end of document */`}</span>
-        <Link
-          href="/"
-          className="text-primary/50 hover:text-primary transition-colors"
-        >
-          {`[ return to index ] →`}
-        </Link>
+      <div className="mt-20 pt-8 flex flex-col items-center gap-4 text-xs font-mono text-foreground/25">
+        <div className="flex items-center gap-3">
+          <span className="h-[1px] w-8 bg-border" />
+          <span className="text-primary/40">◆</span>
+          <span className="h-[1px] w-8 bg-border" />
+        </div>
+        <div className="flex items-center gap-4">
+          <Link
+            href="/"
+            className="text-foreground/30 hover:text-primary transition-colors"
+          >
+            返回列表
+          </Link>
+          <span className="text-foreground/15">|</span>
+          <span>Kyon Blog</span>
+        </div>
       </div>
     </div>
   );

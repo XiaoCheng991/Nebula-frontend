@@ -1,7 +1,7 @@
 "use client";
 
 import MarkdownIt from "markdown-it";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 
 interface MarkdownRendererProps {
   content: string;
@@ -38,13 +38,13 @@ function preprocessMarkdown(md: string): string {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Wrap headings into <details>/<summary>                            */
+/*  Wrap headings into <details> (open by default, no collapse)       */
 /* ------------------------------------------------------------------ */
 
 function wrapSections(md: string): string {
   const lines = md.split("\n");
   const out: string[] = [];
-  const stack: { level: number; id: string }[] = [];
+  const stack: { level: number }[] = [];
   let headingIdx = 0;
 
   for (let i = 0; i < lines.length; i++) {
@@ -54,30 +54,24 @@ function wrapSections(md: string): string {
       const level = m[1].length;
       const title = m[2].trim();
 
-      // Close any open details with level >= current level
       while (stack.length > 0 && stack[stack.length - 1].level >= level) {
-        const closed = stack.pop()!;
-        out.push(`</details>`);
+        stack.pop();
+        out.push("</details>");
       }
 
-      // If there's a previous open details at a higher level, close it too
-      // (not needed — we close >= level)
-
-      // Open new details
       headingIdx++;
       const id = `h${headingIdx}`;
       out.push(`<details open id="${id}" data-level="${level}">`);
-      out.push(`<summary>${title}</summary>`);
-      stack.push({ level, id });
+      out.push(`<summary data-level="${level}">${title}</summary>`);
+      stack.push({ level });
     } else {
       out.push(line);
     }
   }
 
-  // Close all remaining
   while (stack.length > 0) {
     stack.pop();
-    out.push(`</details>`);
+    out.push("</details>");
   }
 
   return out.join("\n");
@@ -91,36 +85,54 @@ const CSS_ID = "md-render-details";
 
 const cssContent = `
 .md-render { line-height: 1.7; color: hsl(var(--foreground) / 0.85); }
-.md-render details { margin: 0.5rem 0; }
+
+/* Details (always open) */
+.md-render details { margin: 2rem 0 1.5rem 0; }
 .md-render details > summary {
-  cursor: pointer; list-style: none; user-select: none;
-  color: hsl(var(--foreground)); font-weight: 600; padding: 0.3rem 0;
-  font-size: inherit;
+  cursor: default; list-style: none; user-select: none;
+  color: hsl(var(--foreground)); font-weight: 600; padding: 0;
+  pointer-events: none;
 }
 .md-render details > summary::-webkit-details-marker,
 .md-render details > summary::marker { display: none; content: none; }
-.md-render details > summary:hover { color: hsl(var(--primary)); }
-.md-render details > :not(summary) { margin-left: 1rem; }
-.md-render details > :not(summary):first-of-type { margin-top: 0.25rem; }
-.md-render details details { margin-left: 0.5rem; }
+.md-render details > :not(summary) { margin-left: 0; }
+.md-render details details { margin: 1.25rem 0 1rem 0; }
 
-/* First-level headings */
-.md-render > details > summary { font-size: 1.15rem; }
-.md-render > details > details > summary { font-size: 1rem; }
-.md-render > details > details > details > summary { font-size: 0.95rem; }
+/* Heading sizes — distinct from body text (body is ~0.95rem) */
+.md-render details > summary[data-level="1"] { font-size: 2.5rem;  line-height: 1.15; letter-spacing: -0.02em; margin: 0 0 1.75rem 0; }
+.md-render details > summary[data-level="2"] { font-size: 1.85rem; line-height: 1.2;  margin: 2rem 0 1rem 0; }
+.md-render details > summary[data-level="3"] { font-size: 1.45rem; line-height: 1.25; margin: 1.5rem 0 0.75rem 0; }
+.md-render details > summary[data-level="4"] { font-size: 1.15rem; line-height: 1.3;  margin: 1.25rem 0 0.6rem 0; }
+.md-render details > summary[data-level="5"] { font-size: 1.05rem; line-height: 1.35; margin: 1rem 0 0.5rem 0; }
+.md-render details > summary[data-level="6"] { font-size: 1rem;    line-height: 1.4;   margin: 0.85rem 0 0.4rem 0; }
 
-/* Blockquote */
+/* Paragraphs */
+.md-render p { margin: 1.25rem 0; line-height: 1.9; }
+
+/* Blockquote — tight padding */
 .md-render blockquote {
   border-left: 2px solid hsl(var(--secondary) / 0.5);
-  padding: 0.5rem 1rem; margin: 0.75rem 0;
-  color: hsl(var(--foreground) / 0.6); font-style: italic;
+  padding: 0.25rem 0.75rem;
+  margin: 1.25rem 0;
+  color: hsl(var(--foreground) / 0.6);
+  font-style: italic;
 }
 .md-render blockquote p { margin: 0.2rem 0; }
 
 /* Lists */
-.md-render ul { list-style: disc; padding-left: 1.5rem; margin: 0.5rem 0; }
-.md-render ol { list-style: decimal; padding-left: 1.5rem; margin: 0.5rem 0; }
-.md-render li { font-size: 0.875rem; line-height: 1.7; margin: 0.15rem 0; }
+.md-render ul { list-style: disc; padding-left: 1.75rem; margin: 1.25rem 0; }
+.md-render ol { list-style: decimal; padding-left: 1.75rem; margin: 1.25rem 0; }
+.md-render li { font-size: 0.925rem; line-height: 1.8; margin: 0.25rem 0; }
+
+/* Images */
+.md-render img {
+  display: block;
+  margin: 1.75rem auto;
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  max-height: 65vh;
+}
 
 /* Inline code */
 .md-render code {
@@ -138,7 +150,75 @@ const cssContent = `
 .md-render em { color: hsl(var(--foreground) / 0.8); }
 
 /* HR */
-.md-render hr { border-color: hsl(var(--border)); margin: 1.5rem 0; }
+.md-render hr { border-color: hsl(var(--border)); margin: 3rem 0; }
+
+/* Scroll to top — data stream */
+.md-render .scroll-top-btn {
+  position: fixed;
+  bottom: 2.5rem;
+  right: 2.5rem;
+  width: 44px;
+  height: 44px;
+  background: hsl(var(--primary) / 0.06);
+  border: 1px solid hsl(var(--primary) / 0.3);
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(16px);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 100;
+  padding: 0;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  backdrop-filter: blur(4px);
+}
+.md-render .scroll-top-btn.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+/* Three data-stream bars — bright fluorescent */
+.md-render .scroll-top-btn .bar {
+  display: block;
+  width: 3px;
+  border-radius: 1px;
+  background: hsl(var(--primary) / 0.7);
+  box-shadow: 0 0 4px hsl(var(--primary) / 0.3);
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+.md-render .scroll-top-btn .bar:nth-child(1) { height: 10px; animation: data-pulse 1.2s ease-in-out infinite 0s; }
+.md-render .scroll-top-btn .bar:nth-child(2) { height: 16px; animation: data-pulse 1.2s ease-in-out infinite 0.2s; }
+.md-render .scroll-top-btn .bar:nth-child(3) { height: 12px; animation: data-pulse 1.2s ease-in-out infinite 0.4s; }
+@keyframes data-pulse {
+  0%, 100% { transform: scaleY(1); opacity: 0.7; }
+  50% { transform: scaleY(1.8); opacity: 1; }
+}
+/* Hover: full fluorescent burst */
+.md-render .scroll-top-btn:hover {
+  border-color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.12);
+  box-shadow:
+    0 0 16px hsl(var(--primary) / 0.3),
+    0 0 40px hsl(var(--primary) / 0.12),
+    inset 0 0 16px hsl(var(--primary) / 0.06);
+  transform: translateY(-3px);
+}
+.md-render .scroll-top-btn:hover .bar {
+  background: hsl(var(--primary));
+  box-shadow: 0 0 8px hsl(var(--primary) / 0.8), 0 0 16px hsl(var(--primary) / 0.4);
+}
+.md-render .scroll-top-btn:hover .bar:nth-child(1) { height: 14px; }
+.md-render .scroll-top-btn:hover .bar:nth-child(2) { height: 22px; }
+.md-render .scroll-top-btn:hover .bar:nth-child(3) { height: 16px; }
+.md-render .scroll-top-btn:active {
+  transform: translateY(0) scale(0.88);
+  box-shadow: 0 0 24px hsl(var(--primary) / 0.5);
+}
 `;
 
 function injectStyle() {
@@ -155,12 +235,20 @@ function injectStyle() {
 /* ------------------------------------------------------------------ */
 
 export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
+  const [showScroll, setShowScroll] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setShowScroll(window.scrollY > 300);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const html = useMemo(() => {
     const md = preprocessMarkdown(content);
     const wrapped = wrapSections(md);
     const renderer = new MarkdownIt({
-      html: true,       // Allow raw HTML (our <details>/<summary>)
-      linkify: true,    // Auto-link URLs
+      html: true,
+      linkify: true,
       breaks: false,
     });
     return renderer.render(wrapped);
@@ -169,9 +257,17 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
   useMemo(() => injectStyle(), []);
 
   return (
-    <div
-      className="md-render"
-      dangerouslySetInnerHTML={{ __html: html }}
-    />
+    <div className="md-render relative">
+      <div dangerouslySetInnerHTML={{ __html: html }} />
+      <button
+        className={`scroll-top-btn ${showScroll ? "visible" : ""}`}
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        title="回到顶部"
+      >
+        <span className="bar" />
+        <span className="bar" />
+        <span className="bar" />
+      </button>
+    </div>
   );
 }

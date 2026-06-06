@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "NebulaHub // blog",
+  title: "Kyon // blog",
   description: "Kyon's Blog — 代码、想法与技术笔记",
 };
 
@@ -24,7 +24,7 @@ export default function RootLayout({
               href="/"
               className="text-primary font-mono text-lg tracking-wider font-bold text-glow glitch-hover"
             >
-              {'<NebulaHub />'}
+              {'Kyon'}
             </a>
             <div className="flex items-center gap-6 text-sm font-mono">
               <a
@@ -47,7 +47,7 @@ export default function RootLayout({
         </main>
         <footer className="border-t border-border mt-20">
           <div className="max-w-4xl mx-auto px-4 py-8 text-xs font-mono text-foreground/30 flex justify-between items-center">
-            <span>{`/* ${new Date().getFullYear()} NebulaHub */`}</span>
+            <span>{`/* ${new Date().getFullYear()} Kyon */`}</span>
             <span>powered by Next.js</span>
           </div>
         </footer>

@@ -1,7 +1,7 @@
 {
   "name": "nebulahub",
   "version": "1.0.0",
-  "description": "NebulaHub Blog — 个人技术博客",
+  "description": "Kyon Blog — 个人技术博客",
   "private": true,
   "scripts": {
     "dev": "next dev",
