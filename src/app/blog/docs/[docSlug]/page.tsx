@@ -1,42 +1,35 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getPostBySlug, getPostSlugs } from "@/lib/posts";
+import { getDocContent, getDocMeta, getDocsList } from "@/lib/docs";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
 
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString("zh-CN", {
-    year: "numeric",
-    month: "long",
-    day: "2-digit",
-  });
-}
-
 type Props = {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ docSlug: string }>;
 };
 
 export async function generateStaticParams() {
-  return getPostSlugs().map((slug) => ({ slug }));
+  return getDocsList().map((doc) => ({ docSlug: doc.slug }));
 }
 
 export async function generateMetadata(
   { params }: Props,
 ): Promise<Metadata> {
-  const { slug } = await params;
-  const post = getPostBySlug(slug);
-  if (!post) return { title: "Not Found" };
+  const { docSlug } = await params;
+  const meta = getDocMeta(docSlug);
+  if (!meta) return { title: "Not Found" };
   return {
-    title: `${post.title} // NebulaHub Blog`,
-    description: post.summary,
+    title: `${meta.title} // NebulaHub Blog`,
+    description: meta.summary,
   };
 }
 
-export default async function PostPage({ params }: Props) {
-  const { slug } = await params;
-  const post = getPostBySlug(slug);
-  if (!post) notFound();
+export default async function DocPage({ params }: Props) {
+  const { docSlug } = await params;
+  const content = getDocContent(docSlug);
+  const meta = getDocMeta(docSlug);
+
+  if (!content || !meta) notFound();
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-10">
@@ -49,28 +42,17 @@ export default async function PostPage({ params }: Props) {
       </Link>
 
       <div className="flex items-center gap-2 text-xs font-mono text-primary/50 mb-3">
-        <span>{`// ${post.date}`}</span>
-        <span className="text-foreground/20">|</span>
-        <span>{`// ${post.readTime} min read`}</span>
+        <span className="px-1.5 py-0.5 border border-secondary/40 text-secondary/70 text-[10px]">
+          DOCS
+        </span>
       </div>
 
       <h1 className="text-2xl font-bold tracking-tight mb-3 text-foreground text-glow">
-        {post.title}
+        {meta.title}
       </h1>
 
-      <div className="flex items-center gap-2 mb-8">
-        {post.tags.map((tag) => (
-          <span
-            key={tag}
-            className="px-2 py-0.5 border border-border text-xs font-mono text-foreground/40"
-          >
-            #{tag}
-          </span>
-        ))}
-      </div>
-
       <article className="prose prose-sm max-w-none">
-        <MarkdownRenderer content={post.content} />
+        <MarkdownRenderer content={content} />
       </article>
 
       <div className="mt-16 pt-6 border-t border-border flex items-center justify-between text-xs font-mono text-foreground/30">

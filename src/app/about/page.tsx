@@ -212,11 +212,6 @@ export default function AboutPage() {
               数据科学与大数据技术 · 本科 · 2021.09 ~ 2025.06
             </div>
           </div>
-          <div className="flex gap-4 text-xs font-mono text-foreground/40">
-            <span>GPA: <strong className="text-primary/70">前15%</strong></span>
-            <span>CET-4: <strong className="text-primary/70">488</strong></span>
-            <span>CET-6: <strong className="text-primary/70">455</strong></span>
-          </div>
         </div>
       </section>
 

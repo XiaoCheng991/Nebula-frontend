@@ -14,7 +14,8 @@ export default function RootLayout({
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <head>
-        <link rel="icon" href="/logo_icon.svg" />
+        <link rel="icon" href="/branding/logo/logo_icon.svg" />
+        <title></title>
       </head>
       <body className="bg-background text-foreground scanlines grid-bg min-h-screen">
         <header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-sm">
