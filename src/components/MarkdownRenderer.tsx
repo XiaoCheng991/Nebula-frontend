@@ -132,6 +132,11 @@ const cssContent = `
   height: auto;
   border-radius: 6px;
   max-height: 65vh;
+  animation: img-reveal 0.6s ease-out both;
+}
+@keyframes img-reveal {
+  from { opacity: 0; filter: blur(8px); }
+  to   { opacity: 1; filter: blur(0); }
 }
 
 /* Inline code */

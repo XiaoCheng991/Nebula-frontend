@@ -78,7 +78,7 @@ export default function AboutPage() {
           {/* Avatar */}
           <div className="shrink-0">
             <img
-              src="https://avatars.githubusercontent.com/XiaoCheng991"
+              src="/avatar/XiaoCheng991.jpeg"
               alt="avatar"
               className="w-20 h-20 rounded-lg border border-primary/30"
             />
