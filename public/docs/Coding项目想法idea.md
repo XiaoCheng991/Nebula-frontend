@@ -1,10 +1,10 @@
 title: Coding项目参考
-tags: [随笔、碎碎念]
-readTime: 3
+tags: [技术、想法]
+readTime: 1
 time： 2026/06/08
 
 > 2026/06/08 Monday \
->  Coding大赏\
+>  Coding大赏 \
 
 ## 项目想法参考记录
 
