@@ -65,8 +65,8 @@ export default async function HomePage({
           <span>{`// system.init()`}</span>
           <span className="cursor-blink" />
         </div>
-        <h1 className="text-4xl font-bold tracking-tight mb-3 text-foreground">
-          Kyon{" "}
+        <h1 className="text-4xl font-bold tracking-normal mb-3 text-foreground">
+          Kyon{"\u00A0"}
           <span className="text-secondary text-glow-secondary">Blog</span>
         </h1>
         <p className="text-foreground/50 font-mono text-sm max-w-xl">
@@ -86,17 +86,21 @@ export default async function HomePage({
           </span>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-3">
           {pageItems.map((item) => (
             <Link
               key={item.slug}
               href={item.href}
-              className="block group border border-border bg-card/50 p-5 hover:border-primary/40 hover:border-glow transition-all duration-200"
+              className="block group border border-border bg-card/50 p-5 hover:border-primary/40 transition-all duration-200"
             >
               <div className="flex items-start justify-between gap-4 mb-2">
                 <h3 className="text-base font-semibold text-foreground group-hover:text-primary transition-colors flex items-center gap-2">
                   <span className="text-primary/40 group-hover:text-primary transition-colors">{`> `}</span>
-                  {item.isDoc}
+                  {item.isDoc && (
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 border border-secondary/40 text-secondary/70 shrink-0">
+                      DOCS
+                    </span>
+                  )}
                   {item.title}
                 </h3>
                 {item.date && (
@@ -109,10 +113,10 @@ export default async function HomePage({
                 {item.summary}
               </p>
               <div className="flex items-center gap-3 pl-4 text-xs font-mono">
-                {item.tags.map((tag) => (
+                {item.tags.map((tag, idx) => (
                   <span
                     key={tag}
-                    className="px-2 py-0.5 border border-border text-foreground/40 group-hover:border-primary/30 group-hover:text-primary/60 transition-colors"
+                    className={`${idx > 0 ? 'ml-2' : ''} px-2 py-0.5 border border-border text-foreground/40 group-hover:border-primary/30 group-hover:text-primary/60 transition-colors`}
                   >
                     #{tag}
                   </span>

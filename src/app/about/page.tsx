@@ -80,7 +80,7 @@ export default function AboutPage() {
             <img
               src="/avatar/XiaoCheng991.jpeg"
               alt="avatar"
-              className="w-20 h-20 rounded-lg border border-primary/30"
+              className="w-24 h-24 sm:w-32 sm:h-32 rounded-lg border border-primary/30 object-cover"
             />
           </div>
           <div>
