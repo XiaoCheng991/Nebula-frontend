@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { posts } from "@/lib/posts";
 import { getDocsList } from "@/lib/docs";
+import Pagination from "@/components/Pagination";
 
 function formatDate(dateStr: string): string {
   if (!dateStr) return "";
@@ -13,16 +14,24 @@ function formatDate(dateStr: string): string {
   });
 }
 
-export default function HomePage() {
-  const docs = getDocsList();
-  const totalCount = posts.length + docs.length;
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; size?: string }>;
+}) {
+  const { page, size } = await searchParams;
+  const currentPage = Math.max(1, parseInt(page || "1", 10) || 1);
+  const pageSize = [10, 20, 50].includes(parseInt(size || "10", 10))
+    ? parseInt(size || "10", 10)
+    : 10;
 
-  // Flatten docs into the same shape as posts for unified rendering
+  const docs = getDocsList();
+
   const docItems = docs.map((doc) => ({
     slug: `docs/${doc.slug}`,
     title: doc.title,
     summary: doc.summary,
-    date: doc.date,  // doc date (may be empty)
+    date: doc.date,
     tags: doc.tags.length > 0 ? doc.tags : ["笔记"],
     readTime: doc.readTime || 0,
     isDoc: true,
@@ -35,7 +44,18 @@ export default function HomePage() {
     href: `/blog/${p.slug}`,
   }));
 
-  const allItems = [...docItems, ...postItems];
+  const allItems = [...docItems, ...postItems].sort((a, b) => {
+    if (!a.date && !b.date) return 0;
+    if (!a.date) return 1;
+    if (!b.date) return -1;
+    return b.date.localeCompare(a.date);
+  });
+
+  const totalCount = allItems.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const safePage = Math.min(currentPage, totalPages);
+  const startIdx = (safePage - 1) * pageSize;
+  const pageItems = allItems.slice(startIdx, startIdx + pageSize);
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
@@ -46,7 +66,7 @@ export default function HomePage() {
           <span className="cursor-blink" />
         </div>
         <h1 className="text-4xl font-bold tracking-tight mb-3 text-foreground">
-          Kyon{' '}
+          Kyon{" "}
           <span className="text-secondary text-glow-secondary">Blog</span>
         </h1>
         <p className="text-foreground/50 font-mono text-sm max-w-xl">
@@ -67,7 +87,7 @@ export default function HomePage() {
         </div>
 
         <div className="space-y-2">
-          {allItems.map((item) => (
+          {pageItems.map((item) => (
             <Link
               key={item.slug}
               href={item.href}
@@ -76,11 +96,7 @@ export default function HomePage() {
               <div className="flex items-start justify-between gap-4 mb-2">
                 <h3 className="text-base font-semibold text-foreground group-hover:text-primary transition-colors flex items-center gap-2">
                   <span className="text-primary/40 group-hover:text-primary transition-colors">{`> `}</span>
-                  {item.isDoc && (
-                    <span className="text-[10px] font-mono px-1.5 py-0.5 border border-secondary/40 text-secondary/70 shrink-0">
-                      DOCS
-                    </span>
-                  )}
+                  {item.isDoc}
                   {item.title}
                 </h3>
                 {item.date && (
@@ -113,10 +129,16 @@ export default function HomePage() {
             </Link>
           ))}
         </div>
+
+        <Pagination
+          currentPage={safePage}
+          totalPages={totalPages}
+          pageSize={pageSize}
+        />
       </section>
 
       {/* About preview */}
-      <section className="mt-16 pt-8 border-t border-border">
+      <section className="mt-16">
         <div className="flex items-center gap-3 mb-4">
           <h2 className="text-sm font-mono text-primary tracking-wider">
             {`[ about ]`}

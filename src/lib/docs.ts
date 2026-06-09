@@ -15,70 +15,62 @@ export interface DocFile {
   order: number;
 }
 
+/** Find colon index, supporting both English : and Chinese ： */
+function findColon(s: string): number {
+  const en = s.indexOf(":");
+  const zh = s.indexOf("：");
+  if (en !== -1 && zh !== -1) return Math.min(en, zh);
+  return en !== -1 ? en : zh;
+}
+
 /**
- * Parse frontmatter: supports --- delimited or bare key-value at top.
- * Handles time: 2026/06/06, date: 2026-06-06, etc.
+ * Parse YAML frontmatter from markdown content.
+ * Supports --- delimited blocks and bare key-value at file top.
  */
 function parseFrontmatter(content: string): Record<string, any> {
-  let fmBlock: string | null = null;
+  let fmText: string;
 
-  const withDelimiter = content.match(/^---\s*\n([\s\S]*?)\n---/);
-  if (withDelimiter) {
-    fmBlock = withDelimiter[1];
+  const delimMatch = content.match(/^---\s*\n([\s\S]*?)\n---/);
+  if (delimMatch) {
+    fmText = delimMatch[1];
   } else {
     const lines = content.split("\n");
-    const blockLines: string[] = [];
+    const kvLines: string[] = [];
     for (const line of lines) {
-      const trimmed = line.trim();
-      if (!trimmed) break;
-      if (trimmed.startsWith("#")) break;
-      const colonIdx = trimmed.indexOf(":");
-      if (colonIdx === -1) break;
-      blockLines.push(line);
+      const t = line.trim();
+      if (!t || t.startsWith("#")) break;
+      if (findColon(t) === -1) break;
+      kvLines.push(t);
     }
-    if (blockLines.length > 0) {
-      fmBlock = blockLines.join("\n");
-    }
+    fmText = kvLines.join("\n");
   }
 
-  if (!fmBlock) return {};
+  if (!fmText) return {};
 
   const result: Record<string, any> = {};
+  for (const line of fmText.split("\n")) {
+    const t = line.trim();
+    if (!t || t.startsWith("#")) continue;
+    const ci = findColon(t);
+    if (ci === -1) continue;
+    const key = t.slice(0, ci).trim().toLowerCase();
+    const value = t.slice(ci + 1).trim();
 
-  for (const line of fmBlock.split("\n")) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) continue;
-
-    const colonIdx = trimmed.indexOf(":");
-    if (colonIdx === -1) continue;
-
-    const key = trimmed.slice(0, colonIdx).trim();
-    const value = trimmed.slice(colonIdx + 1).trim();
-
-    // Parse arrays: [a, b, c] — supports both English comma and Chinese dunhao
     if (value.startsWith("[") && value.endsWith("]")) {
       result[key] = value
         .slice(1, -1)
         .split(/[,、\s]+/)
         .map((s) => s.trim().replace(/['"]/g, ""))
         .filter(Boolean);
-    }
-    // Parse numbers
-    else if (/^\d+$/.test(value)) {
+    } else if (/^\d+$/.test(value)) {
       result[key] = parseInt(value, 10);
-    }
-    // Parse booleans
-    else if (value === "true") {
+    } else if (value === "true") {
       result[key] = true;
     } else if (value === "false") {
       result[key] = false;
-    }
-    // Parse quoted strings
-    else if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+    } else if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
       result[key] = value.slice(1, -1);
-    }
-    // Plain string
-    else {
+    } else {
       result[key] = value;
     }
   }
@@ -86,33 +78,39 @@ function parseFrontmatter(content: string): Record<string, any> {
   return result;
 }
 
-function extractTitle(content: string, frontmatter: Record<string, any>): string {
-  if (frontmatter.title) return String(frontmatter.title);
+function extractTitle(content: string, fm: Record<string, any>): string {
+  if (fm.title) return String(fm.title);
   const match = content.match(/^#\s+(.+)$/m);
   return match ? match[1].trim() : "Untitled";
 }
 
 function extractSummary(content: string, title: string): string {
-  const withoutFm = content.replace(/^---\s*\n[\s\S]*?\n---\s*\n/, "");
-  const lines = withoutFm.split("\n");
-  let started = false;
-  const parts: string[] = [];
+  let text = content.replace(/^---\s*\n[\s\S]*?\n---\s*\n/, "");
+  const lines = text.split("\n");
+  let start = 0;
+  for (let i = 0; i < lines.length; i++) {
+    const t = lines[i].trim();
+    if (!t || t.startsWith("#")) { start = i; break; }
+    if (findColon(t) !== -1) { start = i + 1; continue; }
+    start = i; break;
+  }
+  text = lines.slice(start).join("\n");
 
-  for (const line of lines) {
+  const parts: string[] = [];
+  for (const line of text.split("\n")) {
     if (line.startsWith("# ")) {
-      if (started) break;
-      started = true;
+      if (parts.length > 0) break;
       continue;
     }
-    if (started && line.trim() && !line.startsWith("#") && !line.startsWith(">") && !line.startsWith("![[")) {
-      const text = line
-        .replace(/!\[([^\]]*)\]\([^)]+\)/g, "")
-        .replace(/\[([^\]]*)\]\([^)]+\)/g, "$1")
+    if (line.trim() && !line.startsWith(">") && !line.startsWith("![")) {
+      const cleaned = line
+        .replace(/!\[([^\]]*)]\([^)]+\)/g, "")
+        .replace(/\[([^\]]*)]\([^)]+\)/g, "$1")
         .replace(/\*\*/g, "")
         .replace(/[`{}_*#]/g, "")
         .trim();
-      if (text) parts.push(text);
-      if (parts.length >= 3) break;
+      if (cleaned) parts.push(cleaned);
+      if (parts.length >= 2) break;
     }
   }
 
@@ -120,25 +118,19 @@ function extractSummary(content: string, title: string): string {
   return summary.length > 30 ? summary.slice(0, 30) + "…" : (summary || title);
 }
 
-/**
- * Normalize date string: accepts 2026/06/06, 2026-06-06, 2026.06.06 etc.
- * Returns ISO string for formatting.
- */
 function normalizeDate(raw: string): string {
   if (!raw) return "";
   raw = raw.trim();
   if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
-  // 2026/06/06 or 2026.06.06
-  const parts = raw.split(/[\.\//]+/);
-  if (parts.length >= 3 && /^\d{4}$/.test(parts[0]) && /^\d{1,2}$/.test(parts[1]) && /^\d{1,2}$/.test(parts[2])) {
-    return `${parts[0]}-${parts[1].padStart(2, "0")}-${parts[2].padStart(2, "0")}`;
+  const p = raw.split(/[.\/]+/);
+  if (p.length >= 3 && /^\d{4}$/.test(p[0])) {
+    return `${p[0]}-${p[1].padStart(2, "0")}-${p[2].padStart(2, "0")}`;
   }
   return "";
 }
 
 export function getDocsList(): DocFile[] {
   if (!fs.existsSync(DOCS_DIR)) return [];
-
   const files = fs.readdirSync(DOCS_DIR).filter((f) => f.endsWith(".md"));
 
   return files.map((filename, index) => {
@@ -151,19 +143,13 @@ export function getDocsList(): DocFile[] {
     const summary = extractSummary(content, title);
     const tags = Array.isArray(fm.tags) ? fm.tags.map(String) : [];
     const readTime = typeof fm.readTime === "number" ? fm.readTime : 0;
-    // Accept time:, date:, published: keys
     const rawDate = fm.time || fm.date || fm.published || "";
     const date = normalizeDate(String(rawDate));
-
     return { slug, urlSlug, filename, title, summary, tags, readTime, date, order: index };
   });
 }
 
-/**
- * Get raw markdown content (with frontmatter stripped for rendering).
- */
 export function getDocContent(slug: string): string | null {
-  // Try matching by urlSlug first, then by slug (filename without .md)
   const list = getDocsList();
   const doc = list.find((d) => d.urlSlug === slug || d.slug === slug);
   if (!doc) return null;
@@ -171,36 +157,26 @@ export function getDocContent(slug: string): string | null {
   if (!fs.existsSync(filePath)) return null;
   const content = fs.readFileSync(filePath, "utf-8");
 
-  // Strip frontmatter: try --- delimited first, then fallback (key: value at top)
   let stripped = content.replace(/^---\s*\n[\s\S]*?\n---\s*\n/, "");
   if (stripped === content) {
     const lines = content.split("\n");
     let startIdx = 0;
     for (let i = 0; i < lines.length; i++) {
-      const trimmed = lines[i].trim();
-      if (!trimmed) break;
-      if (trimmed.startsWith("#")) break;
-      const ci = trimmed.indexOf(":");
-      if (ci === -1) break;
-      const key = trimmed.slice(0, ci).trim().toLowerCase();
-      if (["title", "tags", "readtime", "time", "date", "published"].includes(key)) {
-        startIdx = i + 1;
-      } else {
-        break;
-      }
+      const t = lines[i].trim();
+      if (!t || t.startsWith("#")) break;
+      if (findColon(t) !== -1) { startIdx = i + 1; continue; }
+      break;
     }
     stripped = lines.slice(startIdx).join("\n");
   }
 
-  // Remove first-level heading (# title) — page title already shows it
   stripped = stripped.trimStart();
-  const firstLine = stripped.split('\n')[0];
-  if (firstLine && /^#\s+.+$/.test(firstLine)) {
-    stripped = stripped.slice(firstLine.length).replace(/^(\r?\n)/, '');
+  const firstLine = stripped.split("\n")[0];
+  if (firstLine && /^#.+$/.test(firstLine)) {
+    stripped = stripped.slice(firstLine.length).replace(/^\r?\n/, "");
   }
 
-  // Normalize image paths: ../img/ → /img/
-  stripped = stripped.replace(/!\[([^\]]*)\]\(\.\.\/img\//g, '![$1](/img/');
+  stripped = stripped.replace(/!\[([^\]]*)]\(\.\.\/img\//g, "![$1](/img/");
 
   return stripped;
 }
