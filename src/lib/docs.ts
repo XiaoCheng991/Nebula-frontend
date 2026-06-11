@@ -142,7 +142,7 @@ export function getDocsList(): DocFile[] {
     const title = extractTitle(content, fm);
     const summary = extractSummary(content, title);
     const tags = Array.isArray(fm.tags) ? fm.tags.map(String) : [];
-    const readTime = typeof fm.readTime === "number" ? fm.readTime : 0;
+    const readTime = fm.readtime !== undefined ? Number(fm.readtime) : 0;
     const rawDate = fm.time || fm.date || fm.published || "";
     const date = normalizeDate(String(rawDate));
     return { slug, urlSlug, filename, title, summary, tags, readTime, date, order: index };

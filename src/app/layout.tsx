@@ -18,24 +18,27 @@ export default function RootLayout({
         <title></title>
       </head>
       <body className="bg-background text-foreground scanlines grid-bg min-h-screen">
+        {/* Scroll progress bar */}
+        <div id="scroll-progress" />
+
         <header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-sm">
           <nav className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
             <a
               href="/"
-              className="text-primary font-mono text-lg tracking-wider font-bold text-glow glitch-hover"
+              className="text-primary font-mono text-lg tracking-wider font-bold text-glow nav-glow"
             >
               {'Kyon'}
             </a>
             <div className="flex items-center gap-6 text-sm font-mono">
               <a
                 href="/"
-                className="text-foreground/70 hover:text-primary transition-colors hover:text-glow glitch-hover"
+                className="text-foreground/70 hover:text-primary transition-colors nav-glow"
               >
                 [ blog ]
               </a>
               <a
                 href="/about"
-                className="text-foreground/70 hover:text-primary transition-colors hover:text-glow glitch-hover"
+                className="text-foreground/70 hover:text-primary transition-colors nav-glow"
               >
                 [ about ]
               </a>

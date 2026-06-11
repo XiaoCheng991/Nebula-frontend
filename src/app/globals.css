@@ -98,36 +98,6 @@
       linear-gradient(90deg, hsl(var(--primary) / 0.03) 1px, transparent 1px);
     background-size: 40px 40px;
   }
-  .grid-bg-fine {
-    background-image:
-      linear-gradient(hsl(var(--primary) / 0.02) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--primary) / 0.02) 1px, transparent 1px);
-    background-size: 20px 20px;
-  }
-
-  /* Glitch animation */
-  @keyframes glitch {
-    0% { transform: translate(0); }
-    20% { transform: translate(-2px, 2px); }
-    40% { transform: translate(-2px, -2px); }
-    60% { transform: translate(2px, 2px); }
-    80% { transform: translate(2px, -2px); }
-    100% { transform: translate(0); }
-  }
-
-  @keyframes glitch-subtle {
-    0% { transform: translate(0); filter: hue-rotate(0deg); }
-    2% { transform: translate(-1px, 1px); filter: hue-rotate(90deg); }
-    4% { transform: translate(-1px, -1px); filter: hue-rotate(180deg); }
-    6% { transform: translate(1px, 1px); filter: hue-rotate(270deg); }
-    8% { transform: translate(1px, -1px); filter: hue-rotate(360deg); }
-    10% { transform: translate(0); filter: hue-rotate(0deg); }
-    100% { transform: translate(0); filter: hue-rotate(0deg); }
-  }
-
-  .glitch-hover:hover {
-    animation: glitch-subtle 0.3s ease-in-out;
-  }
 
   /* Blink cursor */
   @keyframes blink {
@@ -141,32 +111,45 @@
     margin-left: 2px;
   }
 
-  /* Neon pulse */
-  @keyframes neon-pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
+  /* === CARD ENTER ANIMATION — terminal-style fade-in with border glow === */
+  @keyframes card-rise {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+      border-color: hsl(var(--primary) / 0.05);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+      border-color: hsl(var(--border) / 0.8);
+    }
   }
-  .neon-pulse {
-    animation: neon-pulse 2s ease-in-out infinite;
+  .card-rise {
+    animation: card-rise 0.45s ease-out both;
   }
 
-  /* Slide in */
-  @keyframes slide-in-left {
-    from { transform: translateX(-20px); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-  }
-  .slide-in-left {
-    animation: slide-in-left 0.3s ease-out;
+  /* === SCROLL PROGRESS BAR === */
+  #scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg,
+      hsl(var(--primary)),
+      hsl(var(--secondary)),
+      hsl(var(--accent))
+    );
+    z-index: 10000;
+    box-shadow: 0 0 8px hsl(var(--primary) / 0.6);
+    transition: width 0.1s linear;
   }
 
-  /* Terminal typing effect */
-  @keyframes typing {
-    from { width: 0; }
-    to { width: 100%; }
+  /* Hover glow for nav */
+  .nav-glow {
+    transition: text-shadow 0.2s;
   }
-  .typewriter {
-    overflow: hidden;
-    white-space: nowrap;
-    animation: typing 2s steps(40, end);
+  .nav-glow:hover {
+    text-shadow: 0 0 10px hsl(var(--primary) / 0.5), 0 0 20px hsl(var(--primary) / 0.3);
   }
 }

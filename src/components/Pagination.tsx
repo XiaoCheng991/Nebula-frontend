@@ -17,32 +17,39 @@ export default function Pagination({
 
   return (
     <div className="flex items-center justify-between mt-8">
-      <div className="flex items-center gap-2 text-xs font-mono text-foreground/40">
+      {/* Page size selector — pill style */}
+      <div className="flex items-center gap-2 text-xs font-mono text-foreground/50">
         <span>每页</span>
-        <select
-          value={pageSize}
-          onChange={(e) => {
-            window.location.href = `/?page=1&size=${e.target.value}`;
-          }}
-          className="bg-background border border-border text-foreground/60 px-2 py-1 text-xs font-mono cursor-pointer hover:border-primary/50 focus:border-primary focus:outline-none transition-colors"
-        >
+        <div className="flex items-center gap-px border border-border overflow-hidden">
           {PAGE_SIZES.map((sz) => (
-            <option key={sz} value={sz}>{sz}</option>
+            <Link
+              key={sz}
+              href={`/?page=1&size=${sz}`}
+              className={`px-2.5 py-1 hover:bg-primary/10 transition-colors ${
+                pageSize === sz
+                  ? "bg-primary/10 text-primary"
+                  : "text-foreground/40 hover:text-foreground/60"
+              }`}
+            >
+              {sz}
+            </Link>
           ))}
-        </select>
-        <span>条</span>
+        </div>
       </div>
 
+      {/* Navigation */}
       <div className="flex items-center gap-2 text-xs font-mono">
         {safePage > 1 ? (
           <Link
             href={`/?page=${safePage - 1}&size=${pageSize}`}
-            className="px-3 py-1.5 border border-border hover:border-primary/50 text-foreground/60 hover:text-primary transition-colors"
+            className="px-3 py-1.5 border border-border hover:border-primary/40 text-foreground/60 hover:text-primary transition-colors"
           >
             ← prev
           </Link>
         ) : (
-          <span className="px-3 py-1.5 border border-border text-foreground/20 cursor-default">← prev</span>
+          <span className="px-3 py-1.5 border border-border/40 text-foreground/20 cursor-default">
+            ← prev
+          </span>
         )}
         <span className="text-foreground/40 px-2">
           {safePage} / {totalPages}
@@ -50,12 +57,14 @@ export default function Pagination({
         {safePage < totalPages ? (
           <Link
             href={`/?page=${safePage + 1}&size=${pageSize}`}
-            className="px-3 py-1.5 border border-border hover:border-primary/50 text-foreground/60 hover:text-primary transition-colors"
+            className="px-3 py-1.5 border border-border hover:border-primary/40 text-foreground/60 hover:text-primary transition-colors"
           >
             next →
           </Link>
         ) : (
-          <span className="px-3 py-1.5 border border-border text-foreground/20 cursor-default">next →</span>
+          <span className="px-3 py-1.5 border border-border/40 text-foreground/20 cursor-default">
+            next →
+          </span>
         )}
       </div>
     </div>
