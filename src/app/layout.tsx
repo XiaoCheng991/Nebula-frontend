@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import BackToTop from "@/components/BackToTop";
 
 export const metadata: Metadata = {
   title: "Kyon // blog",
@@ -37,6 +38,12 @@ export default function RootLayout({
                 [ blog ]
               </a>
               <a
+                href="/tags"
+                className="text-foreground/70 hover:text-primary transition-colors nav-glow"
+              >
+                [ tags ]
+              </a>
+              <a
                 href="/about"
                 className="text-foreground/70 hover:text-primary transition-colors nav-glow"
               >
@@ -54,6 +61,9 @@ export default function RootLayout({
             <span>powered by Next.js</span>
           </div>
         </footer>
+
+        {/* Floating back-to-top button — always visible */}
+        <BackToTop />
       </body>
     </html>
   );

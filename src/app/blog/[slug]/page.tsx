@@ -3,15 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPostBySlug, getPostSlugs } from "@/lib/posts";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
-
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString("zh-CN", {
-    year: "numeric",
-    month: "long",
-    day: "2-digit",
-  });
-}
+import ReadingBreath from "@/components/ReadingBreath";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -48,10 +40,13 @@ export default async function PostPage({ params }: Props) {
         <span>{`[ back to index ]`}</span>
       </Link>
 
-      <div className="flex items-center gap-2 text-xs font-mono text-primary/50 mb-3">
-        <span>{`// ${post.date}`}</span>
-        <span className="text-foreground/20">|</span>
-        <span>{`// ${post.readTime} min read`}</span>
+      <div className="flex items-center gap-2 mb-8">
+        <ReadingBreath />
+        <div className="flex items-center gap-2 text-xs font-mono text-primary/50">
+          <span>{`// ${post.date}`}</span>
+          <span className="text-foreground/20">|</span>
+          <span>{`// ${post.readTime} min read`}</span>
+        </div>
       </div>
 
       <h1 className="text-2xl font-bold tracking-tight mb-3 text-foreground text-glow">

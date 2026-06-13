@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getDocContent, getDocMeta, getDocsList } from "@/lib/docs";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
+import ReadingBreath from "@/components/ReadingBreath";
 
 type Props = {
   params: Promise<{ docSlug: string }>;
@@ -41,22 +42,25 @@ export default async function DocPage({ params }: Props) {
         <span>{`[ back to index ]`}</span>
       </Link>
 
-      <div className="flex items-center gap-2 text-xs font-mono text-primary/50 mb-3">
-        <span className="px-1.5 py-0.5 border border-secondary/40 text-secondary/70 text-[10px]">
-          DOCS
-        </span>
-        {meta.date && (
-          <>
-            <span className="text-foreground/20">|</span>
-            <span>{meta.date}</span>
-          </>
-        )}
-        {meta.readTime > 0 && (
-          <>
-            <span className="text-foreground/20">|</span>
-            <span>{meta.readTime} min read</span>
-          </>
-        )}
+      <div className="flex items-center gap-2 mb-8">
+        <ReadingBreath />
+        <div className="flex items-center gap-2 text-xs font-mono text-primary/50">
+          <span className="px-1.5 py-0.5 border border-secondary/40 text-secondary/70 text-[10px]">
+            DOCS
+          </span>
+          {meta.date && (
+            <>
+              <span className="text-foreground/20">|</span>
+              <span>{meta.date}</span>
+            </>
+          )}
+          {meta.readTime > 0 && (
+            <>
+              <span className="text-foreground/20">|</span>
+              <span>{meta.readTime} min read</span>
+            </>
+          )}
+        </div>
       </div>
 
       <h1 className="text-2xl font-bold tracking-tight mb-3 text-foreground text-glow">

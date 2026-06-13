@@ -1,7 +1,7 @@
 "use client";
 
 import MarkdownIt from "markdown-it";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo } from "react";
 
 interface MarkdownRendererProps {
   content: string;
@@ -179,74 +179,6 @@ const cssContent = `
 
 /* HR */
 .md-render hr { border-color: hsl(var(--border)); margin: 3rem 0; }
-
-/* Scroll to top — data stream */
-.md-render .scroll-top-btn {
-  position: fixed;
-  bottom: 2.5rem;
-  right: 2.5rem;
-  width: 44px;
-  height: 44px;
-  background: hsl(var(--primary) / 0.06);
-  border: 1px solid hsl(var(--primary) / 0.3);
-  cursor: pointer;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(16px);
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  z-index: 100;
-  padding: 0;
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  backdrop-filter: blur(4px);
-}
-.md-render .scroll-top-btn.visible {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-/* Three data-stream bars — bright fluorescent */
-.md-render .scroll-top-btn .bar {
-  display: block;
-  width: 3px;
-  border-radius: 1px;
-  background: hsl(var(--primary) / 0.7);
-  box-shadow: 0 0 4px hsl(var(--primary) / 0.3);
-  transition: all 0.3s ease;
-  flex-shrink: 0;
-}
-.md-render .scroll-top-btn .bar:nth-child(1) { height: 10px; animation: data-pulse 1.2s ease-in-out infinite 0s; }
-.md-render .scroll-top-btn .bar:nth-child(2) { height: 16px; animation: data-pulse 1.2s ease-in-out infinite 0.2s; }
-.md-render .scroll-top-btn .bar:nth-child(3) { height: 12px; animation: data-pulse 1.2s ease-in-out infinite 0.4s; }
-@keyframes data-pulse {
-  0%, 100% { transform: scaleY(1); opacity: 0.7; }
-  50% { transform: scaleY(1.8); opacity: 1; }
-}
-/* Hover: full fluorescent burst */
-.md-render .scroll-top-btn:hover {
-  border-color: hsl(var(--primary));
-  background: hsl(var(--primary) / 0.12);
-  box-shadow:
-    0 0 16px hsl(var(--primary) / 0.3),
-    0 0 40px hsl(var(--primary) / 0.12),
-    inset 0 0 16px hsl(var(--primary) / 0.06);
-  transform: translateY(-3px);
-}
-.md-render .scroll-top-btn:hover .bar {
-  background: hsl(var(--primary));
-  box-shadow: 0 0 8px hsl(var(--primary) / 0.8), 0 0 16px hsl(var(--primary) / 0.4);
-}
-.md-render .scroll-top-btn:hover .bar:nth-child(1) { height: 14px; }
-.md-render .scroll-top-btn:hover .bar:nth-child(2) { height: 22px; }
-.md-render .scroll-top-btn:hover .bar:nth-child(3) { height: 16px; }
-.md-render .scroll-top-btn:active {
-  transform: translateY(0) scale(0.88);
-  box-shadow: 0 0 24px hsl(var(--primary) / 0.5);
-}
 `;
 
 function injectStyle() {
@@ -263,14 +195,6 @@ function injectStyle() {
 /* ------------------------------------------------------------------ */
 
 export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
-  const [showScroll, setShowScroll] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setShowScroll(window.scrollY > 300);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   const html = useMemo(() => {
     const md = preprocessMarkdown(content);
     const wrapped = wrapSections(md);
@@ -287,15 +211,6 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
   return (
     <div className="md-render relative">
       <div dangerouslySetInnerHTML={{ __html: html }} />
-      <button
-        className={`scroll-top-btn ${showScroll ? "visible" : ""}`}
-        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        title="回到顶部"
-      >
-        <span className="bar" />
-        <span className="bar" />
-        <span className="bar" />
-      </button>
     </div>
   );
 }
