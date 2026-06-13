@@ -37,9 +37,12 @@ function shortOf(name: string): string {
   const trimmed = name.trim();
   if (!trimmed) return "??";
   const ascii = trimmed.replace(/[^\x00-\x7F]/g, "");
-  if (ascii.length >= 2) return ascii.slice(0, 2).toLowerCase();
-  if (trimmed.length === 1) return trimmed + trimmed;
-  return trimmed.slice(0, 2);
+  if (ascii.length >= 2) return ascii.slice(0, 2).toUpperCase();
+  if (ascii.length === 1) return ascii.toUpperCase() + ascii.toUpperCase();
+  // CJK-only tag: take the first 2 code points verbatim.
+  const chars = Array.from(trimmed);
+  if (chars.length === 1) return chars[0] + chars[0];
+  return chars.slice(0, 2).join("");
 }
 
 // ▏▎▍▇█ - six-step density glyph. We use it to render a
@@ -223,7 +226,6 @@ export default function TagCloud({ tags }: TagCloudProps) {
                         className={[
                           "font-mono tracking-wide flex-1 truncate transition-colors text-[14px] leading-[1.4]",
                           tagColorClass,
-                          "group-hover:text-glow",
                         ].join(" ")}
                         style={{ paddingTop: "1px" }}
                       >
