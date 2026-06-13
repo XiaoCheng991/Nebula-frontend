@@ -6,7 +6,7 @@ export type { TagStat };
 
 /**
  * Aggregate tag counts from both posts (static) and docs (markdown).
- * Server-only — uses fs via docs.ts.
+ * Server-only - uses fs via docs.ts.
  */
 export function getAllTags(): TagStat[] {
   const counts: Record<string, number> = {};
@@ -25,5 +25,8 @@ export function getAllTags(): TagStat[] {
 
   return Object.entries(counts)
     .map(([name, count]) => ({ name, count }))
+    // Pure count desc, ties broken by pinyin asc. The page component
+    // marks the top-N tags visually - ordering decides which tags get
+    // promoted, not a fixed count >= threshold.
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 }

@@ -1,5 +1,5 @@
 title: Agent项目记录-01
-tags: [技术、项目、record]
+tags: [技术、项目、Record]
 readTime: 15
 time: 2026/06/13
 
