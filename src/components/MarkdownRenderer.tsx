@@ -1,7 +1,7 @@
 "use client";
 
 import MarkdownIt from "markdown-it";
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useMemo, useState, useEffect } from "react";
 
 interface MarkdownRendererProps {
   content: string;
@@ -144,6 +144,29 @@ const cssContent = `
   background: hsl(var(--muted)); padding: 0.15rem 0.4rem;
   font-size: 0.8rem; font-family: 'Space Mono', 'Fira Code', monospace;
   color: hsl(var(--secondary));
+}
+
+/* Code blocks — wrap long lines, no horizontal overflow */
+.md-render pre {
+  background: hsl(var(--muted) / 0.6);
+  border: 1px solid hsl(var(--border));
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+  overflow-x: auto;
+  font-family: 'Space Mono', 'Fira Code', 'Courier New', monospace;
+  font-size: 0.82rem;
+  line-height: 1.65;
+  color: hsl(var(--foreground) / 0.85);
+  border-radius: 4px;
+}
+.md-render pre code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 /* Links */

@@ -50,3 +50,5 @@ next-env.d.ts
 src/app/admin/logs/
 .gstack/
 .codegraph*
+.planning/*
+.planning*
