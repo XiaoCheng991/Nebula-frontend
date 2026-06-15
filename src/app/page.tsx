@@ -25,12 +25,19 @@ export default async function BlogPage({
     readTime: doc.readTime || 0,
     isDoc: true,
     href: `/blog/docs/${doc.urlSlug}`,
+    cover: doc.cover,
   }));
 
   const postItems = posts.map((p) => ({
-    ...p,
+    slug: p.slug,
+    title: p.title,
+    summary: p.summary,
+    date: p.date,
+    tags: p.tags,
+    readTime: p.readTime,
     isDoc: false,
     href: `/blog/${p.slug}`,
+    cover: p.cover,
   }));
 
   const allItems = [...docItems, ...postItems].sort((a, b) => {

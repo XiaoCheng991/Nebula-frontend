@@ -6,6 +6,7 @@ export interface Post {
   tags: string[];
   readTime: number;
   content: string;
+  cover?: string;
 }
 
 const BACKTICK = '`';

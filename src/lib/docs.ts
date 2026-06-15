@@ -13,6 +13,7 @@ export interface DocFile {
   readTime: number;
   date: string;
   order: number;
+  cover?: string;
 }
 
 /** Find colon index, supporting both English : and Chinese ： */
@@ -129,6 +130,11 @@ function normalizeDate(raw: string): string {
   return "";
 }
 
+/** Convert relative image path (../img/foo.jpg) to public URL (/img/foo.jpg) */
+function resolveCoverPath(rel: string): string {
+  return rel.replace(/^\.\.\//, "/");
+}
+
 export function getDocsList(): DocFile[] {
   if (!fs.existsSync(DOCS_DIR)) return [];
   const files = fs.readdirSync(DOCS_DIR).filter((f) => f.endsWith(".md"));
@@ -145,7 +151,12 @@ export function getDocsList(): DocFile[] {
     const readTime = fm.readtime !== undefined ? Number(fm.readtime) : 0;
     const rawDate = fm.time || fm.date || fm.published || "";
     const date = normalizeDate(String(rawDate));
-    return { slug, urlSlug, filename, title, summary, tags, readTime, date, order: index };
+
+    // Extract first image from markdown content
+    const imgMatch = content.match(/!\[[^\]]*]\(([^)]+)\)/);
+    const cover = imgMatch ? resolveCoverPath(imgMatch[1]) : undefined;
+
+    return { slug, urlSlug, filename, title, summary, tags, readTime, date, order: index, cover };
   });
 }
 

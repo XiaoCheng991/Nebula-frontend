@@ -15,6 +15,7 @@ interface Item {
   readTime: number;
   isDoc: boolean;
   href: string;
+  cover?: string;
 }
 
 interface PageProps {
@@ -45,6 +46,7 @@ export default async function TagPostsPage({ params }: PageProps) {
         readTime: post.readTime || 0,
         isDoc: false,
         href: `/blog/${post.slug}`,
+        cover: post.cover,
       });
     }
   }
@@ -60,6 +62,7 @@ export default async function TagPostsPage({ params }: PageProps) {
         readTime: doc.readTime || 0,
         isDoc: true,
         href: `/blog/docs/${doc.urlSlug}`,
+        cover: doc.cover,
       });
     }
   }
