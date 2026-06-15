@@ -1,9 +1,7 @@
 import Link from "next/link";
 import { posts } from "@/lib/posts";
 import { getDocsList } from "@/lib/docs";
-import { quotes } from "@/data/quotes";
 import BlogClient from "@/components/blog-client";
-import RandomQuote from "@/components/RandomQuote";
 
 export default async function BlogPage({
   searchParams,
@@ -107,14 +105,7 @@ export default async function BlogPage({
         </p>
       </section>
 
-      {/* Random quote — inline terminal-style one-liner, no card */}
-      <section className="mt-10 mb-2">
-        <RandomQuote
-          initialQuote={
-            quotes[Math.floor(Math.random() * quotes.length)]
-          }
-        />
-      </section>
+      {/* RandomQuote moved out to layout.tsx - fixed bottom-right, dock-style. */}
     </div>
   );
 }

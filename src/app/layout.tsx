@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import BackToTop from "@/components/BackToTop";
+import RandomQuote from "@/components/RandomQuote";
 
 export const metadata: Metadata = {
   title: "Kyon // blog",
@@ -62,8 +63,11 @@ export default function RootLayout({
           </div>
         </footer>
 
-        {/* Floating back-to-top button — always visible */}
+        {/* Floating back-to-top button - always visible */}
         <BackToTop />
+
+        {/* Floating violet quote chip - docks left of BackToTop */}
+        <RandomQuote />
       </body>
     </html>
   );
