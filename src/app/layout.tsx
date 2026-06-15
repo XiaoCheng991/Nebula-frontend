@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import BackToTop from "@/components/BackToTop";
-import RandomQuote from "@/components/RandomQuote";
+import MusicPlayer from "@/components/MusicPlayer";
 
 export const metadata: Metadata = {
   title: "Kyon // blog",
@@ -31,7 +31,7 @@ export default function RootLayout({
             >
               {'Kyon'}
             </a>
-            <div className="flex items-center gap-6 text-sm font-mono">
+            <div className="flex items-center gap-5 text-sm font-mono">
               <a
                 href="/"
                 className="text-foreground/70 hover:text-primary transition-colors nav-glow"
@@ -50,10 +50,12 @@ export default function RootLayout({
               >
                 [ about ]
               </a>
+              {/* Music trigger - in nav, opens a popover beneath it */}
+              <MusicPlayer />
             </div>
           </nav>
         </header>
-        <main className="pt-14">
+        <main className="pt-14 pb-24">
           {children}
         </main>
         <footer className="border-t border-border mt-20">
@@ -65,9 +67,6 @@ export default function RootLayout({
 
         {/* Floating back-to-top button - always visible */}
         <BackToTop />
-
-        {/* Floating violet quote chip - docks left of BackToTop */}
-        <RandomQuote />
       </body>
     </html>
   );

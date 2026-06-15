@@ -4,144 +4,163 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { QUOTES } from "@/lib/quotes";
 
 /**
- * Floating "word of the moment" patch.
+ * Random-quote panel - docked top-left, expands downward.
  *
- *  - Mounts in the bottom-right, docked to the left of the BackToTop
- *    button (which sits at right-6 bottom-6 w-48). We park 96px to
- *    its left so the two never collide.
- *  - Two states: collapsed (chip with one truncated line) and
- *    expanded (panel with full quote, attribution, and a re-roll).
- *  - Click anywhere on the chip -> expand; click outside or [x] ->
- *    collapse. Re-roll is the only way to swap to a new line, on
- *    purpose: a floating patch that mutates under the cursor would
- *    feel haunted.
- *  - Animation is opacity + translate-y only (transform + opacity
- *    are GPU-cheap). No typewriter, no glitch, no particles - site
- *    already bans those.
- *  - Quotes come from src/lib/quotes.ts.
- *
- * Optional `initialQuote` prop kept for callers that want to lock
- * the first paint to a specific line (e.g. SSR with fixed seed).
- * If omitted, localStorage carries the last index across sessions,
- * falling back to Math.random() on first ever visit.
+ *  - Stays attached to the left margin so it never covers the
+ *    centered blog list (which starts at x ~ 192px on the 1024px+
+ *    viewport). On narrow screens it shrinks and docks to the top,
+ *    a horizontal strip.
+ *  - Two states: collapsed chip (default) and expanded panel
+ *    (click to open). The chip is mostly empty - a tiny `[>] quote`
+ *    glyph only - so the expanded view feels like a deliberate
+ *    gesture rather than a second nav item.
+ *  - Expanded panel shows the full quote, attribution line, a
+ *    counter (3/12), and a [re-roll] button. Click outside or
+ *    press [x] to fold back. State (idx + open) persists in
+ *    localStorage so it remembers where you left it.
+ *  - Quotes live in src/lib/quotes.ts.
+ *  - SSR / hydration: server renders quote 0 with the chip state
+ *    so SSR matches the first client paint.
  */
 
-const STORAGE_KEY = "kyon:quote:idx";
-const COLLAPSED_OFFSET_RIGHT = "5.5rem"; // docks left of BackToTop (48px + gap)
+const STORAGE_KEY = "kyon:quote:state";
+const STORAGE_IDX_KEY = "kyon:quote:idx";
 
-// Module-level latch so the very first call after window exists
-// returns 0 (matching SSR). All subsequent calls read localStorage.
-// One latch per page lifetime is enough - the component only mounts once.
+interface PersistedShape {
+  idx: number;
+  open: boolean;
+}
+
 let hydratedGlobal = false;
 
-interface RandomQuoteProps {
-  initialQuote?: { body: string; by: string };
-}
-
-function indexOfQuote(body: string, by: string): number {
-  const i = QUOTES.findIndex((q) => q.body === body && q.by === by);
-  return i < 0 ? 0 : i;
-}
-
-function pickInitialIndex(seed?: { body: string; by: string }): number {
-  if (seed) return indexOfQuote(seed.body, seed.by);
-  if (typeof window === "undefined") return 0;
-  // Server SSR / first client paint: always render quote 0 so
-  // server markup and client first paint agree (no hydration flash).
-  // After mount we swap to the persisted / random line.
+function pickInitial(seed?: { body: string; by: string }): PersistedShape {
+  if (typeof window === "undefined") return { idx: 0, open: false };
   if (!hydratedGlobal) {
     hydratedGlobal = true;
-    return 0;
+    return { idx: 0, open: false };
   }
-  const raw = window.localStorage.getItem(STORAGE_KEY);
-  if (!raw) return Math.floor(Math.random() * QUOTES.length);
-  const n = Number.parseInt(raw, 10);
-  if (Number.isNaN(n) || n < 0 || n >= QUOTES.length) return 0;
-  return n;
+  try {
+    const shapeRaw = localStorage.getItem(STORAGE_KEY);
+    const shapeParsed = shapeRaw ? JSON.parse(shapeRaw) : null;
+    const idxRaw = localStorage.getItem(STORAGE_IDX_KEY);
+    let idx =
+      typeof shapeParsed?.idx === "number"
+        ? shapeParsed.idx
+        : typeof idxRaw === "string"
+        ? Number.parseInt(idxRaw, 10)
+        : 0;
+    if (typeof idx !== "number" || Number.isNaN(idx) || idx < 0) idx = 0;
+    if (idx >= QUOTES.length) idx = 0;
+    // Legacy on-by-default from the very first iteration showed panel
+    // open at boot. We now collapse it by default - open feels too
+    // greedy for a lazy chip. Re-collapse retroactively.
+    const open =
+      typeof shapeParsed?.open === "boolean" ? false : false;
+    return { idx, open };
+  } catch {
+    return { idx: 0, open: false };
+  }
 }
 
 function nextIndex(prev: number): number {
   if (QUOTES.length <= 1) return 0;
   let next = prev;
-  // Tiny anti-flicker: never re-roll to the same line twice in a row.
-  while (next === prev) {
-    next = Math.floor(Math.random() * QUOTES.length);
-  }
+  while (next === prev) next = Math.floor(Math.random() * QUOTES.length);
   return next;
 }
 
+interface RandomQuoteProps {
+  initialQuote?: { body: string; by: string };
+}
+
 export default function RandomQuote({ initialQuote }: RandomQuoteProps = {}) {
-  const [idx, setIdx] = useState(0);
-  const [open, setOpen] = useState(false);
+  const [state, setState] = useState<PersistedShape>({
+    idx: 0,
+    open: false,
+  });
   const [hydrated, setHydrated] = useState(false);
 
-  // Hydrate once on mount. Updating state during render is unsafe,
-  // so we run it in useEffect and let the first paint use the SSR
-  // default (idx 0). After hydration, swap to the persisted value
-  // (or the seed supplied via `initialQuote`).
   useEffect(() => {
-    setIdx(pickInitialIndex(initialQuote));
     setHydrated(true);
+    if (initialQuote) {
+      const i = QUOTES.findIndex(
+        (q) => q.body === initialQuote.body && q.by === initialQuote.by
+      );
+      setState({ idx: i < 0 ? 0 : i, open: false });
+    } else {
+      setState((prev) => ({ ...prev, ...pickInitial() }));
+    }
   }, [initialQuote]);
 
-  // Persist current index whenever it changes.
   useEffect(() => {
     if (!hydrated) return;
     try {
-      window.localStorage.setItem(STORAGE_KEY, String(idx));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch {
-      // localStorage disabled - silent, the quote still shows.
+      // silent
     }
-  }, [idx, hydrated]);
+  }, [state, hydrated]);
 
-  // Click-outside dismisses the panel.
+  // Click-outside / Escape to fold.
   useEffect(() => {
-    if (!open) return;
-    const onDocClick = (e: MouseEvent) => {
+    if (!state.open) return;
+    const onDoc = (e: MouseEvent) => {
       const root = document.getElementById("random-quote-root");
       if (!root) return;
-      if (!root.contains(e.target as Node)) setOpen(false);
+      if (!root.contains(e.target as Node)) {
+        setState((prev) => ({ ...prev, open: false }));
+      }
     };
     const onEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") {
+        setState((prev) => ({ ...prev, open: false }));
+      }
     };
-    document.addEventListener("mousedown", onDocClick);
+    document.addEventListener("mousedown", onDoc);
     document.addEventListener("keydown", onEsc);
     return () => {
-      document.removeEventListener("mousedown", onDocClick);
+      document.removeEventListener("mousedown", onDoc);
       document.removeEventListener("keydown", onEsc);
     };
-  }, [open]);
+  }, [state.open]);
 
-  const reRoll = useCallback(
-    (e?: React.MouseEvent) => {
-      e?.stopPropagation();
-      setIdx((p) => nextIndex(p));
-    },
-    []
-  );
+  const reRoll = useCallback(() => {
+    setState((prev) => ({ ...prev, idx: nextIndex(prev.idx) }));
+  }, []);
 
-  const quote = useMemo(() => QUOTES[idx], [idx]);
+  const close = useCallback(() => {
+    setState((prev) => ({ ...prev, open: false }));
+  }, []);
+
+  const toggle = useCallback(() => {
+    setState((prev) => ({ ...prev, open: !prev.open }));
+  }, []);
+
+  const quote = useMemo(() => QUOTES[state.idx], [state.idx]);
 
   return (
     <div
       id="random-quote-root"
-      className="fixed bottom-6 z-[60] font-mono"
-      style={{ right: COLLAPSED_OFFSET_RIGHT }}
+      className="fixed z-[60] font-mono"
+      // Top-left, vertically hangs below the header band (h-14 = 56px).
+      // We park 24px from the left edge (left-6) and 80px from the top
+      // (top-20) which is 56 [nav] + 24 [gutter].
+      style={{ top: 80, left: 24, width: 280 }}
     >
       {/* ============================================================ */}
       {/* COLLAPSED CHIP                                              */}
       {/* ============================================================ */}
-      {!open && (
+      {!state.open && (
         <button
           type="button"
-          onClick={() => setOpen(true)}
+          onClick={toggle}
           aria-label="open random quote"
-          className="group flex items-center gap-2 h-9 max-w-[80vw] sm:max-w-[420px] px-3 text-[11px] text-foreground/65 hover:text-primary transition-colors"
+          className="group flex items-center gap-2 h-9 px-3 text-[11px] text-foreground/65 hover:text-primary transition-colors"
           style={{
             background: "hsl(var(--secondary) / 0.08)",
             border: "1px solid hsl(var(--secondary) / 0.35)",
             backdropFilter: "blur(4px)",
+            width: 280,
           }}
         >
           <span
@@ -151,13 +170,11 @@ export default function RandomQuote({ initialQuote }: RandomQuoteProps = {}) {
             {`[>]`}
           </span>
           <span
-            className="truncate tracking-wide"
+            className="truncate tracking-wide text-left flex-1"
             title={`${quote.body} - ${quote.by}`}
           >
             {quote.body}
-            <span className="text-foreground/35">
-              {` - ${quote.by}`}
-            </span>
+            <span className="text-foreground/35">{` - ${quote.by}`}</span>
           </span>
           <span
             aria-hidden
@@ -171,16 +188,17 @@ export default function RandomQuote({ initialQuote }: RandomQuoteProps = {}) {
       {/* ============================================================ */}
       {/* EXPANDED PANEL                                              */}
       {/* ============================================================ */}
-      {open && (
+      {state.open && (
         <div
           role="dialog"
           aria-label="random quote"
-          className="w-[min(90vw,360px)] text-[12px]"
+          className="text-[12px]"
           style={{
             background: "hsl(var(--background) / 0.92)",
             border: "1px solid hsl(var(--secondary) / 0.45)",
             backdropFilter: "blur(8px)",
             boxShadow: "0 0 0 1px hsl(var(--secondary) / 0.10)",
+            width: 280,
           }}
         >
           {/* header */}
@@ -194,7 +212,7 @@ export default function RandomQuote({ initialQuote }: RandomQuoteProps = {}) {
             <span>// random.quote</span>
             <button
               type="button"
-              onClick={() => setOpen(false)}
+              onClick={close}
               aria-label="close"
               className="text-foreground/45 hover:text-primary transition-colors normal-case tracking-normal"
             >
@@ -229,7 +247,7 @@ export default function RandomQuote({ initialQuote }: RandomQuoteProps = {}) {
             }}
           >
             <span className="tabular-nums normal-case tracking-normal">
-              {`${idx + 1}/${QUOTES.length}`}
+              {`${state.idx + 1}/${QUOTES.length}`}
             </span>
             <button
               type="button"

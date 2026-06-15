@@ -22,10 +22,25 @@ export default function BackToTop() {
   const [pct, setPct] = useState(0);
 
   useEffect(() => {
-    const onScroll = () => setPct(getScrollPct());
+    let rafId: number | null = null;
+    let pending = false;
+    const onScroll = () => {
+      // Coalesce multiple scroll events into one state update per
+      // animation frame; otherwise setState storms make React batch
+      // and ring falls behind `pct` text by 60+ ms.
+      if (pending) return;
+      pending = true;
+      rafId = window.requestAnimationFrame(() => {
+        setPct(getScrollPct());
+        pending = false;
+      });
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (rafId) window.cancelAnimationFrame(rafId);
+    };
   }, []);
 
   const offset = C - (pct / 100) * C;
@@ -99,7 +114,7 @@ export default function BackToTop() {
           strokeDasharray={C}
           strokeDashoffset={offset}
           style={{
-            transition: "stroke-dashoffset 0.15s linear",
+            transition: "none",
             filter: "drop-shadow(0 0 3px hsl(var(--primary) / 0.6))",
           }}
         />
