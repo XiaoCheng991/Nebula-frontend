@@ -25,7 +25,7 @@ function findColon(s: string): number {
 }
 
 /**
- * Parse YAML frontmatter from markdown content.
+ * Parse YAML frontmatter from Markdown content.
  * Supports --- delimited blocks and bare key-value at file top.
  */
 function parseFrontmatter(content: string): Record<string, any> {
@@ -152,7 +152,7 @@ export function getDocsList(): DocFile[] {
     const rawDate = fm.time || fm.date || fm.published || "";
     const date = normalizeDate(String(rawDate));
 
-    // Extract first image from markdown content
+    // Extract first image from Markdown content
     const imgMatch = content.match(/!\[[^\]]*]\(([^)]+)\)/);
     const cover = imgMatch ? resolveCoverPath(imgMatch[1]) : undefined;
 
