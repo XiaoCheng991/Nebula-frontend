@@ -52,7 +52,6 @@ export default function BlogClient({
                       height={96}
                       loading="lazy"
                       decoding="async"
-                      fetchPriority="low"
                     />
                   </div>
                   <div className="flex-1 p-5 pt-3 sm:pt-5">
