@@ -12,7 +12,13 @@ const nextConfig = {
     return config
   },
   images: {
+    formats: ['image/avif', 'image/webp'],
     remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'vzxtwpfxuyqyjitoqgap.supabase.co',
+        pathname: '/storage/v1/object/public/blog-images/**',
+      },
       {
         protocol: 'https',
         hostname: 'avatars.githubusercontent.com',
@@ -35,6 +41,9 @@ const nextConfig = {
       //   pathname: '/user-uploads/**',
       // },
     ],
+  },
+  experimental: {
+    optimizePackageImports: ['lucide-react'],
   },
   async headers() {
     return [

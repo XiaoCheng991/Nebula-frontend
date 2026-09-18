@@ -44,7 +44,10 @@ export default function BackToTop() {
   }, []);
 
   const offset = C - (pct / 100) * C;
-  const scrollTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+  const scrollTop = () => window.scrollTo({
+    top: 0,
+    behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
+  });
 
   return (
     <button

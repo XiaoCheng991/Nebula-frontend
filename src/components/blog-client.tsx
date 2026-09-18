@@ -31,12 +31,12 @@ export default function BlogClient({
     <>
       <div className="space-y-3">
         {items.map((item, idx) => {
-          const delay = 0.06 + idx * 0.07;
+          const delay = Math.min(idx, 6) * 0.04;
           return (
             <Link
               key={item.slug}
               href={item.href}
-              className="card-rise group block border border-border/60 bg-card/20 hover:border-primary/40 hover:bg-card/35 transition-all duration-300 overflow-hidden"
+              className="card-rise group block border border-border/60 bg-card/20 hover:border-primary/40 hover:bg-card/35 transition-colors duration-300 overflow-hidden"
               style={{ animationDelay: `${delay}s` }}
             >
               {item.cover ? (
@@ -50,6 +50,8 @@ export default function BlogClient({
                       style={{ maxHeight: "96px" }}
                       width={100}
                       height={96}
+                      sizes="(max-width: 639px) 56px, 76px"
+                      quality={50}
                       loading="lazy"
                       decoding="async"
                     />

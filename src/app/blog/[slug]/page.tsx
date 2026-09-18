@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPostBySlug, getPostSlugs } from "@/lib/posts";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
+import { getTableOfContents } from "@/components/MarkdownRenderer";
+import FloatingToc from "@/components/FloatingToc";
 import ReadingBreath from "@/components/ReadingBreath";
 
 type Props = {
@@ -64,6 +66,7 @@ export default async function PostPage({ params }: Props) {
         ))}
       </div>
 
+      <FloatingToc items={getTableOfContents(post.content)} />
       <article className="prose prose-sm max-w-none">
         <MarkdownRenderer content={post.content} />
       </article>

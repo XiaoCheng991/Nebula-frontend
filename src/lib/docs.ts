@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
+import { findColon, parseFrontmatter } from "./article-metadata";
 
 const DOCS_DIR = path.join(process.cwd(), "public", "docs");
 
@@ -16,68 +17,6 @@ export interface DocFile {
   cover?: string;
 }
 
-/** Find colon index, supporting both English : and Chinese ： */
-function findColon(s: string): number {
-  const en = s.indexOf(":");
-  const zh = s.indexOf("：");
-  if (en !== -1 && zh !== -1) return Math.min(en, zh);
-  return en !== -1 ? en : zh;
-}
-
-/**
- * Parse YAML frontmatter from Markdown content.
- * Supports --- delimited blocks and bare key-value at file top.
- */
-function parseFrontmatter(content: string): Record<string, any> {
-  let fmText: string;
-
-  const delimMatch = content.match(/^---\s*\n([\s\S]*?)\n---/);
-  if (delimMatch) {
-    fmText = delimMatch[1];
-  } else {
-    const lines = content.split("\n");
-    const kvLines: string[] = [];
-    for (const line of lines) {
-      const t = line.trim();
-      if (!t || t.startsWith("#")) break;
-      if (findColon(t) === -1) break;
-      kvLines.push(t);
-    }
-    fmText = kvLines.join("\n");
-  }
-
-  if (!fmText) return {};
-
-  const result: Record<string, any> = {};
-  for (const line of fmText.split("\n")) {
-    const t = line.trim();
-    if (!t || t.startsWith("#")) continue;
-    const ci = findColon(t);
-    if (ci === -1) continue;
-    const key = t.slice(0, ci).trim().toLowerCase();
-    const value = t.slice(ci + 1).trim();
-
-    if (value.startsWith("[") && value.endsWith("]")) {
-      result[key] = value
-        .slice(1, -1)
-        .split(/[,、\s]+/)
-        .map((s) => s.trim().replace(/['"]/g, ""))
-        .filter(Boolean);
-    } else if (/^\d+$/.test(value)) {
-      result[key] = parseInt(value, 10);
-    } else if (value === "true") {
-      result[key] = true;
-    } else if (value === "false") {
-      result[key] = false;
-    } else if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
-      result[key] = value.slice(1, -1);
-    } else {
-      result[key] = value;
-    }
-  }
-
-  return result;
-}
 
 function extractTitle(content: string, fm: Record<string, any>): string {
   if (fm.title) return String(fm.title);
@@ -143,8 +82,10 @@ export function getDocsList(): DocFile[] {
     const filePath = path.join(DOCS_DIR, filename);
     const content = fs.readFileSync(filePath, "utf-8");
     const slug = filename.replace(/\.md$/, "");
-    const urlSlug = `doc-${index}`;
     const fm = parseFrontmatter(content);
+    const urlSlug = typeof fm.slug === "string" && fm.slug.trim()
+      ? fm.slug.trim()
+      : `article-${slug}`;
     const title = extractTitle(content, fm);
     const summary = extractSummary(content, title);
     const tags = Array.isArray(fm.tags) ? fm.tags.map(String) : [];

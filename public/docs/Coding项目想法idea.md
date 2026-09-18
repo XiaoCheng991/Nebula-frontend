@@ -1,4 +1,5 @@
 title: Coding项目参考
+slug: doc-2
 tags: [技术、想法]
 readTime: 1
 time: 2026/06/08
@@ -16,4 +17,4 @@ time: 2026/06/08
 - DIY眼镜手机成像（简陋版Vision Pro）
 - 生成视频流
 - 坚持健身的自律监控
-- 
+-

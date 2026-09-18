@@ -1,4 +1,5 @@
 title: Coding技术积累
+slug: doc-1
 tags: [技术、沉淀、学习]
 readTime: 3
 time: 2026/06/08

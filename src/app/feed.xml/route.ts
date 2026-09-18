@@ -15,9 +15,9 @@ interface FeedItem {
 
 function escapeXml(s: string): string {
   return s
-    .replace(/&/g, "&")
-    .replace(/</g, "<")
-    .replace(/>/g, ">")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
     .replace(/"/g, "&#34;")
     .replace(/'/g, "&apos;");
 }
@@ -48,7 +48,7 @@ function buildItems(baseUrl: string): FeedItem[] {
   }));
 
   return [...docItems, ...postItems].sort((a, b) =>
-    a.pubDate < b.pubDate ? 1 : a.pubDate > b.pubDate ? -1 : 0,
+    Date.parse(b.pubDate) - Date.parse(a.pubDate),
   );
 }
 
@@ -56,7 +56,7 @@ function renderXml(title: string, description: string, baseUrl: string, items: F
   const lastBuild = items[0]?.pubDate ?? new Date().toUTCString();
   const itemXml = items.map((it) => "<item>\n" +
     "    <title>" + escapeXml(it.title) + "</title>\n" +
-    "    <link>" + escapeXml(it.link) + "\n" +
+    "    <link>" + escapeXml(it.link) + "</link>\n" +
     "    <guid isPermaLink=\"true\">" + escapeXml(it.guid) + "</guid>\n" +
     "    <description>" + escapeXml(it.description) + "</description>\n" +
     "    <pubDate>" + it.pubDate + "</pubDate>" +

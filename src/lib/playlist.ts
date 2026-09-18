@@ -21,18 +21,23 @@ export interface Track {
 
 export const PLAYLIST: Track[] = [
   {
-    title: "Do It For The Show",
-    artist: "哲",
-    src: "/audio/Do It For The Show.mp3",
-  },
-  {
-    title: "Traffic",
-    artist: "maryjo",
-    src: "/audio/Traffic - maryjo[Traffic].flac",
-  },
-  {
     title: "A Broken Heart Heals with Time",
     artist: "Dennis Kuo",
-    src: "/audio/A_Broken_Heart_Heals_with_Time.mp3",
+    src: "https://vzxtwpfxuyqyjitoqgap.supabase.co/storage/v1/object/public/site-bgm/A_Broken_Heart_Heals_with_Time.mp3",
+  },
+  {
+    title: "二十五（20s）",
+    artist: "查漓芸",
+    src: "https://vzxtwpfxuyqyjitoqgap.supabase.co/storage/v1/object/public/site-bgm/25.mp3",
+  },
+  {
+    title: "Fading Echo",
+    artist: "tianyang",
+    src: "https://vzxtwpfxuyqyjitoqgap.supabase.co/storage/v1/object/public/site-bgm/Fading%20Echo.mp3",
+  },
+  {
+    title: "二十五",
+    artist: "陈一豪Clear",
+    src: "https://vzxtwpfxuyqyjitoqgap.supabase.co/storage/v1/object/public/site-bgm/obj_wo3DlMOGwrbDjj7DisKw_82336424052_8125_5cc8_5825_be408fe9300402ba15ac917702c9aff4.mp3",
   },
 ];

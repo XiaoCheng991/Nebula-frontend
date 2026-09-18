@@ -15,8 +15,8 @@ export interface SearchItem {
 }
 
 interface Props {
-  posts?: Post[];
-  docs?: DocFile[];
+  posts?: Pick<Post, "slug" | "title" | "summary" | "tags" | "date">[];
+  docs?: Pick<DocFile, "urlSlug" | "title" | "summary" | "tags" | "date">[];
 }
 
 const SCORE_TERM = 10;

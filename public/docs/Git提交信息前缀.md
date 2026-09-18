@@ -1,4 +1,5 @@
 title: Git 提交信息前缀规则
+slug: doc-3
 tags: [技术、规范]
 readTime: 2
 time: 2026/06/09

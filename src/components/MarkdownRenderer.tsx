@@ -1,7 +1,21 @@
-"use client";
-
+import "server-only";
+import { createHash } from "node:crypto";
 import MarkdownIt from "markdown-it";
-import { useMemo } from "react";
+import CopyCodeButton from "./CopyCodeButton";
+import hljs from "highlight.js/lib/common";
+
+export interface TocItem {
+  id: string;
+  title: string;
+  level: number;
+}
+
+function slugifyHeading(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^\p{Letter}\p{Number}]+/gu, "-")
+    .replace(/^-+|-+$/g, "") || "section";
+}
 
 interface MarkdownRendererProps {
   content: string;
@@ -12,11 +26,23 @@ interface MarkdownRendererProps {
 /* ------------------------------------------------------------------ */
 
 function preprocessMarkdown(md: string): string {
+  const lines = md.split("\n");
+  const offsets = [0];
+  for (const line of lines) offsets.push(offsets[offsets.length - 1] + line.length + 1);
+  const codeRanges = new Map(new MarkdownIt().parse(md, {})
+    .filter((token) => (token.type === "fence" || token.type === "code_block") && token.map)
+    .map((token) => [offsets[token.map![0]], Math.min(md.length, offsets[token.map![1]])]));
   let result = "";
   let inMath = false;
   let i = 0;
 
   while (i < md.length) {
+    const codeEnd = codeRanges.get(i);
+    if (codeEnd !== undefined) {
+      result += md.slice(i, codeEnd);
+      i = codeEnd;
+      continue;
+    }
     const ch = md[i];
     if (ch === "$" && (i === 0 || md[i - 1] !== "\\")) {
       inMath = !inMath;
@@ -42,15 +68,19 @@ function preprocessMarkdown(md: string): string {
 /* ------------------------------------------------------------------ */
 
 function wrapSections(md: string): string {
+  const parser = new MarkdownIt({ html: true });
+  const headingLines = new Set(parser.parse(md, {})
+    .filter((token) => token.type === "heading_open" && token.map)
+    .map((token) => token.map![0]));
   const lines = md.split("\n");
   const out: string[] = [];
   const stack: { level: number }[] = [];
-  let headingIdx = 0;
+  const usedIds = new Set<string>();
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     const m = line.match(/^(#{1,6})\s+(.+)$/);
-    if (m) {
+    if (m && headingLines.has(i)) {
       const level = m[1].length;
       const title = m[2].trim();
 
@@ -59,10 +89,20 @@ function wrapSections(md: string): string {
         out.push("</details>");
       }
 
-      headingIdx++;
-      const id = `h${headingIdx}`;
-      out.push(`<details open id="${id}" data-level="${level}">`);
-      out.push(`<summary data-level="${level}">${title}</summary>`);
+      const plainTitle = title
+        .replace(/!\[([^\]]*)]\([^)]+\)/g, "$1")
+        .replace(/\[([^\]]*)]\([^)]+\)/g, "$1")
+        .replace(/[`*_~]/g, "")
+        .replace(/<[^>]+>/g, "")
+        .trim() || `Heading ${usedIds.size + 1}`;
+      let id = slugifyHeading(plainTitle);
+      let suffix = 2;
+      while (usedIds.has(id)) {
+        id = `${slugifyHeading(plainTitle)}-${suffix++}`;
+      }
+      usedIds.add(id);
+      out.push(`<details open data-level="${level}">`);
+      out.push(`<summary data-level="${level}" id="${id}"><a class="heading-anchor" href="#${id}" aria-label="跳转到 ${parser.utils.escapeHtml(plainTitle)}">${parser.renderInline(title)}</a></summary>`);
       stack.push({ level });
     } else {
       out.push(line);
@@ -75,6 +115,19 @@ function wrapSections(md: string): string {
   }
 
   return out.join("\n");
+}
+
+export function getTableOfContents(content: string): TocItem[] {
+  const wrapped = wrapSections(preprocessMarkdown(content));
+  return [...wrapped.matchAll(/<summary data-level="(\d)" id="([^"]+)">/g)]
+    .map((match) => ({
+      level: Number(match[1]),
+      id: match[2],
+      title: wrapped.slice(match.index + match[0].length, wrapped.indexOf("</summary>", match.index))
+        .replace(/<[^>]+>/g, "")
+        .trim(),
+    }))
+    .filter((item) => item.level >= 2 && item.level <= 4);
 }
 
 /* ------------------------------------------------------------------ */
@@ -92,6 +145,27 @@ const cssContent = `
   cursor: default; list-style: none; user-select: none;
   color: hsl(var(--foreground)); font-weight: 600; padding: 0;
   pointer-events: none;
+}
+.md-render summary .heading-anchor {
+  pointer-events: auto;
+  color: inherit;
+  text-decoration: none;
+}
+.md-render summary .heading-anchor::after {
+  content: "#";
+  margin-left: 0.5rem;
+  color: hsl(var(--primary) / 0);
+  font-size: 0.7em;
+  vertical-align: middle;
+  transition: color 0.2s ease;
+}
+.md-render summary .heading-anchor:hover::after,
+.md-render summary .heading-anchor:focus-visible::after {
+  color: hsl(var(--primary) / 0.8);
+}
+.md-render details > summary,
+.md-render [id] {
+  scroll-margin-top: 5rem;
 }
 .md-render details > summary::-webkit-details-marker,
 .md-render details > summary::marker { display: none; content: none; }
@@ -140,17 +214,23 @@ const cssContent = `
 }
 
 /* Inline code */
-.md-render code {
-  background: hsl(var(--muted)); padding: 0.15rem 0.4rem;
+.md-render :not(pre) > code {
+  background: hsl(var(--muted) / 0.9);
+  border-radius: 4px;
+  padding: 0.2rem 0.55rem;
+  margin-inline: 0.12em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
   font-size: 0.8rem; font-family: 'Space Mono', 'Fira Code', monospace;
   color: hsl(var(--secondary));
 }
 
 /* Code blocks — wrap long lines, no horizontal overflow */
 .md-render pre {
+  position: relative;
   background: hsl(var(--muted) / 0.6);
   border: 1px solid hsl(var(--border));
-  padding: 1rem 1.25rem;
+  padding: 2.75rem 1.25rem 1rem;
   margin: 1.25rem 0;
   overflow-x: auto;
   font-family: 'Space Mono', 'Fira Code', 'Courier New', monospace;
@@ -169,6 +249,53 @@ const cssContent = `
   overflow-wrap: anywhere;
 }
 
+.md-render pre[data-language]::before {
+  content: attr(data-language);
+  position: absolute;
+  top: 0.55rem;
+  left: 1.25rem;
+  color: hsl(var(--foreground) / 0.3);
+  font-size: 0.7rem;
+  pointer-events: none;
+}
+
+.md-render .code-copy-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.15rem 0.45rem;
+  font-family: inherit;
+  font-size: 12px;
+  color: hsl(var(--foreground) / 0.55);
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--background) / 0.9);
+  opacity: 1;
+  transition: color 0.2s, border-color 0.2s, opacity 0.2s;
+}
+
+.md-render pre:hover .code-copy-button,
+.md-render .code-copy-button:focus-visible {
+  opacity: 1;
+}
+
+.md-render .code-copy-button:hover,
+.md-render .code-copy-button:focus-visible {
+  color: hsl(var(--primary));
+  border-color: hsl(var(--primary) / 0.6);
+}
+
+.md-render .hljs-comment,
+.md-render .hljs-quote { color: hsl(var(--foreground) / 0.4); font-style: italic; }
+.md-render .hljs-keyword,
+.md-render .hljs-selector-tag,
+.md-render .hljs-literal { color: hsl(var(--secondary)); }
+.md-render .hljs-string,
+.md-render .hljs-attr,
+.md-render .hljs-selector-attr { color: hsl(var(--primary)); }
+.md-render .hljs-title,
+.md-render .hljs-name,
+.md-render .hljs-built_in { color: hsl(var(--accent)); }
+
 /* Links */
 .md-render a { color: hsl(var(--primary)); text-decoration: underline; text-underline-offset: 2px; }
 .md-render a:hover { text-shadow: 0 0 8px hsl(var(--primary) / 0.3); }
@@ -181,42 +308,37 @@ const cssContent = `
 .md-render hr { border-color: hsl(var(--border)); margin: 3rem 0; }
 `;
 
-function injectStyle() {
-  if (typeof document === "undefined") return;
-  if (document.getElementById(CSS_ID)) return;
-  const el = document.createElement("style");
-  el.id = CSS_ID;
-  el.textContent = cssContent;
-  document.head.appendChild(el);
-}
-
 /* ------------------------------------------------------------------ */
 /*  Main component                                                     */
 /* ------------------------------------------------------------------ */
 
 export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
-  const html = useMemo(() => {
-    const md = preprocessMarkdown(content);
-    const wrapped = wrapSections(md);
-    const renderer = new MarkdownIt({
-      html: true,
-      linkify: true,
-      breaks: false,
-    });
-    return renderer.render(wrapped);
-  }, [content]);
-
-  useMemo(() => injectStyle(), []);
-
-  const htmlWithLazy = useMemo(() =>
-    html.replace(/<img([^>]*)>/gi, (_m, attrs) =>
-      attrs.includes('loading=') ? `<img${attrs}>` : `<img${attrs} loading="lazy">`
-    )
-  , [html]);
+  const md = preprocessMarkdown(content);
+  const wrapped = wrapSections(md);
+  const renderer = new MarkdownIt({
+    html: true,
+    linkify: true,
+    breaks: false,
+  });
+  renderer.renderer.rules.fence = (tokens, index) => {
+    const token = tokens[index];
+    const language = (token.info || "").trim().split(/\s+/)[0] || "text";
+    const highlighted = language !== "text" && hljs.getLanguage(language)
+      ? hljs.highlight(token.content, { language }).value
+      : renderer.utils.escapeHtml(token.content);
+    const label = renderer.utils.escapeHtml(language);
+    return `<pre data-language="${label}"><code class="language-${label}">${highlighted}</code><button type="button" class="code-copy-button" aria-live="polite">复制代码</button></pre>\n`;
+  };
+  const html = renderer.render(wrapped);
+  const htmlWithLazy = html.replace(/<img([^>]*)>/gi, (_match, attrs) =>
+    attrs.includes('loading=') ? `<img${attrs}>` : `<img${attrs} loading="lazy">`
+  );
 
   return (
     <div className="md-render relative">
+      <style id={CSS_ID} dangerouslySetInnerHTML={{ __html: cssContent }} />
       <div dangerouslySetInnerHTML={{ __html: htmlWithLazy }} />
+      <CopyCodeButton revision={createHash("sha256").update(content).digest("hex")} />
     </div>
   );
 }

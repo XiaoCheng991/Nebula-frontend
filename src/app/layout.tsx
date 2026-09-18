@@ -94,7 +94,10 @@ export default function RootLayout({
         <EasterEggs />
 
         {/* Client-side Cmd+K search palette */}
-        <CmdK posts={posts} docs={getDocsList()} />
+        <CmdK
+          posts={posts.map(({ slug, title, summary, tags, date }) => ({ slug, title, summary, tags, date }))}
+          docs={getDocsList().map(({ urlSlug, title, summary, tags, date }) => ({ urlSlug, title, summary, tags, date }))}
+        />
         </body>
     </html>
   );
