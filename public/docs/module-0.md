@@ -10,11 +10,12 @@ readTime: 15
 
 ## 实现思路
 <!-- 提示: 这个模块做了什么？ 项目怎么分层的？为什么先搭骨架再分层？ -->
+
 1. 这个模块主要是以 Vite 创建的 vue 和 react 两个项目的脚手架为主，同步开发，两相对比。
     - 主要做了删除初始化项目时的冗余文件，搭建项目骨架
-    - 并且集成了`Pinia`、`React Query`、`Zustand`此类状态管理库
-    - 并安装了`axios`, 在api层封装了请求拦截器和响应拦截器，统一处理请求和响应的错误
-    - 并且在`vite.config.ts`和`tsconfig.json`中配置了路径别名
+    - 集成了`Pinia`、`React Query`、`Zustand`此类状态管理库
+    - 安装了`axios`, 在api层封装了请求拦截器和响应拦截器，统一处理请求和响应的错误
+    - 在`vite.config.ts`和`tsconfig.json`中配置了路径别名
 
 2. 项目分层主要是采用技术分层
     - `api` 层: 封装 axios 请求，统一处理请求和响应的错误
@@ -33,20 +34,21 @@ readTime: 15
      页面目录 views/ vs pages/;
      改状态的路径(Pinia 直接改 vs Zustand 不可变更新) -->
 
-|  项   |      Vue版       |  React版  | 为什么                                                                       |
-|:----:|:---------------:|:--------:|:--------------------------------------------------------------------------|
-| 入口文件 |     main.ts     | main.tsx | React 的`tsx`文件原生支持JSX语法，必须用tsx后缀；Vue template写在`.vue`单文件中，入口只做挂载，用`.ts`即可 |
-| 组件形态 | Composition API | Hooks | Composition API（`<script setup>`）基于响应式 ref/reactive; React函数组件只能用Hooks。而这都是为了封装逻辑，但响应式底层完全不同：Vue是 Proxy 自动追踪依赖，React Hooks 靠依赖数组手动声明依赖 |
-| 页面目录 |     views/      | pages/ | 约定俗成的规范而已                                                                 |
-| 改状态的路径 |    Pinia 直接改    | Zustand 不可变更新 | Vue采用响应式 **Proxy**，直接修改对象属性可以自动捕获变更，触发视图更新；React遵循**不可变数据思想**，状态只是只读，不能直接修改原对象，必须返回新对象，Zustand延续这个规范，让React检测 state 变化触发重渲染 |
+|   对比项    |      Vue版       |    React版     | 为什么                                                                                                                                    |
+|:--------:|:---------------:|:-------------:|:---------------------------------------------------------------------------------------------------------------------------------------|
+|   入口文件   |     main.ts     |   main.tsx    | React 的`tsx`文件原生支持JSX语法，必须用tsx后缀；Vue template写在`.vue`单文件中，入口只做挂载，用`.ts`即可                                                              |
+|   组件形态   | Composition API |     Hooks     | Composition API（`<script setup>`）基于响应式 ref/reactive; React函数组件只能用Hooks。而这都是为了封装逻辑，但响应式底层完全不同：Vue是 Proxy 自动追踪依赖，React Hooks 靠依赖数组手动声明依赖 |
+|   页面目录   |     views/      |    pages/     | 约定俗成的规范而已                                                                                                                              |
+|  改状态的路径  |    Pinia 直接改    | Zustand 不可变更新 | Vue采用响应式 **Proxy**，直接修改对象属性可以自动捕获变更，触发视图更新；React遵循**不可变数据思想**，状态只是只读，不能直接修改原对象，必须返回新对象，Zustand延续这个规范，让React检测 state 变化触发重渲染            |
 
 
 ## 关键 API / 配置
 <!-- 提示: Axios 封装做了哪三件事？vite alias 和 tsconfig paths 为什么配两处? React Query 的 QueryClient 是什么角色？ -->
+
 1. Axios 封装：
-    - 请求拦截器：对请求进行统一处理，如添加 token、设置请求头等，统一配置`/api`前缀
-    - 响应拦截器：对响应进行统一处理，如处理状态码、错误信息等
-    - 错误处理：Promise.reject(new Error('请求失败'))，统一处理请求失败的情况
+   - 请求拦截器：对请求进行统一处理，如添加 token、设置请求头等，统一配置`/api`前缀
+   - 响应拦截器：对响应进行统一处理，如处理状态码、错误信息等
+   - 错误处理：Promise.reject(new Error('请求失败'))，统一处理请求失败的情况
 
 2. vite alias 和 tsconfig paths 配置两处的原因：
     - vite alias 用于在项目中使用别名导入模块（方便开发者使用）
@@ -60,6 +62,7 @@ readTime: 15
 
 ## 踩过的坑
 <!-- 每条写：现象 -> 原因 -> 解决 -->
+
 暂无
 
 ## 面试考点
@@ -91,6 +94,7 @@ readTime: 15
 
 ## 如果换成另一个框架我会怎么写
 <!-- 比如「用 Vue 的 Pinia 定义计数器」换成 React + Zustand 时，那些概念时直接对应的(状态、动作)？哪些思维方式变了（响应式追踪 vs 重新执行函数）？ -->
+
 1. 直接对应的概念： `state`(状态)、`action`（动作）
     - Pinia：`state`存数据，`action`修改数据
     - Zustand：store 对象里面的属性 = `state`; set 里面定义的函数 = `action`

@@ -28,6 +28,19 @@ export default function RootLayout({
       <head>
         <link rel="alternate" type="application/rss+xml" title="Kyon // blog" href="/feed.xml" />
         <title></title>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function () {
+                try {
+                  if (localStorage.getItem("readMode") === "1") {
+                    document.documentElement.classList.add("read-mode");
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
       </head>
       <body className="bg-background text-foreground scanlines grid-bg min-h-screen">
         {/* Scroll progress bar */}

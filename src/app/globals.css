@@ -97,14 +97,16 @@
     );
     pointer-events: none;
     z-index: 9999;
+    transition: opacity 0.3s ease;
   }
 
-  /* Grid background */
+  /* Grid background - on body */
   .grid-bg {
     background-image:
       linear-gradient(hsl(var(--primary) / 0.03) 1px, transparent 1px),
       linear-gradient(90deg, hsl(var(--primary) / 0.03) 1px, transparent 1px);
     background-size: 40px 40px;
+    transition: background-image 0.3s ease;
   }
 
   /* Blink cursor */
@@ -306,4 +308,104 @@
   .img-lightbox-nav:hover { color: hsl(var(--primary)); }
   .img-lightbox-prev { left: 18px; }
   .img-lightbox-next { right: 18px; }
+}
+
+/* Read mode toggle button */
+.read-mode-toggle {
+  font-family: 'Space Mono', 'Fira Code', 'Courier New', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  padding: 0.35rem 0.85rem;
+  border: 1px solid hsl(var(--border) / 0.6);
+  border-radius: 6px;
+  background: hsl(var(--background) / 0.7);
+  color: hsl(var(--foreground) / 0.7);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(6px);
+  white-space: nowrap;
+}
+.read-mode-toggle:hover:not(:disabled) {
+  border-color: hsl(var(--primary) / 0.6);
+  color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.1);
+  box-shadow: 0 0 12px hsl(var(--primary) / 0.15);
+}
+.read-mode-toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.4);
+}
+.read-mode-toggle:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.read-mode-toggle[aria-pressed="true"] {
+  border-color: hsl(var(--primary) / 0.5);
+  color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.12);
+}
+
+/* ===== READ MODE ===== */
+/* scanlines 完全隐藏（fixed 伪元素，不影响文档流） */
+html.read-mode .scanlines::before {
+  opacity: 0 !important;
+  pointer-events: none;
+  display: none;
+}
+
+/* 文章区域变成卡片式，带内边距和边框 */
+html.read-mode article.prose {
+  background: hsl(var(--card) / 0.96);
+  border: 1px solid hsl(var(--border) / 0.4);
+  border-radius: 14px;
+  padding: 2.5rem 3rem;
+  box-shadow:
+    0 4px 24px hsl(var(--background) / 0.4),
+    0 0 0 1px hsl(var(--primary) / 0.05),
+    inset 0 1px 0 hsl(var(--primary) / 0.03);
+  max-width: 100% !important;
+}
+
+/* 代码块在阅读模式下稍微亮一点 */
+html.read-mode .md-render pre {
+  background: hsl(var(--muted) / 0.8);
+  border-color: hsl(var(--border) / 0.5);
+}
+
+/* 行内代码在阅读模式下 */
+html.read-mode .md-render :not(pre) > code {
+  background: hsl(var(--muted) / 0.95);
+  color: hsl(var(--secondary));
+}
+
+/* 表格在阅读模式下 */
+html.read-mode .md-render table {
+  border-color: hsl(var(--border) / 0.4);
+}
+html.read-mode .md-render th {
+  background: hsl(var(--muted) / 0.6);
+}
+html.read-mode .md-render td {
+  border-color: hsl(var(--border) / 0.3);
+}
+
+/* 标题锚点在阅读模式下 */
+html.read-mode .md-render summary .heading-anchor::after {
+  color: hsl(var(--primary) / 0) !important;
+}
+html.read-mode .md-render summary .heading-anchor:hover::after,
+html.read-mode .md-render summary .heading-anchor:focus-visible::after {
+  color: hsl(var(--primary) / 0.9) !important;
+}
+
+/* 引用块在阅读模式下 */
+html.read-mode .md-render blockquote {
+  border-left-color: hsl(var(--secondary) / 0.5);
+  background: hsl(var(--muted) / 0.3);
+  border-radius: 0 8px 8px 0;
+}
+
+/* 阅读模式下的分割线 */
+html.read-mode .md-render hr {
+  border-color: hsl(var(--border) / 0.3);
 }

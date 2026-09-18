@@ -1,6 +1,7 @@
 import "server-only";
 import { createHash } from "node:crypto";
 import MarkdownIt from "markdown-it";
+import { markdownItTable } from "markdown-it-table";
 import CopyCodeButton from "./CopyCodeButton";
 import hljs from "highlight.js/lib/common";
 import ImageLightbox from "./ImageLightbox";
@@ -214,6 +215,36 @@ const cssContent = `
   to   { opacity: 1; filter: blur(0); }
 }
 
+/* Tables */
+.md-render table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.85rem;
+  overflow-x: auto;
+  display: block;
+}
+.md-render th,
+.md-render td {
+  border: 1px solid hsl(var(--border) / 0.5);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+.md-render th {
+  background: hsl(var(--muted) / 0.5);
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+.md-render td {
+  color: hsl(var(--foreground) / 0.85);
+}
+.md-render tr:nth-child(even) td {
+  background: hsl(var(--muted) / 0.3);
+}
+.md-render tr:hover td {
+  background: hsl(var(--muted) / 0.5);
+}
+
 /* Inline code */
 .md-render :not(pre) > code {
   background: hsl(var(--muted) / 0.9);
@@ -320,7 +351,7 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
     html: true,
     linkify: true,
     breaks: false,
-  });
+  }).use(markdownItTable);
   renderer.renderer.rules.fence = (tokens, index) => {
     const token = tokens[index];
     const language = (token.info || "").trim().split(/\s+/)[0] || "text";

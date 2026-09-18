@@ -2,9 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getDocContent, getDocMeta, getDocsList } from "@/lib/docs";
+import ArticleNavigation from "@/components/ArticleNavigation";
+import { getPrevNextArticle, getRelatedArticles } from "@/lib/article-navigation";
+import type { ArticleRef } from "@/lib/article-navigation";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
 import { getTableOfContents } from "@/components/MarkdownRenderer";
 import FloatingToc from "@/components/FloatingToc";
+import ReadModeToggle from "@/components/ReadModeToggle";
 import ReadingBreath from "@/components/ReadingBreath";
 
 type Props = {
@@ -65,12 +69,17 @@ export default async function DocPage({ params }: Props) {
         </div>
       </div>
 
-      <h1 className="text-2xl font-bold tracking-tight mb-3 text-foreground text-glow">
-        {meta.title}
-      </h1>
+      <div className="flex items-baseline justify-between gap-4 mb-6 flex-wrap">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground text-glow flex-1 min-w-0">
+          {meta.title}
+        </h1>
+        <div className="flex items-center gap-2 shrink-0">
+          <ReadModeToggle />
+        </div>
+      </div>
 
       {meta.tags.length > 0 && (
-        <div className="flex items-center gap-2 mb-8">
+        <div className="flex items-center gap-2 mb-8 flex-wrap">
           {meta.tags.map((tag) => (
             <span
               key={tag}
@@ -87,23 +96,20 @@ export default async function DocPage({ params }: Props) {
         <MarkdownRenderer content={content} />
       </article>
 
-      <div className="mt-20 pt-8 flex flex-col items-center gap-4 text-xs font-mono text-foreground/25">
-        <div className="flex items-center gap-3">
-          <span className="h-[1px] w-8 bg-border" />
-          <span className="text-primary/40">◆</span>
-          <span className="h-[1px] w-8 bg-border" />
-        </div>
-        <div className="flex items-center gap-4">
-          <Link
-            href="/"
-            className="text-foreground/30 hover:text-primary transition-colors"
-          >
-            返回列表
-          </Link>
-          <span className="text-foreground/15">|</span>
-          <span>Kyon Blog</span>
-        </div>
-      </div>
+      {(() => {
+        const current: ArticleRef = {
+          key: `doc:${meta.urlSlug}`,
+          href: `/blog/docs/${meta.urlSlug}`,
+          title: meta.title,
+          summary: meta.summary,
+          date: meta.date,
+          tags: meta.tags,
+          type: "doc",
+        };
+        const { prev, next } = getPrevNextArticle(current);
+        const related = getRelatedArticles(current);
+        return <ArticleNavigation data={{ current, prev, next, related }} />;
+      })()}
     </div>
   );
 }
