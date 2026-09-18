@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import MarkdownIt from "markdown-it";
 import CopyCodeButton from "./CopyCodeButton";
 import hljs from "highlight.js/lib/common";
+import ImageLightbox from "./ImageLightbox";
 
 export interface TocItem {
   id: string;
@@ -339,6 +340,7 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
       <style id={CSS_ID} dangerouslySetInnerHTML={{ __html: cssContent }} />
       <div dangerouslySetInnerHTML={{ __html: htmlWithLazy }} />
       <CopyCodeButton revision={createHash("sha256").update(content).digest("hex")} />
+      <ImageLightbox revision={createHash("sha256").update(content).digest("hex")} />
     </div>
   );
 }

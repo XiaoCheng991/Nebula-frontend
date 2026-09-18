@@ -254,4 +254,56 @@
     color: hsl(var(--primary));
     background: linear-gradient(90deg, hsl(var(--primary) / 0.08), transparent);
   }
+
+  .img-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgb(3 3 5 / 0.85);
+    backdrop-filter: blur(6px);
+    cursor: zoom-out;
+    padding: 4vh 5vw;
+  }
+
+  .img-lightbox img {
+    max-width: 92vw;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 14px 48px rgb(0 0 0 / 0.6);
+  }
+
+  .img-lightbox-close {
+    position: fixed;
+    top: 18px;
+    right: 24px;
+    font-size: 30px;
+    line-height: 1;
+    color: hsl(var(--foreground) / 0.8);
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .img-lightbox-close:hover { color: hsl(var(--primary)); }
+
+  .img-lightbox-nav {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 44px;
+    line-height: 1;
+    color: hsl(var(--foreground) / 0.7);
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    padding: 0 8px;
+    transition: color 0.2s;
+  }
+  .img-lightbox-nav:hover { color: hsl(var(--primary)); }
+  .img-lightbox-prev { left: 18px; }
+  .img-lightbox-next { right: 18px; }
 }
