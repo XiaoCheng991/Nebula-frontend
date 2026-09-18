@@ -175,12 +175,12 @@ const cssContent = `
 .md-render details details { margin: 1.25rem 0 1rem 0; }
 
 /* Heading sizes — distinct from body text (body is ~0.95rem) */
-.md-render details > summary[data-level="1"] { font-size: 2.5rem;  line-height: 1.15; letter-spacing: -0.02em; margin: 0 0 1.75rem 0; }
-.md-render details > summary[data-level="2"] { font-size: 1.85rem; line-height: 1.2;  margin: 2rem 0 1rem 0; }
-.md-render details > summary[data-level="3"] { font-size: 1.45rem; line-height: 1.25; margin: 1.5rem 0 0.75rem 0; }
-.md-render details > summary[data-level="4"] { font-size: 1.15rem; line-height: 1.3;  margin: 1.25rem 0 0.6rem 0; }
-.md-render details > summary[data-level="5"] { font-size: 1.05rem; line-height: 1.35; margin: 1rem 0 0.5rem 0; }
-.md-render details > summary[data-level="6"] { font-size: 1rem;    line-height: 1.4;   margin: 0.85rem 0 0.4rem 0; }
+.md-render details > summary[data-level="1"] { font-size: 1.625rem; line-height: 1.25; letter-spacing: 0; margin: 2rem 0 1rem 0; }
+.md-render details > summary[data-level="2"] { font-size: 1.375rem; line-height: 1.3; margin: 1.75rem 0 0.9rem 0; }
+.md-render details > summary[data-level="3"] { font-size: 1.125rem; line-height: 1.35; margin: 1.25rem 0 0.6rem 0; }
+.md-render details > summary[data-level="4"] { font-size: 1rem;    line-height: 1.4;   margin: 1rem 0 0.5rem 0; }
+.md-render details > summary[data-level="5"] { font-size: 0.875rem; line-height: 1.45; margin: 1rem 0 0.4rem 0; }
+.md-render details > summary[data-level="6"] { font-size: 0.8125rem; line-height: 1.45; margin: 0.85rem 0 0.4rem 0; }
 
 /* Paragraphs */
 .md-render p { margin: 1.25rem 0; line-height: 1.9; }

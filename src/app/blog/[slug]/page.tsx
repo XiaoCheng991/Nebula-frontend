@@ -56,7 +56,7 @@ export default async function PostPage({ params }: Props) {
       </div>
 
       <div className="flex items-baseline justify-between gap-4 mb-6 flex-wrap">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground text-glow flex-1 min-w-0">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground text-glow flex-1 min-w-0">
           {post.title}
         </h1>
         <div className="flex items-center gap-2 shrink-0">
