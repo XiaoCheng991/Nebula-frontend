@@ -1,3 +1,4 @@
+import Image from "next/image";
 export default function AboutPage() {
   const profile = {
     name: "Kyon",
@@ -77,13 +78,14 @@ export default function AboutPage() {
         <div className="flex items-start gap-6 flex-wrap">
           {/* Avatar */}
           <div className="shrink-0">
-            <img
+            <Image
               src="/avatar/XiaoCheng991.jpeg"
               alt="avatar"
-              className="w-24 h-24 sm:w-32 sm:h-32 rounded-lg border border-primary/30 object-cover"
               width={128}
               height={128}
-              decoding="async"
+              className="w-24 h-24 sm:w-32 sm:h-32 rounded-lg border border-primary/30 object-cover"
+              priority
+              sizes="(max-width: 639px) 96px, 128px"
             />
           </div>
           <div>

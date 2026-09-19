@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
+import { formatDate } from "@/lib/utils";
 
 interface Item {
   slug: string;
@@ -13,6 +15,10 @@ interface Item {
   isDoc: boolean;
   href: string;
   cover?: string;
+}
+
+function formatDateOrEmpty(date: string): string {
+  return formatDate(date) ?? "";
 }
 
 export default function BlogClient({
@@ -27,11 +33,23 @@ export default function BlogClient({
   totalPages: number;
   pageSize: number;
 }) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const buildPageUrl = (page: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", String(page));
+    params.set("size", String(pageSize));
+    const qs = params.toString();
+    return qs ? `${pathname}?${qs}` : pathname;
+  };
+
   return (
     <>
       <div className="space-y-3">
         {items.map((item, idx) => {
           const delay = Math.min(idx, 6) * 0.04;
+          const date = formatDateOrEmpty(item.date);
           return (
             <Link
               key={item.slug}
@@ -64,17 +82,13 @@ export default function BlogClient({
                         </span>
                         {item.title}
                       </h3>
-                      {item.date && (
+                      {date && (
                         <span className="text-xs font-mono text-foreground/40 whitespace-nowrap shrink-0">
-                          {new Date(item.date).toLocaleDateString("zh-CN", {
-                            year: "numeric",
-                            month: "2-digit",
-                            day: "2-digit",
-                          })}
+                          {date}
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-foreground/60 mb-3 leading-relaxed">
+                    <p className="text-sm text-foreground/60 mb-3 leading-relaxed line-clamp-2">
                       {item.summary}
                     </p>
                     <div className="flex items-center gap-2 text-xs font-mono flex-wrap">
@@ -107,17 +121,13 @@ export default function BlogClient({
                       </span>
                       {item.title}
                     </h3>
-                    {item.date && (
+                    {date && (
                       <span className="text-xs font-mono text-foreground/40 whitespace-nowrap shrink-0">
-                        {new Date(item.date).toLocaleDateString("zh-CN", {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                        })}
+                        {date}
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-foreground/60 leading-relaxed">
+                  <p className="text-sm text-foreground/60 leading-relaxed line-clamp-2">
                     {item.summary}
                   </p>
                   <div className="flex items-center gap-2 text-xs font-mono flex-wrap mt-3">
@@ -147,33 +157,33 @@ export default function BlogClient({
 
       {/* Pagination */}
       <div className="flex items-center justify-center gap-4 mt-10 text-xs font-mono">
-        <button
-          className="px-3 py-1.5 border border-border text-foreground/50 hover:border-primary/50 hover:text-primary transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
-          disabled={currentPage <= 1}
-          onClick={() => {
-            const url = new URL(location.pathname, location.origin);
-            url.searchParams.set("page", String(currentPage - 1));
-            url.searchParams.set("size", String(pageSize));
-            location.href = url.toString();
-          }}
-        >
-          ← prev
-        </button>
+        {currentPage > 1 ? (
+          <Link
+            href={buildPageUrl(currentPage - 1)}
+            className="px-3 py-1.5 border border-border text-foreground/50 hover:border-primary/50 hover:text-primary transition-colors"
+          >
+            ← prev
+          </Link>
+        ) : (
+          <span className="px-3 py-1.5 border border-border text-foreground/25 disabled:opacity-25 select-none">
+            ← prev
+          </span>
+        )}
         <span className="text-foreground/30 tabular-nums">
           {currentPage} / {totalPages}
         </span>
-        <button
-          className="px-3 py-1.5 border border-border text-foreground/50 hover:border-primary/50 hover:text-primary transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
-          disabled={currentPage >= totalPages}
-          onClick={() => {
-            const url = new URL(location.pathname, location.origin);
-            url.searchParams.set("page", String(currentPage + 1));
-            url.searchParams.set("size", String(pageSize));
-            location.href = url.toString();
-          }}
-        >
-          next →
-        </button>
+        {currentPage < totalPages ? (
+          <Link
+            href={buildPageUrl(currentPage + 1)}
+            className="px-3 py-1.5 border border-border text-foreground/50 hover:border-primary/50 hover:text-primary transition-colors"
+          >
+            next →
+          </Link>
+        ) : (
+          <span className="px-3 py-1.5 border border-border text-foreground/25 select-none">
+            next →
+          </span>
+        )}
       </div>
     </>
   );
