@@ -6,6 +6,7 @@ import RssIcon from "@/components/RssIcon";
 import EasterEggs from "@/components/EasterEggs";
 import CmdK from "@/components/CmdK";
 import SearchTrigger from "@/components/SearchTrigger";
+import ThemeToggle from "@/components/ThemeToggle";
 import { posts } from "@/lib/posts";
 import { getDocsList } from "@/lib/docs";
 
@@ -35,6 +36,16 @@ export default function RootLayout({
                 try {
                   if (localStorage.getItem("readMode") === "1") {
                     document.documentElement.classList.add("read-mode");
+                  }
+                } catch (e) {}
+                try {
+                  var t = localStorage.getItem("theme");
+                  if (t === "light") {
+                    document.documentElement.classList.add("light");
+                  } else if (t === "dark") {
+                    document.documentElement.classList.remove("light");
+                  } else if (window.matchMedia("(prefers-color-scheme: light)").matches) {
+                    document.documentElement.classList.add("light");
                   }
                 } catch (e) {}
               })();
@@ -74,6 +85,7 @@ export default function RootLayout({
               >
                 [ about ]
               </a>
+              <ThemeToggle />
               {/* Music trigger - in nav, opens a popover beneath it.
                   Renders nothing while PLAYLIST is empty. */}
               <MusicPlayer />
