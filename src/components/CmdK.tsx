@@ -140,7 +140,7 @@ export default function CmdK({ posts = [], docs = [] }: Props) {
       }}
     >
       <div
-        className="w-full max-w-xl border border-primary/40 bg-background/95 shadow-[0_8px_32px_hsl(var(--background)/0.5)]"
+        className="w-full max-w-xl border border-primary/40 bg-background/95 shadow-[0_8px_32px_hsl(var(--background)/0.5)] cmdk-dialog"
         onClick={(e) => e.stopPropagation()}
       >
         {/* input row */}

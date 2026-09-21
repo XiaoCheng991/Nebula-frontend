@@ -387,7 +387,7 @@ export default function MusicPlayer() {
         aria-label={open ? "close music player" : "open music player"}
         aria-expanded={open}
         className={[
-          "h-7 w-7 flex items-center justify-center transition-colors text-[13px] leading-none border nav-glow",
+          "h-7 w-7 flex items-center justify-center transition-colors text-[13px] leading-none border nav-glow music-trigger",
           open
             ? "text-primary border-primary/60"
             : "text-foreground/65 border-transparent hover:text-primary hover:border-primary/40",
@@ -405,7 +405,7 @@ export default function MusicPlayer() {
         <div
           role="dialog"
           aria-label="music player"
-          className="absolute top-full right-0 mt-2 z-[60] text-[11px]"
+          className="absolute top-full right-0 mt-2 z-[60] text-[11px] music-popover"
           style={{
             width: 280,
             background: "hsl(var(--background) / 0.96)",

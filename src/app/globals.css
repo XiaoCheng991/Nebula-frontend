@@ -424,50 +424,566 @@ html.read-mode .md-render hr {
   border-color: hsl(var(--border) / 0.3);
 }
 
-/* ===== LIGHT THEME (html.light class) ===== */
-/* Light mode: clean paper background, defined cards via borders+shadows
-   (transparent cards that work in dark mode need solid treatment here) */
+
+/* ===== LIGHT THEME: LIQUID GLASS ===== */
+/* Cyberpunk terminal reimagined as iOS 27 liquid-glass: warm paper base, colored
+   light bleeding through translucent materials, organic internal gradients,
+   soft volumetric depth, fine paper grain, and editorial breathing room.
+   The dark theme is intentionally left completely untouched. */
+
 html.light {
-  --background: 30 20% 97%;
-  --foreground: 220 15% 18%;
-  --card: 0 0% 99.5%;
-  --card-foreground: 220 15% 18%;
-  --primary: 195 75% 42%;
+  --background: 30 20% 97%;            /* warm paper */
+  --foreground: 220 12% 15%;           /* near-black text */
+  --card: 30 22% 95%;                  /* whisper-warm card tint */
+  --card-foreground: 220 12% 15%;
+  --primary: 185 80% 40%;              /* cyan — #55D9E4 */
   --primary-foreground: 220 20% 12%;
-  --secondary: 265 55% 55%;
-  --secondary-foreground: 220 15% 18%;
+  --secondary: 270 60% 55%;           /* lavender — #8C6EBC */
+  --secondary-foreground: 220 12% 15%;
   --muted: 30 15% 88%;
-  --muted-foreground: 220 10% 40%;
-  --accent: 340 70% 55%;
-  --accent-foreground: 220 15% 18%;
-  --border: 30 20% 84%;
+  --muted-foreground: 220 10% 38%;
+  --accent: 340 70% 55%;             /* magenta-pink */
+  --accent-foreground: 220 12% 15%;
+  --border: 30 18% 82%;
 }
-/* Visible paper fiber texture — contrast-boosted noise */
-html.light .scanlines::before {
-  background: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMDAnIGhlaWdodD0nMTAwJz4KICA8ZmlsdGVyIGlkPSdwYXBlcic+CiAgICA8ZmVUcmJ1bGVuY2UgdHlwZT0nZnJhY3RhbFxub2lzZScgYmFzZUZyZXF1ZW5jeT0nMC4zNScgbnVtT2N0YXZlcz0nMycgc3RpdGNoVGlsZXM9J3N0aXRjaCcvPgogICAgPGZlQ29tcG9uZW50VHJhbnNmZXI+CiAgICAgIDxmZUZ1bmNBIHR5cGU9J2xpbmVhcicgc2xvcGU9JzQnIGludGVyY2VwdD0nLTEuNScnLz4KICAgIDwvZmVDb21wb25lbnRUcmFuc2Zlcj4KICA8L2ZpbHRlcj4KICA8cmVjdCB3aWR0aD0nMTAwJyBoZWlnaHQ9JzEwMCcgZmlsdGVyPSd1cmwoI3BhcGVyKScvPgo8L3N2Zz4=") repeat;
-  background-blend-mode: multiply;
-  opacity: 0.12;
-  z-index: 9999;
+
+/* === LIQUID GLASS BACKDROP: 3 color spots + milky mist === */
+/* Cyan / lavender / top-white spots diffused behind the content. They are
+   pre-blurred, so the page body rendered above stays sharp — true depth-of-field
+   without ever blurring the foreground text/UI. */
+html.light body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    /* cyan blue light — #55D9E4 */
+    radial-gradient(ellipse at 78% 38%, rgb(85 217 228), transparent 68%),
+    /* purple reflection — #8C6EBC */
+    radial-gradient(ellipse at 26% 78%, rgb(140 110 188), transparent 68%),
+    /* top white light — 22% opacity */
+    radial-gradient(ellipse at 52% 8%, rgb(255 255 255 / 0.22), transparent 70%),
+    /* milky white mist #EDF4F2 @10% — top-most, marries the palette */
+    rgb(237 244 242 / 0.10);
+  filter: blur(56px) saturate(180%);
+  opacity: 0.88;
 }
+
+/* Warm paper base sits just above the blurred spots */
 html.light body {
   background: hsl(var(--background));
 }
-/* Solidify transparent backgrounds in light mode for visual hierarchy */
-html.light [class*="bg-card/"] { background-color: hsl(var(--card) / 0.96) !important; }
-html.light .bg-background\/80 { background-color: hsl(var(--background) / 0.98) !important; }
-html.light .bg-background\/90 { background-color: hsl(var(--background) / 0.98) !important; }
-html.light .bg-background\/95 { background-color: hsl(var(--background) / 0.98) !important; }
-html.light .bg-muted\/30 { background-color: hsl(var(--muted) / 0.5) !important; }
-html.light .bg-muted\/50 { background-color: hsl(var(--muted) / 0.6) !important; }
-html.light .bg-muted\/60 { background-color: hsl(var(--muted) / 0.7) !important; }
-/* Light mode: cards get border + subtle shadow instead of transparency */
+
+/* === GRAIN TEXTURE (overlay) === */
+/* Fractal paper noise — the single most important detail: it kills the cheap,
+   plastic-shiny gradient look and gives every glass surface a real, finely
+   abraded texture. */
+html.light .scanlines::before {
+  background: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc1MCcgaGVpZ2h0PSc1MCc+PHN2Zz4KICA8ZmlsdGVyIGlkPSduJz4KICA8ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC45JyBudW1PY3RhdmVzPSczJy8+CiAgPHJlY3Qgd2lkdz0nNTAnIGhlaWdodD0nNTAnIGZpbHRlcj0ndXJsKCFuKScvPgo8L3N2Zz48L3N2Zz4=") repeat;
+  background-size: 50px;
+  opacity: 0.15;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+/* === LIQUID GLASS CARDS & PANELS === */
+/* Translucent white body carrying an ORGANIC, irregular wash of cyan /
+   pink-purple / orange-red that bleeds *inside* the material (a real radial
+   wash, not a linear gradient). backdrop-filter lets the colored backdrop
+   truly bleed through each card — that is the liquid-glass translucency. */
+html.light [class*="bg-card/"],
+html.light .read-mode article.prose {
+  /* ORGANIC, IRREGULAR DIFFUSION wash of the per-card accent. A stack of
+     off-center radials + a soft conic smear bleeds the --card-accent hue *inside*
+     the material — intentionally NOT a simple linear gradient. backdrop-filter
+     lets the colored backdrop truly bleed through each card: liquid-glass. */
+  background:
+    /* fine fractal grain: micro-abrades every glass surface. This is the single
+       most important detail — it kills the cheap, plastic-shiny gradient look. */
+    url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMTAnIGhlaWdodD0nMTEwJz48ZmlsdGVyIGlkPSduJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC43OCcgbnVtT2N0YXZlcz0nNCcgc3RpdGNoVGlsZXM9J3N0aXRjaCcvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPScxMDAlJyBoZWlnaHQ9JzEwMCUnIGZpbHRlcj0ndXJsKCNuKScgZmlsbD0ncmdiYSgwLDAsMCwwLjE2KScvPjwvc3ZnPg==") 0 0 / 60px repeat,
+    radial-gradient(ellipse var(--card-spot, at 90% 16%), var(--card-accent, transparent), transparent 60%),
+    radial-gradient(ellipse at 18% 82%, var(--card-accent, transparent), transparent 56%),
+    conic-gradient(from 200deg at 50% 50%, var(--card-accent, transparent), transparent 55%),
+    hsl(0 0% 100% / 0.18) !important;        /* liquid-glass body: translucent warm white */
+  border: 1px solid hsl(var(--border) / 0.45);
+  border-radius: 22px;                      /* super-large radius */
+  box-shadow:
+    0 12px 44px hsl(var(--foreground) / 0.06),     /* outer volume */
+    0 0 0 1px hsl(var(--foreground) / 0.07),       /* micro border glow */
+    inset 0 1px 0 hsl(0 0% 100% / 0.55),           /* bright glass edge highlight */
+    inset 0 0 6px hsl(0 0% 100% / 0.36),           /* inner glow — layer 1 */
+    inset 0 0 14px hsl(0 0% 100% / 0.18);          /* inner glow — layer 2 */
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* Animation cards: match the glass look; lift + glow on hover */
 html.light .card-rise {
-  border-color: hsl(var(--border)) !important;
-  box-shadow: 0 1px 3px hsl(var(--foreground) / 0.03);
+  border-radius: 22px !important;
 }
 html.light .card-rise:hover {
-  box-shadow: 0 2px 8px hsl(var(--foreground) / 0.05);
+  transform: translateY(-2px);
+  box-shadow:
+    0 22px 58px hsl(var(--foreground) / 0.09),
+    0 0 0 1px hsl(var(--foreground) / 0.09),
+    inset 0 1px 0 hsl(0 0% 100% / 0.68),
+    inset 0 0 8px hsl(0 0% 100% / 0.44),
+    inset 0 0 18px hsl(0 0% 100% / 0.24);
 }
+
+/* === FROSTED NAVIGATION BAR === */
+/* Only the header uses bg-background/80 — make it a true frosted bar so the
+   colored spots bleed through as depth. */
+html.light .bg-background\/80 {
+  background: hsl(0 0% 100% / 0.68) !important;
+  border-bottom: 1px solid hsl(var(--border) / 0.45);
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+html.light .bg-background\/90 { background-color: hsl(var(--background) / 0.96) !important; }
+html.light .bg-background\/95 { background-color: hsl(var(--background) / 0.97) !important; }
+html.light .bg-muted\/30 { background-color: hsl(var(--muted) / 0.4) !important; }
+html.light .bg-muted\/50 { background-color: hsl(var(--muted) / 0.5) !important; }
+html.light .bg-muted\/60 { background-color: hsl(var(--muted) / 0.6) !important; }
+
+/* === LIQUID GLASS: 顶部元素 (代码文本块 + [Posts] 标识 + 导航标签) === */
+/* Light-theme frosted-glass treatment for the top-of-page terminal-style
+   elements. Matches the card wash: translucent white, organic grain,
+   large radius, inner glow — unified with the liquid-glass cards below.
+   Dark theme is completely untouched. */
+html.light .code-glass {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 16px;
+  background: hsl(0 0% 100% / 0.4);
+  border: 1px solid hsl(var(--border) / 0.5);
+  box-shadow:
+    inset 0 1px 0 hsl(0 0% 100% / 0.6),
+    inset 0 0 6px hsl(0 0% 100% / 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+html.light .tag-glass,
+html.light .nav-tag-glass {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.7rem;
+  border-radius: 14px;
+  background: hsl(0 0% 100% / 0.35);
+  border: 1px solid hsl(var(--border) / 0.45);
+  box-shadow:
+    inset 0 1px 0 hsl(0 0% 100% / 0.55),
+    inset 0 0 4px hsl(0 0% 100% / 0.28);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+html.light .nav-tag-glass:hover {
+  background: hsl(0 0% 100% / 0.5);
+  border-color: hsl(var(--primary) / 0.35);
+  box-shadow:
+    inset 0 1px 0 hsl(0 0% 100% / 0.65),
+    inset 0 0 8px hsl(var(--primary) / 0.12);
+}
+
+/* === LIGHT THEME: HERO + NAV + SECTION HEADERS (liquid glass) === */
+/* All rules scoped to html.light — dark theme untouched.
+   Uses .sd (dark-only) / .sl (light-only) / .nav-* to toggle visibility. */
+
+/* Visibility toggles */
+html.light .sd,
+html.light .nav-dark-links { display: none !important; }
+.sl,
+.nav-light-links { display: none !important; }
+html.light .sl { display: block !important; }
+html.light .section-header .sl { display: flex !important; }
+html.light .nav-light-links { display: inline-flex !important; gap: 0.75rem; }
+
+/* Noise texture for glass surfaces */
+html.light { --gn: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMTAnIGhlaWdodD0nMTEwJz48ZmlsdGVyIGlkPSduJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC43OCcgbnVtT2N0YXZlcz0nNCcgc3RpdGNoVGlsZXM9J3N0aXRjaCcvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPScxMDAlJyBoZWlnaHQ9JzEwMCUnIGZpbHRlcj0ndXJsKCNuKScgZmlsbD0ncmdiYSgwLDAsMCwwLjE2KScvPjwvc3ZnPg=="); }
+
+/* Status badge — frosted pill with breathing dot */
+html.light .hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 12px;
+  color: hsl(var(--foreground) / 0.55);
+  background: hsl(0 0% 100% / 0.38);
+  border: 1px solid hsl(var(--border) / 0.4);
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.55), inset 0 0 6px hsl(0 0% 100% / 0.28);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+html.light .hero-badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, hsl(185 80% 40%), hsl(270 60% 55%));
+  box-shadow: 0 0 8px hsl(185 80% 40% / 0.5);
+  animation: breathe 3s ease-in-out infinite;
+}
+@keyframes breathe {
+  0%, 100% { opacity: 0.6; box-shadow: 0 0 8px hsl(185 80% 40% / 0.4); }
+  50% { opacity: 1; box-shadow: 0 0 16px hsl(185 80% 40% / 0.7), 0 0 20px hsl(270 60% 55% / 0.5); }
+}
+
+/* Big K glass logo — blob shape with organic gradient halo */
+html.light .hero-logo {
+  width: 128px;
+  height: 128px;
+  margin: 0 auto;
+  border-radius: 28px;
+  background:
+    var(--gn) 0 0 / 50px repeat,
+    radial-gradient(ellipse at 28% 25%, hsl(185 80% 40% / 0.45), transparent 60%),
+    radial-gradient(ellipse at 72% 75%, hsl(270 60% 55% / 0.35), transparent 60%),
+    hsl(0 0% 100% / 0.22);
+  border: 1px solid hsl(0 0% 100% / 0.5);
+  box-shadow:
+    0 0 0 1px hsl(0 0% 100% / 0.18),
+    inset 0 1px 0 hsl(0 0% 100% / 0.6),
+    inset 0 0 8px hsl(0 0% 100% / 0.35),
+    inset 0 0 18px hsl(0 0% 100% / 0.18),
+    0 0 20px hsl(185 80% 40% / 0.3),
+    0 0 32px hsl(270 60% 55% / 0.22);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Gradient K text — cyan→purple */
+html.light .hero-logo-text {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 64px;
+  font-weight: 700;
+  background: linear-gradient(135deg, hsl(185 80% 40%), hsl(270 60% 55%));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Subtitle — clean non-mono text */
+html.light .hero-subtitle {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  color: hsl(var(--foreground) / 0.6);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Light section label — glass pill */
+html.light .section-header h2 {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.7rem;
+  border-radius: 14px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  color: hsl(var(--foreground) / 0.75);
+  background: hsl(0 0% 100% / 0.32);
+  border: 1px solid hsl(var(--border) / 0.45);
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Light count badge — glass pill */
+html.light .section-count-light {
+  border-radius: 999px;
+  background: hsl(0 0% 100% / 0.3);
+  border: 1px solid hsl(var(--border) / 0.4);
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Light nav tag pills */
+html.light .nav-tag-light {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: hsl(var(--foreground) / 0.7);
+  background: hsl(0 0% 100% / 0.35);
+  border: 1px solid hsl(var(--border) / 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+}
+html.light .nav-tag-light:hover {
+  color: hsl(var(--foreground));
+  background: hsl(0 0% 100% / 0.5);
+  border-color: hsl(var(--primary) / 0.35);
+  box-shadow: 0 0 16px hsl(var(--primary) / 0.12);
+}
+
+/* Light SearchTrigger — rounded glass capsule */
+html.light .search-glass {
+  border-radius: 999px;
+  background: hsl(0 0% 100% / 0.32) !important;
+  border-color: hsl(var(--border) / 0.45) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.55);
+}
+html.light .search-glass:hover {
+  background: hsl(0 0% 100% / 0.45) !important;
+  border-color: hsl(var(--primary) / 0.35) !important;
+}
+html.light .search-glass:hover .text-foreground\/50,
+html.light .search-glass:hover .text-foreground\/40 {
+  color: hsl(var(--foreground) / 0.75) !important;
+}
+html.light .search-glass:hover .text-primary {
+  color: hsl(var(--primary)) !important;
+}
+
+
+
+
+/* === EDITORIAL TYPOGRAPHY (light) === */
+/* Bigger, airier scale — tech with a fashion-magazine's breathing room.
+   Monospace family is retained to preserve the brand identity. */
+html.light h1 { font-size: clamp(1.7rem, 4.2vw, 2.25rem); line-height: 1.16; }
+html.light h2 { font-size: clamp(1.2rem, 2.8vw, 1.6rem); line-height: 1.2; }
+html.light h3 { font-size: clamp(1.05rem, 2.2vw, 1.25rem); line-height: 1.24; }
+html.light h4 { font-size: clamp(0.9rem, 1.8vw, 1.05rem); line-height: 1.3; }
+html.light p,
+html.light li,
+html.light td,
+html.light th { line-height: 1.65; }
+
+
+
+/* === LIGHT THEME: 博客卡片深度优化 === */
+
+/* 隐藏暗色专属元素 / 显示浅色专属元素 */
+html.light .sd,
+html.light .nav-dark-links { display: none !important; }
+.sl,
+.nav-light-links { display: none !important; }
+html.light .sl { display: block !important; }
+html.light .section-header .sl { display: flex !important; }
+html.light .nav-light-links { display: inline-flex !important; gap: 0.75rem; }
+html.light .search-glass { display: inline-flex !important; }
+
+/* --- 隐藏暗色 hero / 显示浅色 hero --- */
+html.light .hero-dark { display: none !important; }
+.hero-light { display: none !important; }
+html.light .hero-light { display: block !important; }
+
+/* --- 隐藏暗色箭头 › / 显示浅色玻璃箭头 --- */
+html.light .arrow-dark { display: none !important; }
+.arrow-light { display: none !important; }
+html.light .arrow-light { display: inline-flex !important; }
+
+/* 隐藏暗色分区标签徽标徽标徽标 */
+html.light .section-dark { display: none !important; }
+
+/* --- Hero logo --- */
+html.light .hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 12px;
+  color: hsl(var(--foreground) / 0.55);
+  background: hsl(0 0% 100% / 0.38);
+  border: 1px solid hsl(var(--border) / 0.4);
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.55), inset 0 0 6px hsl(0 0% 100% / 0.28);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+html.light .hero-badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, hsl(185 80% 40%), hsl(270 60% 55%));
+  box-shadow: 0 0 8px hsl(185 80% 40% / 0.5);
+  animation: breathe 3s ease-in-out infinite;
+}
+@keyframes breathe {
+  0%, 100% { opacity: 0.6; box-shadow: 0 0 8px hsl(185 80% 40% / 0.4); }
+  50% { opacity: 1; box-shadow: 0 0 16px hsl(185 80% 40% / 0.7), 0 0 20px hsl(270 60% 55% / 0.5); }
+}
+html.light .hero-logo {
+  width: 128px;
+  height: 128px;
+  margin: 0 auto;
+  border-radius: 28px;
+  background:
+    var(--gn) 0 0 / 50px repeat,
+    radial-gradient(ellipse at 28% 25%, hsl(185 80% 40% / 0.4), transparent 55%),
+    radial-gradient(ellipse at 72% 72%, hsl(270 60% 55% / 0.3), transparent 55%),
+    hsl(0 0% 100% / 0.22);
+  border: 1px solid hsl(0 0% 100% / 0.5);
+  box-shadow:
+    0 0 0 1px hsl(0 0% 100% / 0.18),
+    inset 0 1px 0 hsl(0 0% 100% / 0.6),
+    inset 0 0 8px hsl(0 0% 100% / 0.35),
+    inset 0 0 18px hsl(0 0% 100% / 0.18),
+    0 0 20px hsl(185 80% 40% / 0.3),
+    0 0 32px hsl(270 60% 55% / 0.25);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+html.light .hero-logo-text {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 64px;
+  font-weight: 700;
+  background: linear-gradient(135deg, hsl(185 80% 40%), hsl(270 60% 55%));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+html.light .hero-subtitle {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  color: hsl(var(--foreground) / 0.6);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* --- Section labels (light) --- */
+html.light .section-header .sl h2 {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.7rem;
+  border-radius: 14px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  color: hsl(var(--foreground) / 0.75);
+  background: hsl(0 0% 100% / 0.32);
+  border: 1px solid hsl(var(--border) / 0.45);
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+html.light .section-count-light {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: hsl(var(--foreground) / 0.6);
+  background: hsl(0 0% 100% / 0.28);
+  border: 1px solid hsl(var(--border) / 0.4);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* --- Card hover: NO cyan text overlay --- */
+html.light .card-rise:hover h3 { color: hsl(var(--foreground)) !important; }
+html.light .card-rise:hover h3 * { color: hsl(var(--foreground)) !important; }
+html.light .card-rise:hover .card-date { color: hsl(var(--foreground) / 0.65) !important; }
+html.light .card-rise:hover .card-time { color: hsl(var(--foreground) / 0.45) !important; }
+html.light .card-rise:hover .tag-pill {
+  color: hsl(var(--foreground) / 0.55) !important;
+  border-color: hsl(var(--border) / 0.35) !important;
+  background-color: hsl(0 0% 100% / 0.18) !important;
+}
+
+/* --- Card content font shrink (light) --- */
+html.light .card-title { font-size: 1.05rem !important; }
+html.light .line-clamp-2 { font-size: 0.8125rem !important; }
+html.light .card-date { color: hsl(var(--foreground) / 0.65) !important; font-size: 0.75rem; font-family: system-ui, sans-serif; }
+html.light .tag-pill { font-size: 0.6rem !important; padding: 0.22rem 0.55rem !important; }
+html.light .card-time { color: hsl(var(--foreground) / 0.45) !important; font-size: 0.6rem !important; font-family: system-ui, sans-serif; }
+
+/* --- Card arrow: glass pill with gradient › --- */
+html.light .card-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 8px;
+  background: hsl(0 0% 100% / 0.25);
+  border: 1px solid hsl(var(--border) / 0.3);
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: transform 0.2s ease;
+}
+html.light .card-arrow::before {
+  content: "›";
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  background: linear-gradient(135deg, hsl(185 80% 40%), hsl(270 60% 55%));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+html.light .card-rise:hover .card-arrow { transform: translateX(2px); }
+
+/* --- Card tags: glass pills with card accent --- */
+html.light .tag-pill {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif !important;
+  font-weight: 500;
+  border-radius: 999px !important;
+  padding: 0.18rem 0.55rem !important;
+  color: hsl(var(--foreground) / 0.55) !important;
+  background: hsl(0 0% 100% / 0.22) !important;
+  border: 1px solid hsl(var(--border) / 0.3) !important;
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* --- Card content padding tighten (light) --- */
+html.light .card-content { padding: 1rem !important; }
+html.light .card-content.pt-3 { padding-top: 0.75rem !important; }
+
+/* --- Pagination: glass + large radius (light) --- */
+html.light .pagination-light {
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+html.light .page-btn,
+html.light .pagination-light span[class*="page-btn"] {
+  border-radius: 14px !important;
+  background: hsl(0 0% 100% / 0.3) !important;
+  border: 1px solid hsl(var(--border) / 0.4) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.5);
+  padding: 0.5rem 1rem !important;
+  font-size: 13px;
+}
+html.light .page-btn[href*="/page"] {
+  color: hsl(var(--foreground) / 0.75) !important;
+}
+html.light .page-btn:hover {
+  background: hsl(0 0% 100% / 0.45) !important;
+  border-color: hsl(var(--primary) / 0.35) !important;
+  color: hsl(var(--foreground)) !important;
+}
+html.light .pagination-light span[class*="text-foreground\/30"] {
+  color: hsl(var(--foreground) / 0.5) !important;
+}
+
 
 /* Theme toggle button */
 .theme-toggle {
@@ -502,4 +1018,120 @@ html.light .card-rise:hover {
 .theme-toggle:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+/* ==================================================================== */
+/* WORKSTREAM 1 ADDITIONS — all scoped to html.light, dark theme untouched */
+/* ==================================================================== */
+
+/* --- Theme toggle: no background, no border, icon only --- */
+html.light .theme-toggle {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  color: hsl(var(--foreground) / 0.55) !important;
+}
+html.light .theme-toggle:hover {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: hsl(var(--primary)) !important;
+}
+
+/* --- Music trigger: remove border, transparent, hover = color only --- */
+html.light .music-trigger {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: hsl(var(--foreground) / 0.6) !important;
+}
+html.light .music-trigger:hover {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: hsl(var(--primary)) !important;
+}
+
+/* --- Music popover: large radius + solid milky-white background --- */
+html.light .music-popover {
+  border-radius: 1.5rem !important;
+  background: #EDF4F2 !important;
+  box-shadow: 0 8px 32px hsl(var(--foreground) / 0.08) !important;
+}
+
+/* --- CmdK search dialog: large radius + solid milky-white background --- */
+html.light .cmdk-dialog {
+  border-radius: 1.5rem !important;
+  background: #EDF4F2 !important;
+}
+
+/* --- Search trigger: expanded glass pill (placeholder + ⌘K) --- */
+html.light .search-glass {
+  border-radius: 999px !important;
+}
+html.light .search-glass kbd {
+  display: inline-block !important;
+  border-radius: 999px !important;
+}
+
+
+
+/* --- Blog detail page: tag chips → rounded-full glass capsules --- */
+html.light .detail-tag {
+  border-radius: 999px !important;
+  background: hsl(0 0% 100% / 0.32) !important;
+  border: 1px solid hsl(var(--border) / 0.35) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: hsl(var(--foreground) / 0.6) !important;
+  padding: 0.18rem 0.55rem !important;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif !important;
+  font-size: 0.7rem !important;
+  font-weight: 500 !important;
+}
+
+/* --- ArticleNavigation: related article cards → large radius glass --- */
+html.light .related-link {
+  border-radius: 1.5rem !important;
+  background: hsl(0 0% 100% / 0.35) !important;
+  border: 1px solid hsl(var(--border) / 0.35) !important;
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+html.light .related-link:hover {
+  border-color: hsl(var(--primary) / 0.35) !important;
+  background: hsl(0 0% 100% / 0.5) !important;
+}
+
+/* --- ArticleNavigation: prev/next links → rounded in light --- */
+html.light .article-nav-link {
+  border-radius: 12px !important;
+}
+
+
+/* --- Blog detail back-to-index link: glass pill (light only) --- */
+html.light .back-link-light {
+  border-radius: 999px !important;
+  background: hsl(0 0% 100% / 0.32) !important;
+  border: 1px solid hsl(var(--border) / 0.45) !important;
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 0.3rem 0.8rem !important;
+  transition: all 0.2s ease !important;
+}
+html.light .back-link-light:hover {
+  transform: translateY(-1px) !important;
+  border-color: hsl(var(--primary) / 0.35) !important;
+  background: hsl(0 0% 100% / 0.45) !important;
+}
+html.light .back-link-light .transition-transform {
+  transition: transform 0.2s ease;
+}
+html.light .back-link-light:hover span:first-child {
+  transform: translateX(-2px) !important;
 }

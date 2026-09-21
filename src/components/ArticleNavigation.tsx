@@ -21,7 +21,7 @@ function PrevNextLink({
   return (
     <Link
       href={item.href}
-      className={`group block min-w-0 px-4 py-1 ${
+      className={`group block min-w-0 px-4 py-1 article-nav-link ${
         right ? "text-right" : "text-left"
       }`}
     >
@@ -46,7 +46,7 @@ export default function ArticleNavigation({ data }: { data: ArticleNavigationDat
 
   return (
     <div className="mt-12 border-border/50 pt-8">
-      <div className="mb-6 flex items-center gap-3 text-xs font-mono text-foreground/30">
+      <div className="mb-6 flex items-center gap-3 text-xs font-mono text-foreground/60">
         <span className="text-primary/40">◆</span>
         <span>continue reading</span>
         <span className="h-[1px] flex-1 bg-border/50" />
@@ -69,7 +69,7 @@ export default function ArticleNavigation({ data }: { data: ArticleNavigationDat
 
       {related.length > 0 ? (
         <>
-          <div className="mt-10 mb-3 text-[11px] font-mono tracking-[0.14em] text-foreground/35">
+          <div className="mt-10 mb-3 text-[11px] font-mono tracking-[0.14em] text-foreground/60">
             related
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -77,7 +77,7 @@ export default function ArticleNavigation({ data }: { data: ArticleNavigationDat
               <Link
                 key={item.key}
                 href={item.href}
-                className="group border border-border/50 bg-background/40 p-3 transition-colors hover:border-primary/35 hover:bg-background/70"
+                className="group border border-border/50 bg-background/40 p-3 transition-colors hover:border-primary/35 hover:bg-background/70 related-link"
               >
                 <div className="truncate font-mono text-xs font-semibold text-foreground/75 group-hover:text-primary transition-colors">
                   {item.title}
@@ -102,11 +102,11 @@ export default function ArticleNavigation({ data }: { data: ArticleNavigationDat
           <span className="h-[1px] w-8 bg-border" />
         </div>
         <div className="flex items-center gap-4">
-          <Link href="/" className="text-foreground/30 hover:text-primary transition-colors">
+          <Link href="/" className="text-foreground/70 hover:text-primary transition-colors">
             返回列表
           </Link>
-          <span className="text-foreground/15">|</span>
-          <span>Kyon Blog</span>
+          <span className="text-foreground/40">|</span>
+          <span className="text-foreground/70">Halcyon</span>
         </div>
       </div>
     </div>

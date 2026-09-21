@@ -38,13 +38,26 @@ export default async function PostPage({ params }: Props) {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-10">
-      <Link
-        href="/"
-        className="inline-flex items-center gap-2 text-xs font-mono text-foreground/40 hover:text-primary transition-colors mb-8"
-      >
-        <span>{`←`}</span>
-        <span>{`[ back to index ]`}</span>
-      </Link>
+      {/* Dark theme: original monospace back link — untouched */}
+      <div className="sd">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-xs font-mono text-foreground/40 hover:text-primary transition-colors mb-8"
+        >
+          <span>{`←`}</span>
+          <span>{`[ back to index ]`}</span>
+        </Link>
+      </div>
+      {/* Light theme: glass pill — Chinese text, readable */}
+      <div className="sl">
+        <Link
+          href="/"
+          className="back-link-light group inline-flex items-center gap-2 text-xs text-foreground/70 hover:text-primary transition-colors mb-8"
+        >
+          <span className="transition-transform group-hover:-translate-x-0.5">←</span>
+          <span>返回文章列表</span>
+        </Link>
+      </div>
 
       <div className="flex items-center gap-2 mb-8">
         <ReadingBreath />
@@ -68,7 +81,7 @@ export default async function PostPage({ params }: Props) {
         {post.tags.map((tag) => (
           <span
             key={tag}
-            className="px-2 py-0.5 border border-border text-xs font-mono text-foreground/40"
+            className="px-2 py-0.5 border border-border text-xs font-mono text-foreground/40 detail-tag"
           >
             #{tag}
           </span>

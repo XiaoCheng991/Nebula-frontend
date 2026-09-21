@@ -1,0 +1,46 @@
+<!doctype html>
+<html class="read-mode light"><head><meta charset="utf-8">
+<style>
+:root{--border:30 18% 82%;--foreground:220 12% 15%;--card:30 22% 95%}
+body{margin:0;background:#f8f4e9;font-family:monospace}
+body::before{content:"";position:fixed;inset:0;z-index:0;
+  background:radial-gradient(ellipse at 78% 38%,rgb(85 217 228),transparent 68%),radial-gradient(ellipse at 26% 78%,rgb(140 110 188),transparent 68%),radial-gradient(ellipse at 52% 8%,rgb(255 255 255 / 0.22),transparent 70%),rgb(237 244 242 / 0.10);
+  filter:blur(56px) saturate(180%);opacity:0.88}
+html.read-mode .scanlines::before{opacity:0;display:none}
+html.light [class*="bg-card/"],
+html.light .read-mode article.prose{
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='110'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' fill='rgba(255,255,255,0.14)'/%3E%3C/svg%3E"),
+    linear-gradient(rgba(255 255 255 / 0.28), rgba(255 255 255 / 0.28)),
+    radial-gradient(ellipse var(--card-spot, at 90% 16%), var(--card-accent, transparent), transparent 62%)
+    !important;
+  background-size: 60px, cover, cover;
+  background-repeat: repeat, no-repeat, no-repeat;
+  border: 1px solid hsl(var(--border)/0.45);
+  border-radius: 22px;
+  box-shadow:
+    0 20px 56px hsl(var(--foreground)/0.08),
+    0 0 0 1px hsl(var(--foreground)/0.10),
+    inset 0 1px 0 hsl(0 0% 100% / 0.62),
+    inset 0 0 8px hsl(0 0% 100% / 0.40),
+    inset 0 0 22px var(--card-accent-glow, hsl(0 0% 100% / 0.22)) !important;
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+}
+.c{position:relative;z-index:1;width:270px;height:110px;line-height:50px;text-align:center;font-size:13px;color:#111}
+</style></head><body>
+<div class="c bg-card/20"><b>default</b></div>
+<div class="c bg-card/20" style="--card-accent:hsl(15 95% 58% / 0.45);--card-spot:at 20% 70%;--card-accent-glow:hsl(15 95% 58% / 0.28)"><b>orange-red</b></div>
+<div class="c bg-card/20" style="--card-accent:hsl(185 75% 60% / 0.45);--card-spot:at 75% 30%;--card-accent-glow:hsl(185 75% 60% / 0.28)"><b>cyan</b></div>
+<div class="c bg-card/20" style="--card-accent:hsl(317 75% 58% / 0.45);--card-spot:at 90% 80%;--card-accent-glow:hsl(317 75% 58% / 0.28)"><b>magenta</b></div>
+<script>
+const r=[];document.querySelectorAll('.c').forEach((el,i)=>{
+  const bg=getComputedStyle(el).background.replace(/\s+/g,' ');
+  const bc=getComputedStyle(el).backgroundColor.slice(0,22);
+  const sz=getComputedStyle(el).backgroundSize;
+  const rp=getComputedStyle(el).backgroundRepeat;
+  const sh=getComputedStyle(el).boxShadow.replace(/\s+/g,' ');
+  r.push((i+1)+':'+el.textContent.slice(0,-4)+' bc='+bc+' layers='+bg.split(',').filter(x=>x.trim()).length+' noise='+(bg.includes('url(')?1:0)+' sz='+sz.slice(0,10)+' glow='+(sh.includes('inset')?1:0));
+});
+document.title=r.join(' | ');
+</script>
+</body></html>

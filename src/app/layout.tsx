@@ -63,28 +63,46 @@ export default function RootLayout({
               href="/"
               className="text-primary font-mono text-lg tracking-wider font-bold text-glow nav-glow shrink-0"
             >
-              {'Kyon'}
+              {'Halcyon'}
             </a>
             <div className="flex items-center gap-3 text-sm font-mono">
               <SearchTrigger />
-              <a
-                href="/"
-                className="text-foreground/70 hover:text-primary transition-colors nav-glow"
-              >
-                [ blog ]
-              </a>
-              <a
-                href="/tags"
-                className="text-foreground/70 hover:text-primary transition-colors nav-glow"
-              >
-                [ tags ]
-              </a>
-              <a
-                href="/about"
-                className="text-foreground/70 hover:text-primary transition-colors nav-glow"
-              >
-                [ about ]
-              </a>
+              {/* Dark theme: [ blog ] [ tags ] [ about ] — hidden in light */}
+              <span className="nav-dark-links">
+                <a
+                  href="/"
+                  className="text-foreground/70 hover:text-primary transition-colors nav-glow"
+                >
+                  [ blog ]
+                </a>
+                <a
+                  href="/tags"
+                  className="text-foreground/70 hover:text-primary transition-colors nav-glow"
+                >
+                  [ tags ]
+                </a>
+                <a
+                  href="/about"
+                  className="text-foreground/70 hover:text-primary transition-colors nav-glow"
+                >
+                  [ about ]
+                </a>
+              </span>
+              {/* Light theme: Tags About (no [ blog ], glass pills) */}
+              <span className="nav-light-links hidden">
+                <a
+                  href="/tags"
+                  className="nav-tag-light"
+                >
+                  Tags
+                </a>
+                <a
+                  href="/about"
+                  className="nav-tag-light"
+                >
+                  About
+                </a>
+              </span>
               <ThemeToggle />
               {/* Music trigger - in nav, opens a popover beneath it.
                   Renders nothing while PLAYLIST is empty. */}
@@ -92,10 +110,10 @@ export default function RootLayout({
             </div>
           </nav>
         </header>
-        <main className="pt-14 pb-24">
+        <main className="pt-14 pb-12">
           {children}
         </main>
-        <footer className="border-t border-border mt-20">
+        <footer className="border-t border-border mt-12">
           <div className="max-w-4xl mx-auto px-4 py-8 text-xs font-mono text-foreground/30 flex justify-between items-center">
             <span>{`/* ${new Date().getFullYear()} Kyon */`}</span>
             <div className="flex items-center gap-4">
