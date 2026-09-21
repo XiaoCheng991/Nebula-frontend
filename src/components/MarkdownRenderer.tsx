@@ -249,8 +249,8 @@ const cssContent = `
 .md-render :not(pre) > code {
   background: hsl(var(--muted) / 0.9);
   border-radius: 4px;
-  padding: 0.2rem 0.55rem;
-  margin-inline: 0.12em;
+  padding: 0.2rem 0.3rem;
+  margin-inline: 0.24em;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
   font-size: 0.8rem; font-family: 'Space Mono', 'Fira Code', monospace;
@@ -269,7 +269,7 @@ const cssContent = `
   font-size: 0.82rem;
   line-height: 1.65;
   color: hsl(var(--foreground) / 0.85);
-  border-radius: 4px;
+  border-radius: 8px;
 }
 .md-render pre code {
   background: transparent;
@@ -338,7 +338,36 @@ const cssContent = `
 
 /* HR */
 .md-render hr { border-color: hsl(var(--border)); margin: 3rem 0; }
-`;
+
+.md-render pre.rich-block {
+  position: relative;
+  background: hsl(var(--muted) / 0.6);
+  border: 1px solid hsl(var(--border));
+  padding: 2.25rem 1.5rem 1.25rem;
+  margin: 1.25rem 0;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  font-family: 'Space Mono', 'Fira Code', monospace;
+}
+.md-render pre.rich-block::before {
+  content: attr(data-language);
+  position: absolute;
+  top: 0.55rem;
+  left: 1.25rem;
+  color: hsl(var(--foreground) / 0.3);
+  font-size: 0.7rem;
+  pointer-events: none;
+}
+.md-render pre.rich-block code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+}
+
+`
+;
 
 /* ------------------------------------------------------------------ */
 /*  Main component                                                     */
@@ -352,15 +381,34 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
     linkify: true,
     breaks: false,
   }).use(markdownItTable);
+
   renderer.renderer.rules.fence = (tokens, index) => {
     const token = tokens[index];
     const language = (token.info || "").trim().split(/\s+/)[0] || "text";
+
+    // rich 块：支持 markdown 格式（加粗、行内代码等），但视觉仍是代码块样式
+    if (language === "rich") {
+      let content = token.content;
+      // 先转义 HTML
+      content = content
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      // 加粗
+      content = content.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+      // 行内代码
+      content = content.replace(/`(.+?)`/g, "<code>$1</code>");
+      return `<pre class="rich-block" data-language="${language}"><code>${content}</code><button type="button" class="code-copy-button" aria-live="polite">复制代码</button></pre>\n`;
+    }
+
+    // 普通代码块（语法高亮）
     const highlighted = language !== "text" && hljs.getLanguage(language)
       ? hljs.highlight(token.content, { language }).value
       : renderer.utils.escapeHtml(token.content);
     const label = renderer.utils.escapeHtml(language);
     return `<pre data-language="${label}"><code class="language-${label}">${highlighted}</code><button type="button" class="code-copy-button" aria-live="polite">复制代码</button></pre>\n`;
   };
+
   const html = renderer.render(wrapped);
   const htmlWithLazy = html.replace(/<img([^>]*)>/gi, (_match, attrs) =>
     attrs.includes('loading=') ? `<img${attrs}>` : `<img${attrs} loading="lazy">`
