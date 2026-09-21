@@ -37,7 +37,7 @@ export default function ThemeToggle() {
       <button
         type="button"
         aria-label="切换主题"
-        className="theme-toggle"
+        className="theme-toggle" id="theme-toggle-btn"
         disabled
       >
         ◐
@@ -50,7 +50,7 @@ export default function ThemeToggle() {
       type="button"
       onClick={toggle}
       aria-label={isLight ? "切换为深色模式" : "切换为浅色模式"}
-      className="theme-toggle"
+      className="theme-toggle" id="theme-toggle-btn"
       title={isLight ? "切换为深色模式" : "切换为浅色模式"}
     >
       {isLight ? "☀" : "☾"}

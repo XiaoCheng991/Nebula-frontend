@@ -57,7 +57,7 @@ export default function RootLayout({
         {/* Scroll progress bar */}
         <div id="scroll-progress" />
 
-        <header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-sm">
+        <header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-sm nav-header">
           <nav className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
             <a
               href="/"
@@ -110,10 +110,10 @@ export default function RootLayout({
             </div>
           </nav>
         </header>
-        <main className="pt-14 pb-12">
+        <main className="pt-14 pb-12 main-wrapper">
           {children}
         </main>
-        <footer className="border-t border-border mt-12">
+        <footer className="border-t border-border mt-12 nav-footer">
           <div className="max-w-4xl mx-auto px-4 py-8 text-xs font-mono text-foreground/30 flex justify-between items-center">
             <span>{`/* ${new Date().getFullYear()} Kyon */`}</span>
             <div className="flex items-center gap-4">

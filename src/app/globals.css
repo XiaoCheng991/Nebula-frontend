@@ -680,31 +680,20 @@ html.light .hero-subtitle {
   line-height: 1.5;
 }
 
-/* Light section label — glass pill */
-html.light .section-header h2 {
+/* Light count badge — unified glass pill */
+html.light .section-count-light {
   display: inline-flex;
   align-items: center;
-  padding: 0.25rem 0.7rem;
-  border-radius: 14px;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  font-weight: 500;
-  font-size: 14px;
-  color: hsl(var(--foreground) / 0.75);
-  background: hsl(0 0% 100% / 0.32);
-  border: 1px solid hsl(var(--border) / 0.45);
-  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.5);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-
-/* Light count badge — glass pill */
-html.light .section-count-light {
+  padding: 0.35rem 0.9rem;
   border-radius: 999px;
-  background: hsl(0 0% 100% / 0.3);
-  border: 1px solid hsl(var(--border) / 0.4);
-  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.5);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  background: hsl(0 0% 100% / 0.4);
+  border: 1px solid hsl(var(--border) / 0.5);
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.55);
 }
 
 /* Light nav tag pills */
@@ -866,10 +855,10 @@ html.light .hero-subtitle {
 html.light .section-header .sl h2 {
   display: inline-flex;
   align-items: center;
-  padding: 0.25rem 0.7rem;
+  padding: 0;
   border-radius: 14px;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  font-weight: 500;
+  font-weight: 300;
   font-size: 14px;
   color: hsl(var(--foreground) / 0.75);
   background: hsl(0 0% 100% / 0.32);
@@ -878,19 +867,20 @@ html.light .section-header .sl h2 {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
+/* Light count badge — unified glass pill */
 html.light .section-count-light {
   display: inline-flex;
   align-items: center;
-  padding: 0.2rem 0.6rem;
+  padding: 0.35rem 0.9rem;
   border-radius: 999px;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 500;
-  color: hsl(var(--foreground) / 0.6);
-  background: hsl(0 0% 100% / 0.28);
-  border: 1px solid hsl(var(--border) / 0.4);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: hsl(0 0% 100% / 0.4);
+  border: 1px solid hsl(var(--border) / 0.5);
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.55);
 }
 
 /* --- Card hover: NO cyan text overlay --- */
@@ -1134,4 +1124,183 @@ html.light .back-link-light .transition-transform {
 }
 html.light .back-link-light:hover span:first-child {
   transform: translateX(-2px) !important;
+}
+
+/* Avatar: cyan→purple gradient with noise + inner glow */
+html.light .avatar-gradient {
+  box-shadow: inset 0 0 0 1px hsl(0 0% 100% / 0.3), 0 0 12px hsl(185 80% 40% / 0.4);
+  background-blend-mode: overlay;
+}
+
+/* Social icon buttons: glass squares, 40x40 */
+html.light .social-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: hsl(0 0% 100% / 0.45);
+  border: 1px solid hsl(var(--border) / 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+html.light .social-btn:hover {
+  transform: translateY(-2px);
+  border-color: hsl(var(--primary) / 0.4);
+  background: hsl(0 0% 100% / 0.6);
+}
+
+/* Sidebar text colors — already using inline Tailwind classes text-foreground/80 etc */
+/* Ensure tag/archive links are non-mono for readability */
+html.light .sidebar-light a {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* --- ArticleNavigation footer: light theme color overrides --- */
+html.light .article-nav-footer .nav-footer-link {
+  color: hsl(var(--foreground) / 0.7) !important;
+}
+html.light .article-nav-footer .separator {
+  color: hsl(var(--foreground) / 0.4) !important;
+}
+html.light .article-nav-footer .brand-text {
+  color: hsl(var(--foreground) / 0.7) !important;
+}
+
+/* --- ArticleNavigation titles: deepen in light theme --- */
+html.light .section-nav-title {
+  color: hsl(var(--foreground) / 0.6) !important;
+}
+html.light .section-related-title {
+  color: hsl(var(--foreground) / 0.6) !important;
+}
+
+
+/* ==================================================================== */
+/* WORKSTREAM: Light-mode nav removal + dual-column layout */
+/* ==================================================================== */
+
+/* Hide top nav and footer in light mode — dark theme untouched */
+html.light .nav-header { display: none !important; }
+html.light .nav-footer { display: none !important; }
+
+/* Main: no top padding in light mode (no fixed header) */
+html.light .main-wrapper { padding-top: 0 !important; }
+
+/* Sidebar: hidden on mobile in light mode */
+html.light .sidebar-light { display: none !important; }
+
+/* Dual-column layout on desktop ≥1024px (light only) */
+@media (min-width: 1024px) {
+  html.light .home-container {
+    max-width: 100% !important;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+    display: flex !important;
+    gap: 48px;
+    align-items: flex-start;
+  }
+  html.light .sidebar-light {
+    display: block !important;
+    position: sticky;
+    top: 6rem;
+    height: fit-content;
+    width: 240px;
+  }
+  html.light .sidebar-right {
+    display: block !important;
+    position: sticky;
+    top: 6rem;
+    height: fit-content;
+    width: 220px;
+  }
+}
+
+/* Social icon buttons: glass squares 40×40 */
+html.light .social-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: hsl(0 0% 100% / 0.45);
+  border: 1px solid hsl(var(--border) / 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+html.light .social-btn:hover {
+  transform: translateY(-2px);
+  border-color: hsl(var(--primary) / 0.35);
+  background: hsl(0 0% 100% / 0.55);
+}
+
+/* Nav items & sidebar: non-mono in light mode */
+html.light .sidebar-light {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+html.light .nav-item-light {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  color: hsl(var(--foreground) / 0.7);
+  transition: all 0.2s ease;
+}
+html.light .nav-item-light:hover {
+  color: hsl(var(--foreground));
+  background: hsl(0 0% 100% / 0.4);
+  border-radius: 0.75rem;
+}
+
+/* 右栏玻璃卡片 */
+html.light .sidebar-card {
+  border-radius: 1.5rem;
+  background: hsl(0 0% 100% / 0.35);
+  border: 1px solid hsl(var(--border) / 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.55);
+  padding: 1rem;
+}
+html.light .sidebar-card-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: hsl(var(--foreground) / 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid hsl(var(--border) / 0.4);
+}
+html.light .sidebar-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+html.light .sidebar-card-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 0.5rem;
+  font-size: 14px;
+  color: hsl(var(--foreground) / 0.7);
+  transition: all 0.2s ease;
+}
+html.light .sidebar-card-item:hover {
+  background: hsl(0 0% 100% / 0.3);
+  color: hsl(var(--foreground));
+  border-radius: 0.5rem;
+}
+html.light .sidebar-card-count {
+  font-size: 12px;
+  color: hsl(var(--foreground) / 0.4);
+}
+
+/* SearchTrigger full-width inside right sidebar card */
+html.light .sidebar-right .search-glass {
+  width: 100% !important;
+  max-width: 100% !important;
 }

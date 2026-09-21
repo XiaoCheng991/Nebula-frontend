@@ -46,7 +46,7 @@ export default function ArticleNavigation({ data }: { data: ArticleNavigationDat
 
   return (
     <div className="mt-12 border-border/50 pt-8">
-      <div className="mb-6 flex items-center gap-3 text-xs font-mono text-foreground/60">
+      <div className="mb-6 flex items-center gap-3 text-xs font-mono text-foreground/30 section-nav-title">
         <span className="text-primary/40">◆</span>
         <span>continue reading</span>
         <span className="h-[1px] flex-1 bg-border/50" />
@@ -69,7 +69,7 @@ export default function ArticleNavigation({ data }: { data: ArticleNavigationDat
 
       {related.length > 0 ? (
         <>
-          <div className="mt-10 mb-3 text-[11px] font-mono tracking-[0.14em] text-foreground/60">
+          <div className="mt-10 mb-3 text-[11px] font-mono tracking-[0.14em] text-foreground/35 section-related-title">
             related
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -95,18 +95,21 @@ export default function ArticleNavigation({ data }: { data: ArticleNavigationDat
         </>
       ) : null}
 
-      <div className="mt-12 flex flex-col items-center gap-4 text-xs font-mono text-foreground/25">
+      <div className="mt-12 flex flex-col items-center gap-4 text-xs font-mono text-foreground/25 article-nav-footer">
         <div className="flex items-center gap-3">
           <span className="h-[1px] w-8 bg-border" />
           <span className="text-primary/40">◆</span>
           <span className="h-[1px] w-8 bg-border" />
         </div>
         <div className="flex items-center gap-4">
-          <Link href="/" className="text-foreground/70 hover:text-primary transition-colors">
+          <Link href="/" className="text-foreground/30 hover:text-primary transition-colors nav-footer-link">
             返回列表
           </Link>
-          <span className="text-foreground/40">|</span>
-          <span className="text-foreground/70">Halcyon</span>
+          <span className="text-foreground/15 separator">|</span>
+          <span className="brand-text">
+            <span className="sd">Kyon Blog</span>
+            <span className="sl">Halcyon</span>
+          </span>
         </div>
       </div>
     </div>

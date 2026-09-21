@@ -15,6 +15,7 @@ interface Item {
   isDoc: boolean;
   href: string;
   cover?: string;
+  wordCount?: number;
 }
 
 function formatDateOrEmpty(date: string): string {
@@ -81,7 +82,7 @@ export default function BlogClient({
                       src={item.cover}
                       alt=""
                       className="w-full h-auto object-cover opacity-70 group-hover:opacity-100 transition-opacity duration-300"
-                      style={{ maxHeight: "96px" }}
+                      style={{ height: "auto", width: "auto" }}
                       width={100}
                       height={96}
                       sizes="(max-width: 639px) 56px, 76px"
@@ -127,6 +128,14 @@ export default function BlogClient({
                           </span>
                         </>
                       )}
+                      {(item.wordCount || 0) > 0 && (
+                        <>
+                          <span className="text-foreground/25">·</span>
+                          <span className="text-foreground/35 transition-colors text-[10px]">
+                            约 {item.wordCount} 字
+                          </span>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -166,6 +175,14 @@ export default function BlogClient({
                         <span className="text-foreground/25">·</span>
                         <span className="text-foreground/35 group-hover:text-primary/40 transition-colors text-[10px] card-time">
                           {item.readTime}m read
+                        </span>
+                      </>
+                    )}
+                    {(item.wordCount || 0) > 0 && (
+                      <>
+                        <span className="text-foreground/25">·</span>
+                        <span className="text-foreground/35 transition-colors text-[10px]">
+                          约 {item.wordCount} 字
                         </span>
                       </>
                     )}
