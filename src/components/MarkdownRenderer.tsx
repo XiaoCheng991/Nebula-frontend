@@ -119,15 +119,24 @@ function wrapSections(md: string): string {
   return out.join("\n");
 }
 
+function stripHTML(str: string): string {
+  return str
+    .replace(/<[^>]+>/g, "")
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&")
+    .trim();
+}
+
 export function getTableOfContents(content: string): TocItem[] {
   const wrapped = wrapSections(preprocessMarkdown(content));
   return [...wrapped.matchAll(/<summary data-level="(\d)" id="([^"]+)">/g)]
     .map((match) => ({
       level: Number(match[1]),
       id: match[2],
-      title: wrapped.slice(match.index + match[0].length, wrapped.indexOf("</summary>", match.index))
-        .replace(/<[^>]+>/g, "")
-        .trim(),
+      title: stripHTML(wrapped.slice(match.index + match[0].length, wrapped.indexOf("</summary>", match.index))),
     }))
     .filter((item) => item.level >= 2 && item.level <= 4);
 }

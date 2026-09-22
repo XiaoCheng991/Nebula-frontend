@@ -37,7 +37,7 @@
 
   html {
     scroll-behavior: smooth;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   body {
@@ -45,7 +45,7 @@
     font-family: 'Space Mono', 'Fira Code', 'Courier New', monospace;
     margin: 0;
     padding: 0;
-    overflow-x: hidden;
+    overflow-x: clip;
     background: #050505;
   }
 
@@ -1303,4 +1303,46 @@ html.light .sidebar-card-count {
 html.light .sidebar-right .search-glass {
   width: 100% !important;
   max-width: 100% !important;
+}
+
+/* ==================================================================== */
+/* LIGHT-THEME: MarkdownRenderer overrides (blockquote + code blocks)   */
+/* ==================================================================== */
+/* All rules scoped to html.light — dark theme untouched.               */
+
+/* Quote blocks — smaller font, left accent, frosted bg */
+html.light .md-render blockquote {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  border-left: 3px solid hsl(var(--secondary) / 0.6);
+  padding: 0.25rem 0.75rem 0.25rem 1rem;
+  background: hsl(0 0% 100% / 0.3);
+  border-radius: 0 12px 12px 0;
+  color: hsl(var(--foreground) / 0.5);
+}
+
+/* Code blocks — solid purple-grey, no glass blur */
+html.light .md-render pre {
+  background: #f5f3f8;
+  border: 1px solid hsl(var(--border) / 0.4);
+  line-height: 1.7;
+  border-radius: 8px;
+}
+
+/* Language label — text-xs gray */
+html.light .md-render pre[data-language]::before {
+  font-size: 0.75rem;
+  color: hsl(var(--foreground) / 0.5);
+}
+
+/* Copy button — plain solid, matching block bg */
+html.light .md-render .code-copy-button {
+  background: #f5f3f8;
+  border: 1px solid hsl(var(--border) / 0.4);
+  color: hsl(var(--foreground) / 0.55);
+}
+html.light .md-render .code-copy-button:hover,
+html.light .md-render .code-copy-button:focus-visible {
+  color: hsl(var(--primary));
+  border-color: hsl(var(--primary) / 0.6);
 }
