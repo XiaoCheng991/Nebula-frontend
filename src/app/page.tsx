@@ -6,7 +6,6 @@ import BlogClient from "@/components/blog-client";
 import { getAllTags } from "@/lib/tags";
 import SearchTrigger from "@/components/SearchTrigger";
 import SidebarSearchItem from "@/components/SidebarSearchItem";
-import ThemeToggle from "@/components/ThemeToggle";
 import {
   IconBrandGithub,
   IconBrandBilibili,
@@ -17,6 +16,7 @@ import {
   IconFolder,
   IconFileText,
 } from "@tabler/icons-react";
+import ThemeToggleRow from "@/components/ThemeToggleRow";
 
 function countWords(content: string): number {
   return content.replace(/\s/g, "").length;
@@ -129,20 +129,17 @@ export default async function BlogPage({
         <div className="flex flex-col gap-2 items-center">
           {/* Nav items — English, flex column, left-aligned */}
           <nav className="flex flex-col gap-1.5">
-            <Link href="/" className="nav-item-light flex w-full items-center gap-2.5 text-[20px] font-medium px-5 py-2 rounded-[10px]"><IconHome size={20} />Home</Link>
-            <Link href="/about" className="nav-item-light flex w-full items-center gap-2.5 text-[20px] font-medium px-5 py-2 rounded-[10px]"><IconUser size={20} />About</Link>
-            <Link href="/about" className="nav-item-light flex w-full items-center gap-2.5 text-[20px] font-medium px-5 py-2 rounded-[10px]"><IconFolder size={20} />Projects</Link>
-            <Link href="/about" className="nav-item-light flex w-full items-center gap-2.5 text-[20px] font-medium px-5 py-2 rounded-[10px]"><IconFileText size={20} />Plans</Link>
+            <Link href="/" className="menu-item"><IconHome size={20} />Home</Link>
+            <Link href="/about" className="menu-item"><IconUser size={20} />About</Link>
+            <Link href="/about" className="menu-item"><IconFolder size={20} />Projects</Link>
+            <Link href="/about" className="menu-item"><IconFileText size={20} />Plans</Link>
             <SidebarSearchItem />
-            <div className="nav-item-light flex w-full items-center gap-2.5 text-[20px] font-medium px-5 py-2 rounded-[10px]">
-              <ThemeToggle />
-              <span>To Dark</span>
-            </div>
+            <ThemeToggleRow />
           </nav>
         </div>
       </aside>
 
-      {/* Main content: Hero + Posts */}
+      {/* Main content: Posts */}
       <div className="min-w-0 flex-1">
         {/* Hero — dark: code/h1/comment  |  light: badge */}
         <section className="mb-12 pt-4">
@@ -182,10 +179,10 @@ export default async function BlogPage({
               </span>
             </div>
             <div className="sl flex items-center gap-3 mb-6">
-              <h2 className="section-count-light text-base font-medium text-foreground">
+              <span className="section-count-light text-base font-medium text-foreground">
                 所有文章
-              </h2>
-              <span className="section-count-light text-base font-medium text-foreground/50">
+              </span>
+              <span className="section-count-light ml-auto text-base font-medium text-foreground/50">
                 {totalCount} 篇
               </span>
             </div>

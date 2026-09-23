@@ -6,9 +6,9 @@ import RssIcon from "@/components/RssIcon";
 import EasterEggs from "@/components/EasterEggs";
 import CmdK from "@/components/CmdK";
 import SearchTrigger from "@/components/SearchTrigger";
-import ThemeToggle from "@/components/ThemeToggle";
 import { posts } from "@/lib/posts";
 import { getDocsList } from "@/lib/docs";
+import ThemeToggleIcon from "@/components/ThemeToggleIcon";
 
 export const metadata: Metadata = {
   title: "Kyon // blog",
@@ -103,7 +103,7 @@ export default function RootLayout({
                   About
                 </a>
               </span>
-              <ThemeToggle />
+              <ThemeToggleIcon />
               {/* Music trigger - in nav, opens a popover beneath it.
                   Renders nothing while PLAYLIST is empty. */}
               <MusicPlayer />
