@@ -5,67 +5,21 @@ import { getDocsList, getDocContent } from "@/lib/docs";
 import BlogClient from "@/components/blog-client";
 import { getAllTags } from "@/lib/tags";
 import SearchTrigger from "@/components/SearchTrigger";
+import SidebarSearchItem from "@/components/SidebarSearchItem";
 import ThemeToggle from "@/components/ThemeToggle";
 import {
   IconBrandGithub,
   IconBrandBilibili,
   IconMail,
   IconRss,
+  IconHome,
+  IconUser,
+  IconFolder,
+  IconFileText,
 } from "@tabler/icons-react";
 
 function countWords(content: string): number {
   return content.replace(/\s/g, "").length;
-}
-
-// Tabler-style inline SVG icons (16x16 viewBox)
-function IconHome() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <path d="M3 9.5L12 3L21 9.5" />
-      <path d="M5 11V19H9M15 11V19H19V11" />
-    </svg>
-  );
-}
-function IconUser() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <circle cx="12" cy="8" r="3" />
-      <path d="M4 21V14a4 4 0 018 0v7M20 21V14a4 4 0 00-3-3.87" />
-    </svg>
-  );
-}
-function IconTool() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <path d="M14.752 18.35C14.41 18.73 14 19.06 14 19.5a2.5 2.5 0 005 0c0-.44-.33-.77-.65-1.15A5.5 5.5 0 0014.752 18.35z" />
-      <path d="M14.752 18.35l-4.976-4.976a3.5 3.5 0 010-4.95l1.8-1.8a2.5 2.5 0 003.5 0l2.5-2.5a1.5 1.5 0 00-2.12-2.12l-2.5 2.5a3.5 3.5 0 000 4.95z" />
-    </svg>
-  );
-}
-function IconFile() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-      <path d="M14 2L14 8H20" />
-      <path d="M8 13h8" />
-      <path d="M8 17h8" />
-    </svg>
-  );
-}
-function IconSearch() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <circle cx="11" cy="11" r="6" />
-      <path d="M21 21L15 15" />
-    </svg>
-  );
-}
-function IconMoon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <path d="M21 12.79A9 9 0 0111.21 3 9 9 0 0021 12.79z" />
-    </svg>
-  );
 }
 
 export default async function BlogPage({
@@ -140,20 +94,20 @@ export default async function BlogPage({
   );
 
   return (
-    <div className="max-w-4xl px-5 py-10 home-container">
+    <div className="max-w-2xl mx-auto px-5 py-6 home-container">
       {/* Light-theme sidebar: avatar + nav */}
       <aside className="sl sidebar-light">
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col px-5 gap-3 w-full items-center">
           {/* Avatar */}
-          <div className="w-24 h-24 rounded-full overflow-hidden border border-border/60">
-            <Image src="/avatar/XiaoCheng991.jpeg" alt="avatar"
+          <div className="w-32 h-32 rounded-full overflow-hidden mx-1 mt-4 mb-1">
+            <Image src="https://vzxtwpfxuyqyjitoqgap.supabase.co/storage/v1/object/public/user-avatar/avatars/myslef.png" alt="avatar"
                    width={96} height={96} className="w-full h-full object-cover" />
           </div>
 
           {/* Name + tagline */}
           <div className="flex flex-col gap-1">
-            <span className="text-xl font-bold text-foreground">Halcyon</span>
-            <span className="text-sm text-foreground/50">谁还记得？</span>
+            <span className="text-xl font-bold text-foreground">Halcyon的博客</span>
+            <span className="text-sm text-foreground/50 text-center">喜忧参半，皆是日常</span>
           </div>
 
           {/* Social icons (bare, no glass box) */}
@@ -167,17 +121,22 @@ export default async function BlogPage({
             <a href="/feed.xml" aria-label="RSS"
                className="hover:text-primary transition-colors"><IconRss size={20} /></a>
           </div>
+        </div>
 
+        {/* Divider */}
+        <div className="h-px bg-border my-6" />
+
+        <div className="flex flex-col gap-2 items-center">
           {/* Nav items — English, flex column, left-aligned */}
-          <nav className="flex flex-col gap-3 w-full">
-            <Link href="/" className="nav-item-light flex items-center gap-2 text-base font-medium"><IconHome />Home</Link>
-            <Link href="/about" className="nav-item-light flex items-center gap-2 text-base font-medium"><IconUser />About</Link>
-            <Link href="/about" className="nav-item-light flex items-center gap-2 text-base font-medium"><IconTool />Projects</Link>
-            <Link href="/about" className="nav-item-light flex items-center gap-2 text-base font-medium"><IconFile />Plans</Link>
-            <div className="nav-item-light flex items-center gap-2 text-base font-medium cursor-pointer"><IconSearch />Search</div>
-            <div className="nav-item-light flex items-center gap-2 text-base font-medium">
-              <IconMoon />
+          <nav className="flex flex-col gap-1.5">
+            <Link href="/" className="nav-item-light flex w-full items-center gap-2.5 text-[20px] font-medium px-5 py-2 rounded-[10px]"><IconHome size={20} />Home</Link>
+            <Link href="/about" className="nav-item-light flex w-full items-center gap-2.5 text-[20px] font-medium px-5 py-2 rounded-[10px]"><IconUser size={20} />About</Link>
+            <Link href="/about" className="nav-item-light flex w-full items-center gap-2.5 text-[20px] font-medium px-5 py-2 rounded-[10px]"><IconFolder size={20} />Projects</Link>
+            <Link href="/about" className="nav-item-light flex w-full items-center gap-2.5 text-[20px] font-medium px-5 py-2 rounded-[10px]"><IconFileText size={20} />Plans</Link>
+            <SidebarSearchItem />
+            <div className="nav-item-light flex w-full items-center gap-2.5 text-[20px] font-medium px-5 py-2 rounded-[10px]">
               <ThemeToggle />
+              <span>To Dark</span>
             </div>
           </nav>
         </div>

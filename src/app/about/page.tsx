@@ -79,7 +79,7 @@ export default function AboutPage() {
           {/* Avatar */}
           <div className="shrink-0">
             <Image
-              src="/avatar/XiaoCheng991.jpeg"
+              src="https://vzxtwpfxuyqyjitoqgap.supabase.co/storage/v1/object/public/user-avatar/avatars/myslef.png"
               alt="avatar"
               width={128}
               height={128}

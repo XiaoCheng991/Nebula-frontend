@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
-const path = require('path')
-const fs = require('fs')
+
 const nextConfig = {
   webpack: (config, { isServer }) => {
     if (!isServer) {
@@ -17,7 +16,6 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'vzxtwpfxuyqyjitoqgap.supabase.co',
-        pathname: '/storage/v1/object/public/blog-images/**',
       },
       {
         protocol: 'https',

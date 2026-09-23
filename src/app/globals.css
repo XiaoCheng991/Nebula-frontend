@@ -978,13 +978,13 @@ html.light .pagination-light span[class*="text-foreground\/30"] {
 /* Theme toggle button */
 .theme-toggle {
   font-family: 'Space Mono', 'Fira Code', 'Courier New', monospace;
-  font-size: 13px;
+  font-size: 20px;
   line-height: 1;
-  width: 30px;
-  height: 30px;
+  width: auto;
+  height: auto;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: left;
   border: 1px solid hsl(var(--border) / 0.6);
   border-radius: 6px;
   background: hsl(var(--background) / 0.7);
@@ -1206,9 +1206,9 @@ html.light .sidebar-light { display: none !important; }
   html.light .sidebar-light {
     display: block !important;
     position: sticky;
-    top: 6rem;
+    top: 1rem;           /* ← 加这一行 */
     height: fit-content;
-    width: 240px;
+    width: 180px;
   }
   html.light .sidebar-right {
     display: block !important;
@@ -1247,12 +1247,11 @@ html.light .sidebar-light {
 html.light .nav-item-light {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   color: hsl(var(--foreground) / 0.7);
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 html.light .nav-item-light:hover {
   color: hsl(var(--foreground));
   background: hsl(0 0% 100% / 0.4);
-  border-radius: 0.75rem;
 }
 
 /* 右栏玻璃卡片 */

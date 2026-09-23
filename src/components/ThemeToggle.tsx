@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import {IconMoon, IconSun} from "@tabler/icons-react";
+
+const THEME_EVENT = "theme-change";
 
 export default function ThemeToggle() {
   const [isLight, setIsLight] = useState(false);
@@ -8,16 +11,24 @@ export default function ThemeToggle() {
 
   useEffect(() => {
     setMounted(true);
-    const stored = localStorage.getItem("theme");
-    if (stored === "light") {
-      setIsLight(true);
-    } else if (stored === "dark") {
-      setIsLight(false);
-    } else {
-      setIsLight(
-        window.matchMedia("(prefers-color-scheme: light)").matches,
-      );
+
+    const applyTheme = () => {
+      const stored = localStorage.getItem("theme");
+
+      let light;
+
+      if (stored === "light") light = true;
+      else if (stored === "dark") light = false;
+      else light = window.matchMedia("(prefers-color-scheme: light)").matches;
+
+      setIsLight(light)
+      document.documentElement.classList.toggle("light", light);
     }
+
+    applyTheme();
+
+    window.addEventListener(THEME_EVENT, applyTheme);
+    return () => window.removeEventListener(THEME_EVENT, applyTheme);
   }, []);
 
   const toggle = () => {
@@ -30,6 +41,7 @@ export default function ThemeToggle() {
       document.documentElement.classList.remove("light");
       localStorage.setItem("theme", "dark");
     }
+    window.dispatchEvent(new Event(THEME_EVENT));
   };
 
   if (!mounted) {
@@ -53,7 +65,7 @@ export default function ThemeToggle() {
       className="theme-toggle" id="theme-toggle-btn"
       title={isLight ? "切换为深色模式" : "切换为浅色模式"}
     >
-      {isLight ? "☀" : "☾"}
+      {isLight ? <IconSun size={18} /> : <IconMoon size={18} />}
     </button>
   );
 }

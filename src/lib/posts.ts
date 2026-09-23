@@ -9,12 +9,6 @@ export interface Post {
   cover?: string;
 }
 
-const BACKTICK = '`';
-
-function code(lang: string, ...lines: string[]): string {
-  return `${BACKTICK}${lang}\n${lines.join('\n')}\n${BACKTICK}`;
-}
-
 export const posts: Post[] = [
   {
     slug: "hello-world",
