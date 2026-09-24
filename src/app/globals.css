@@ -514,8 +514,6 @@ html.light .read-mode article.prose {
     inset 0 1px 0 hsl(0 0% 100% / 0.55),           /* bright glass edge highlight */
     inset 0 0 6px hsl(0 0% 100% / 0.36),           /* inner glow — layer 1 */
     inset 0 0 14px hsl(0 0% 100% / 0.18);          /* inner glow — layer 2 */
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
 }
 
 /* Animation cards: match the glass look; lift + glow on hover */

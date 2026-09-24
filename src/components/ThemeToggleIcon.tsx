@@ -36,7 +36,12 @@ export default function ThemeToggleIcon() {
   };
 
   return (
-      <button onClick={toggle} aria-label="切换主题" style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", display: "flex", alignItems: "center" }}>
+      <button
+          className="h-7 w-7 flex item-center justify-center transition-colors text-foreground/65 border border-transparent hover:text-primary hover:border-primary/40"
+          onClick={toggle}
+          aria-label="切换主题"
+          style={{ background: "none", cursor: "pointer", display: "flex", alignItems: "center" }}
+      >
         {isLight ? <IconSun size={18} /> : <IconMoon size={18} />}
       </button>
   );

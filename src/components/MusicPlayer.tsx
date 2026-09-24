@@ -394,7 +394,7 @@ export default function MusicPlayer() {
         ].join(" ")}
       >
         <span aria-hidden>
-          <IconNote size={13} />
+          <IconNote size={18} />
         </span>
       </button>
 

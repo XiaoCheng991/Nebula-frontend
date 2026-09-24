@@ -11,8 +11,8 @@ import { getDocsList } from "@/lib/docs";
 import ThemeToggleIcon from "@/components/ThemeToggleIcon";
 
 export const metadata: Metadata = {
-  title: "Kyon // blog",
-  description: "Kyon's Blog — 代码、想法与技术笔记",
+  title: "HalcyonBlog",
+  description: "HalcyonBlog",
   icons: {
     icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
     shortcut: "/favicon.svg",
@@ -69,12 +69,6 @@ export default function RootLayout({
               <SearchTrigger />
               {/* Dark theme: [ blog ] [ tags ] [ about ] — hidden in light */}
               <span className="nav-dark-links">
-                <a
-                  href="/"
-                  className="text-foreground/70 hover:text-primary transition-colors nav-glow"
-                >
-                  [ blog ]
-                </a>
                 <a
                   href="/tags"
                   className="text-foreground/70 hover:text-primary transition-colors nav-glow"

@@ -66,7 +66,7 @@ export default function BlogClient({
             <Link
               key={item.slug}
               href={item.href}
-              className="card-rise group block border border-border/60 bg-card/20 hover:border-primary/40 hover:bg-card/35 transition-colors duration-300 overflow-hidden card-light"
+              className="card-rise group block border border-border/60 bg-card/20 hover:border-primary/40 hover:bg-card/35 transition-[background-color] duration-300 overflow-hidden card-light"
               style={
                 {
                   "--card-accent": accent,

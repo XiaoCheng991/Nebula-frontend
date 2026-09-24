@@ -24,7 +24,7 @@ export default function ThemeToggle() {
   return (
     <button onClick={toggle} className="menu-item w-full text-left">
       {isLight ? <IconSun size={18} /> : <IconMoon size={18} />}
-      <span className="theme-toggle-label">{isLight ? "To Dark" : "To Light"}</span>
+      <span className="theme-toggle-label">{isLight ? "Dark" : "Light"}</span>
     </button>
   );
 }

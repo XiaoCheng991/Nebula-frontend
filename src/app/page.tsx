@@ -150,11 +150,11 @@ export default async function BlogPage({
               <span className="cursor-blink" />
             </div>
             <h1 className="text-4xl font-bold mb-3 text-foreground leading-tight">
-              <span className="text-primary">Kyon</span>
+              <span className="text-primary">Halcyon</span>
               <span className="text-secondary"> Blog</span>
             </h1>
             <p className="text-foreground/50 font-mono text-sm max-w-xl">
-              {`谁还记得`}
+              {`喜忧参半，皆是日常`}
             </p>
           </div>
           {/* Light theme: status badge only */}
@@ -169,7 +169,7 @@ export default async function BlogPage({
         {/* Posts + Docs */}
         <section>
           <div className="section-header">
-            <div className="sd flex items-center gap-3">
+            <div className="sd flex items-center gap-3 mb-3">
               <h2 className="text-sm font-mono text-primary tracking-wider">
                 {`[ posts ]`}
               </h2>
