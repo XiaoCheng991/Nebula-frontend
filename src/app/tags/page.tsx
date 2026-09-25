@@ -1,5 +1,6 @@
 import { getAllTags } from "@/lib/tags";
 import TagCloud from "@/components/TagCloud";
+import Sidebar from "@/components/Sidebar";
 
 /**
  * /tags - personal-tag index page.
@@ -46,7 +47,9 @@ export default function TagsPage() {
   const totalPosts = tags.reduce((s, t) => s + t.count, 0);
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-10">
+    <div className="max-w-5xl mx-auto px-4 py-10 light-page-layout light-two-column">
+      <Sidebar />
+      <div className="light-page-main">
       {/* ============================================================ */}
       {/* HERO                                                        */}
       {/* ============================================================ */}
@@ -126,6 +129,7 @@ export default function TagsPage() {
           <span className="text-primary/70">{maxCount}</span>
         </span>
       </footer>
+      </div>
     </div>
   );
 }

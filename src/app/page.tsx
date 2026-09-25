@@ -1,22 +1,10 @@
 import Link from "next/link";
-import Image from "next/image";
 import { posts } from "@/lib/posts";
 import { getDocsList, getDocContent } from "@/lib/docs";
 import BlogClient from "@/components/blog-client";
 import { getAllTags } from "@/lib/tags";
 import SearchTrigger from "@/components/SearchTrigger";
-import SidebarSearchItem from "@/components/SidebarSearchItem";
-import {
-  IconBrandGithub,
-  IconBrandBilibili,
-  IconMail,
-  IconRss,
-  IconHome,
-  IconUser,
-  IconFolder,
-  IconFileText,
-} from "@tabler/icons-react";
-import ThemeToggleRow from "@/components/ThemeToggleRow";
+import Sidebar from "@/components/Sidebar";
 
 function countWords(content: string): number {
   return content.replace(/\s/g, "").length;
@@ -94,53 +82,11 @@ export default async function BlogPage({
   );
 
   return (
-    <div className="max-w-2xl mx-auto px-5 py-6 home-container">
-      {/* Light-theme sidebar: avatar + nav */}
-      <aside className="sl sidebar-light">
-        <div className="flex flex-col px-5 gap-3 w-full items-center">
-          {/* Avatar */}
-          <div className="w-32 h-32 rounded-full overflow-hidden mx-1 mt-4 mb-1">
-            <Image src="https://vzxtwpfxuyqyjitoqgap.supabase.co/storage/v1/object/public/user-avatar/avatars/myslef.png" alt="avatar"
-                   width={96} height={96} className="w-full h-full object-cover" />
-          </div>
-
-          {/* Name + tagline */}
-          <div className="flex flex-col gap-1">
-            <span className="text-xl font-bold text-foreground">Halcyon的博客</span>
-            <span className="text-sm text-foreground/50 text-center">喜忧参半，皆是日常</span>
-          </div>
-
-          {/* Social icons (bare, no glass box) */}
-          <div className="flex gap-4 text-foreground/60">
-            <a href="https://github.com/XiaoCheng991" target="_blank" rel="noreferrer" aria-label="GitHub"
-               className="hover:text-primary transition-colors"><IconBrandGithub size={20} /></a>
-            <a href="https://space.bilibili.com/3546566354798756" target="_blank" rel="noreferrer" aria-label="Bilibili"
-               className="hover:text-primary transition-colors"><IconBrandBilibili size={20} /></a>
-            <a href="mailto:kyon991@proton.me" aria-label="Email"
-               className="hover:text-primary transition-colors"><IconMail size={20} /></a>
-            <a href="/feed.xml" aria-label="RSS"
-               className="hover:text-primary transition-colors"><IconRss size={20} /></a>
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div className="h-px bg-border my-6" />
-
-        <div className="flex flex-col gap-2 items-center">
-          {/* Nav items — English, flex column, left-aligned */}
-          <nav className="flex flex-col gap-1.5">
-            <Link href="/" className="menu-item"><IconHome size={20} />Home</Link>
-            <Link href="/about" className="menu-item"><IconUser size={20} />About</Link>
-            <Link href="/about" className="menu-item"><IconFolder size={20} />Projects</Link>
-            <Link href="/about" className="menu-item"><IconFileText size={20} />Plans</Link>
-            <SidebarSearchItem />
-            <ThemeToggleRow />
-          </nav>
-        </div>
-      </aside>
+    <div className="max-w-2xl mx-auto px-5 py-6 home-container light-page-layout">
+      <Sidebar />
 
       {/* Main content: Posts */}
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 home-main">
         {/* Hero — dark: code/h1/comment  |  light: badge */}
         <section className="mb-12 pt-4">
           {/* Dark theme: terminal-style hero (完全隐藏在浅色) */}
@@ -210,7 +156,7 @@ export default async function BlogPage({
           <div className="sidebar-card">
             <div className="sidebar-card-title">分类</div>
             <div className="sidebar-card-list">
-              {sidebarTags.map((t) => (
+              {sidebarTags.slice(0, 10).map((t) => (
                 <Link key={t.name} href={`/tags`} className="sidebar-card-item">
                   <span>{t.name}</span>
                   <span className="sidebar-card-count">{t.count}</span>

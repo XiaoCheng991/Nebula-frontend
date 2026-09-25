@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Sidebar from "@/components/Sidebar";
 export default function AboutPage() {
   const profile = {
     name: "Kyon",
@@ -68,7 +69,9 @@ export default function AboutPage() {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-10">
+    <div className="max-w-4xl mx-auto px-4 py-10 light-page-layout light-two-column">
+      <Sidebar />
+      <div className="light-page-main light-about-main">
       {/* Hero */}
       <section className="mb-16 pt-8">
         <div className="flex items-center gap-2 text-xs font-mono text-primary/60 mb-4">
@@ -226,6 +229,7 @@ export default function AboutPage() {
           {"代码不只是代码。"}
         </blockquote>
       </section>
+      </div>
     </div>
   );
 }

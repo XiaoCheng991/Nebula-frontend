@@ -5,6 +5,7 @@ import { getDocsList } from "@/lib/docs";
 import { getAllTags } from "@/lib/tags";
 import { getTagColor } from "@/lib/tag-color";
 import BlogClient from "@/components/blog-client";
+import Sidebar from "@/components/Sidebar";
 
 interface Item {
   slug: string;
@@ -78,7 +79,9 @@ export default async function TagPostsPage({ params }: PageProps) {
   const colorClass = getTagColor(tag);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-10">
+    <div className="max-w-4xl mx-auto px-4 py-10 light-page-layout light-two-column">
+      <Sidebar />
+      <div className="light-page-main">
       <Link
         href="/tags"
         className="inline-flex items-center gap-2 text-xs font-mono text-foreground/40 hover:text-primary transition-colors mb-6"
@@ -116,6 +119,7 @@ export default async function TagPostsPage({ params }: PageProps) {
           />
         )}
       </section>
+      </div>
     </div>
   );
 }

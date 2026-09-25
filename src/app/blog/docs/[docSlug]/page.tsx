@@ -10,6 +10,8 @@ import { getTableOfContents } from "@/components/MarkdownRenderer";
 import FloatingToc from "@/components/FloatingToc";
 import ReadModeToggle from "@/components/ReadModeToggle";
 import ReadingBreath from "@/components/ReadingBreath";
+import Sidebar from "@/components/Sidebar";
+import ArticleToc from "@/components/ArticleToc";
 
 type Props = {
   params: Promise<{ docSlug: string }>;
@@ -37,9 +39,12 @@ export default async function DocPage({ params }: Props) {
   const meta = getDocMeta(docSlug);
 
   if (!content || !meta) notFound();
+  const toc = getTableOfContents(content);
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-10">
+    <div className="max-w-3xl mx-auto px-4 py-10 light-page-layout">
+      <Sidebar />
+      <div className="light-page-main">
       {/* Dark theme: original monospace back link — untouched */}
       <div className="sd">
         <Link
@@ -104,7 +109,7 @@ export default async function DocPage({ params }: Props) {
         </div>
       )}
 
-      <FloatingToc items={getTableOfContents(content)} />
+      <FloatingToc items={toc} />
       <article className="prose prose-sm max-w-none">
         <MarkdownRenderer content={content} />
       </article>
@@ -123,6 +128,12 @@ export default async function DocPage({ params }: Props) {
         const related = getRelatedArticles(current);
         return <ArticleNavigation data={{ current, prev, next, related }} />;
       })()}
+      </div>
+      {toc.length > 0 && (
+        <aside className="sl light-detail-toc" aria-label="文章目录">
+          <ArticleToc items={toc} />
+        </aside>
+      )}
     </div>
   );
 }
