@@ -33,6 +33,7 @@ readTime: 20
 │  ① **setup(）**                                │  ← Vue 3 组合式API的入口
 │     所有代码最先执行的地方                     │
 │     ref()、computed()、watch(） 在这里注册    │
+│  (immediate: true时回调在同一时刻同步执行一次)  │
 │     ⚠️ 此时还没有 DOM, template 还没渲染      │
 └────────────────────┬───────────────────────┘
                      │
@@ -49,7 +50,6 @@ readTime: 20
 │     页面上已经能看到渲染出来的 HTML 了            │
 │     ✅ 这里可以操作 DOM（获取元素、初始化第三方库） │
 │     ✅ 这里可以发网络请求（但不推荐，见后文)       │
-│     ⚠️ watch({ immediate: true }) 在这一步执行 │
 └────────────────────┬─────────────────────────┘
                      │
                      ▼
@@ -67,7 +67,7 @@ readTime: 20
          │
          ▼
 ┌──────────────────┐
-│ ⑤ **onUpdate()**     │  ← DOM 已经更新完毕
+│ ⑤ **onUpdated()**     │  ← DOM 已经更新完毕
 │   新的 DOM 已就位  │     ⚠️ 不要在里面改状态，会死循环
 └────────┬─────────┘
          │
@@ -100,7 +100,7 @@ const loading = ref(false)               // 创建响应式引用，值 = false
 const page = ref(1)                      // 创建响应式引用，值 = 1
 const total = ref(0)                     // 创建响应式引用，值 = 0
 
-// watch 注册（但回调还没执行，要等 mounted 阶段才触发 immediate）
+// watch 注册，immediate: true 时，回调在同一时刻【同步】执行 --- 仍在setup阶段，早于挂载 onMounted
 watch(
   [searchParams, page],
   ([params, p]) => { load({ ...params, page: p }) },
@@ -116,7 +116,7 @@ function handlePageChange(newPage) { ... }
 **setup()** 时的状态：
 - DOM：❌不存在
 - 数据：✅已就绪(ref都创建好了)
-- 网络请求：❌未发起（watch回调还没执行）
+- 网络请求：✅已发起（immediate 回调在 setup 阶段同步执行，请求已发出，响应稍后到达）
 
 ---
 
@@ -251,13 +251,13 @@ onUnmounted(() => {
 
 **对应关系**：
 
-| 代码                              | 	实际执行时机                           |
-|---------------------------------|-----------------------------------|
-| ref([])                         | setup() 阶段，同步创建                   |
-| computed(...)                   | 	setup() 阶段，同步创建（但值是懒计算的）         |
-| watch(..., { immediate: true }) | setup() 注册，onMounted 阶段执行回调       |
-| watch(...)（没有 immediate）        | setup() 注册，等依赖变化时才执行              |
-| `<template>` 里的内容               | onBeforeMount 之前编译，onMounted 时已可见 |
+| 代码                              | 	实际执行时机                                      |
+|---------------------------------|----------------------------------------------|
+| ref([])                         | setup() 阶段，同步创建                              |
+| computed(...)                   | 	setup() 阶段，同步创建（但值是懒计算的）                    |
+| watch(..., { immediate: true }) | setup() 注册，同一时刻同步执行回调（仍在setup阶段，遭遇onMounted） |
+| watch(...)（没有 immediate）        | setup() 注册，等依赖变化时才执行                         |
+| `<template>` 里的内容               | onBeforeMount 之前编译，onMounted 时已可见            |
 
 ## 五、什么时候用哪个钩子（速查）
 
