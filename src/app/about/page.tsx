@@ -1,257 +1,670 @@
+"use client";
+
 import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
+import {
+  IconArrowUpRight,
+  IconBrandBilibili,
+  IconBrandGithub, IconBrandTiktok,
+  IconExternalLink,
+  IconMail,
+  IconWorld,
+} from "@tabler/icons-react";
 import Sidebar from "@/components/Sidebar";
-export default function AboutPage() {
-  const profile = {
-    name: "Kyon",
-    alias: "小橙991",
-    github: "https://github.com/XiaoCheng991",
-    email: "kyon991@proton.me",
-    location: "East Asia",
-    csdn: "https://blog.csdn.net/qq_60985619",
-    gitee: "https://gitee.com/XiaoCheng991",
+
+type Status = {
+  icon: string;
+  label: string;
+  time: string;
+};
+
+type Weather = {
+  temperature: number;
+  icon: string;
+  label: string;
+};
+
+type WeatherResponse = {
+  current?: {
+    temperature_2m?: number;
+    weather_code?: number;
   };
+};
 
-  const skills = [
-    {
-      category: "backend",
-      label: "BACKEND",
-      items: ["Java", "SpringBoot / SpringCloud", "MyBatis-Plus", "MySQL / Redis"],
-    },
-    {
-      category: "ai",
-      label: "AI / ML",
-      items: ["Python", "LangChain", "OpenClaw", "多模态大模型"],
-    },
-    {
-      category: "frontend",
-      label: "FRONTEND",
-      items: ["JavaScript", "TypeScript", "React", "Next.js"],
-    },
-    {
-      category: "devops",
-      label: "DEVOPS",
-      items: ["Docker", "Git / GitLab", "Linux", "Jenkins CI/CD"],
-    },
-    {
-      category: "data",
-      label: "DATA",
-      items: ["Spark", "达梦 DM8", "数据治理", "数据可视化"],
-    },
-    {
-      category: "other",
-      label: "OTHER",
-      items: ["Go (Gin)", "RabbitMQ", "K8s 基础"],
-    },
-  ];
+const weatherByCode: Record<number, { icon: string; label: string }> = {
+  0: { icon: "☀️", label: "晴" },
+  1: { icon: "🌤️", label: "晴间多云" },
+  2: { icon: "⛅", label: "多云" },
+  3: { icon: "☁️", label: "阴" },
+  45: { icon: "🌫️", label: "雾" },
+  48: { icon: "🌫️", label: "雾凇" },
+  51: { icon: "🌦️", label: "毛毛雨" },
+  53: { icon: "🌦️", label: "小雨" },
+  55: { icon: "🌧️", label: "细雨" },
+  56: { icon: "🌧️", label: "冻雨" },
+  57: { icon: "🌧️", label: "冻雨" },
+  61: { icon: "🌧️", label: "小雨" },
+  63: { icon: "🌧️", label: "中雨" },
+  65: { icon: "🌧️", label: "大雨" },
+  66: { icon: "🌧️", label: "冻雨" },
+  67: { icon: "🌧️", label: "冻雨" },
+  71: { icon: "🌨️", label: "小雪" },
+  73: { icon: "❄️", label: "中雪" },
+  75: { icon: "❄️", label: "大雪" },
+  77: { icon: "🌨️", label: "雪粒" },
+  80: { icon: "🌦️", label: "阵雨" },
+  81: { icon: "🌧️", label: "阵雨" },
+  82: { icon: "⛈️", label: "强阵雨" },
+  85: { icon: "🌨️", label: "阵雪" },
+  86: { icon: "❄️", label: "强阵雪" },
+  95: { icon: "⛈️", label: "雷雨" },
+  96: { icon: "⛈️", label: "雷雨伴冰雹" },
+  99: { icon: "⛈️", label: "强雷雨" },
+};
 
-  const experiences = [
-    {
-      company: "某大型零售电商集团",
-      period: "2025.07 ~ 至今",
-      role: "全栈开发工程师",
-      points: [
-        "集团管培生，10个月完成全链路岗位培训，荣获2025年度优秀员工奖（TOP10%）",
-        "驻场国际知名快餐企业总部参与主数据中台项目，获甲方书面认可",
-        "直连商品中台提供实时库存/价格查询，响应时间 ≤500ms",
-        "个人自学 OpenClaw、LangChain 等AI工具和框架",
-      ],
-    },
-    {
-      company: "某互联网科技企业",
-      period: "2024.05 ~ 2024.11",
-      role: "Java 开发工程师",
-      points: [
-        "负责高校教育平台、教考分离平台等3个核心系统后端研发",
-        "EasyExcel + MinIO 处理文件导出5000+次，效率提升40%",
-        "交付健壮接口80+个，接口调用成功率99.9%",
-      ],
-    },
-  ];
+const socialLinks = [
+  { label: "GitHub", href: "https://github.com/XiaoCheng991", icon: IconBrandGithub },
+  { label: "Bilibili", href: "https://space.bilibili.com/3546566354798756", icon: IconBrandBilibili },
+  { label: "Email", href: "mailto:kyon991@proton.me", icon: IconMail },
+  { label: "CSDN", href: "https://blog.csdn.net/qq_60985619", icon: IconWorld },
+  { label: "Gitee", href: "https://gitee.com/XiaoCheng991", icon: IconExternalLink },
+  { label: "Douyin", href: "https://www.douyin.com/user/self?from_tab_name=main", icon: IconBrandTiktok },
+  { label: "Xiaohongshu", href: "https://www.xiaohongshu.com/user/profile/65730a66000000002002ef1a", icon: IconExternalLink },
+];
+
+type GameEntry = {
+  name: string;
+  coverUrl?: string;
+};
+
+type BookEntry = {
+  title: string;
+  coverUrl?: string;
+};
+
+type VideoEntry = {
+  title: string;
+  coverUrl?: string;
+  href?: string;
+};
+
+type FavoriteEntry = {
+  title: string;
+  meta?: string;
+  href?: string;
+};
+
+type FavoriteTab = "quotes" | "podcasts" | "videos" | "writing";
+
+type UploadTarget = "hobby" | "game" | "book" | "video" | "favorite";
+
+type UploadButtonProps = {
+  target: UploadTarget;
+  label: string;
+  accept: string;
+  disabled?: boolean;
+  onUpload: (target: UploadTarget, file: File) => void;
+};
+
+const hobbies = [
+  { title: "吉他", description: "把灵感拨成一段旋律。" },
+];
+const initialHobbyWorks: { title: string; kind: "audio" | "video"; href?: string }[] = [];
+const initialGames: GameEntry[] = [];
+const initialBooks: BookEntry[] = [];
+const initialVideos: VideoEntry[] = [];
+const initialFavoriteQuotes: FavoriteEntry[] = [];
+const initialFavoritePodcasts: FavoriteEntry[] = [];
+const initialFavoriteVideos: FavoriteEntry[] = [];
+const initialFavoriteWriting: FavoriteEntry[] = [];
+const favoriteTabs: { id: FavoriteTab; label: string }[] = [
+  { id: "quotes", label: "语录" },
+  { id: "podcasts", label: "播客" },
+  { id: "videos", label: "视频" },
+  { id: "writing", label: "文字" },
+];
+
+const initialFavoriteCollections: Record<FavoriteTab, FavoriteEntry[]> = {
+  quotes: initialFavoriteQuotes,
+  podcasts: initialFavoritePodcasts,
+  videos: initialFavoriteVideos,
+  writing: initialFavoriteWriting,
+};
+
+const supabaseUrl = (
+  process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://vzxtwpfxuyqyjitoqgap.supabase.co"
+).replace(/\/$/, "");
+const supabaseKey =
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_KEY;
+
+function UploadButton({
+  target,
+  label,
+  accept,
+  disabled,
+  onUpload,
+}: UploadButtonProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-10 light-page-layout light-two-column">
+    <>
+      <button
+        type="button"
+        className="about-upload-button"
+        disabled={disabled}
+        onClick={() => inputRef.current?.click()}
+      >
+        {label}
+      </button>
+      <input
+        ref={inputRef}
+        className="sr-only"
+        type="file"
+        accept={accept}
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          if (file) onUpload(target, file);
+          event.target.value = "";
+        }}
+      />
+    </>
+  );
+}
+
+async function uploadToBlogImages(file: File, target: UploadTarget) {
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error("缺少 NEXT_PUBLIC_SUPABASE_URL 或 NEXT_PUBLIC_SUPABASE_ANON_KEY");
+  }
+
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
+  const path = `${target}/${Date.now()}-${safeName}`;
+  const response = await fetch(`${supabaseUrl}/storage/v1/object/blog-images/${path}`, {
+    method: "POST",
+    headers: {
+      apikey: supabaseKey,
+      Authorization: `Bearer ${supabaseKey}`,
+      "Content-Type": file.type || "application/octet-stream",
+      "x-upsert": "false",
+    },
+    body: file,
+  });
+
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(detail || "Supabase 上传失败");
+  }
+
+  return `${supabaseUrl}/storage/v1/object/public/blog-images/${path
+    .split("/")
+    .map(encodeURIComponent)
+    .join("/")}`;
+}
+
+function getNanjingStatus(): Status {
+  const now = new Date();
+  const parts = new Intl.DateTimeFormat("zh-CN", {
+    timeZone: "Asia/Shanghai",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(now);
+  const hour = Number(parts.find((part) => part.type === "hour")?.value ?? 0);
+  const minute = parts.find((part) => part.type === "minute")?.value ?? "00";
+
+  let icon = "😴";
+  let label = "睡觉中";
+  if (hour >= 9 && hour < 12) {
+    icon = "💻";
+    label = "写代码中";
+  } else if (hour >= 12 && hour < 14) {
+    icon = "🍚";
+    label = "干饭时间";
+  } else if (hour >= 14 && hour < 18) {
+    icon = "🐟";
+    label = "摸鱼中";
+  } else if (hour >= 18 && hour < 20) {
+    icon = "🚶";
+    label = "散步放空";
+  } else if (hour >= 20 && hour < 23) {
+    icon = "📝";
+    label = "写博客";
+  }
+
+  return { icon, label, time: `${String(hour).padStart(2, "0")}:${minute}` };
+}
+
+function getWeather(code: number) {
+  return weatherByCode[code] ?? { icon: "🌐", label: "天气未知" };
+}
+
+export default function AboutPage() {
+  const [status, setStatus] = useState<Status | null>(null);
+  const [weather, setWeather] = useState<Weather | null>(null);
+  const [favoriteTab, setFavoriteTab] = useState<FavoriteTab>("quotes");
+  const [hobbyWorks, setHobbyWorks] = useState(initialHobbyWorks);
+  const [games, setGames] = useState(initialGames);
+  const [books, setBooks] = useState(initialBooks);
+  const [videos, setVideos] = useState(initialVideos);
+  const [favoriteCollections, setFavoriteCollections] = useState(initialFavoriteCollections);
+  const [uploadingTarget, setUploadingTarget] = useState<UploadTarget | null>(null);
+  const [uploadMessage, setUploadMessage] = useState<string | null>(null);
+
+  const handleUpload = async (target: UploadTarget, file: File) => {
+    setUploadingTarget(target);
+    setUploadMessage(null);
+    try {
+      const publicUrl = await uploadToBlogImages(file, target);
+      const title = file.name.replace(/\.[^.]+$/, "");
+
+      if (target === "hobby") {
+        setHobbyWorks((items) => [
+          ...items,
+          { title, kind: file.type.startsWith("video/") ? "video" : "audio", href: publicUrl },
+        ]);
+      } else if (target === "game") {
+        setGames((items) => [...items, { name: title, coverUrl: publicUrl }]);
+      } else if (target === "book") {
+        setBooks((items) => [...items, { title, coverUrl: publicUrl }]);
+      } else if (target === "video") {
+        setVideos((items) => [
+          ...items,
+          {
+            title,
+            href: publicUrl,
+            coverUrl: file.type.startsWith("image/") ? publicUrl : undefined,
+          },
+        ]);
+      } else {
+        setFavoriteCollections((collections) => ({
+          ...collections,
+          [favoriteTab]: [
+            ...collections[favoriteTab],
+            { title, meta: "刚刚上传", href: publicUrl },
+          ],
+        }));
+      }
+
+      setUploadMessage(`已上传：${title}`);
+    } catch (error) {
+      setUploadMessage(error instanceof Error ? error.message : "上传失败");
+    } finally {
+      setUploadingTarget(null);
+    }
+  };
+
+  useEffect(() => {
+    let active = true;
+    const updateStatus = () => {
+      if (active) setStatus(getNanjingStatus());
+    };
+
+    updateStatus();
+    const timer = window.setInterval(updateStatus, 30_000);
+
+    const loadWeather = async () => {
+      try {
+        const response = await fetch(
+          "https://api.open-meteo.com/v1/forecast?latitude=32.06&longitude=118.80&current=temperature_2m,weather_code",
+          { cache: "no-store" },
+        );
+        if (!response.ok) throw new Error("weather request failed");
+        const data = (await response.json()) as WeatherResponse;
+        const temperature = data.current?.temperature_2m;
+        const code = data.current?.weather_code;
+        if (active && typeof temperature === "number" && typeof code === "number") {
+          setWeather({ temperature, ...getWeather(code) });
+        }
+      } catch {
+        if (active) setWeather(null);
+      }
+    };
+
+    void loadWeather();
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
+  }, []);
+
+  return (
+    <div className="max-w-2xl mx-auto px-5 py-6 light-page-layout light-two-column">
       <Sidebar />
       <div className="light-page-main light-about-main">
-      {/* Hero */}
-      <section className="mb-16 pt-8">
-        <div className="flex items-center gap-2 text-xs font-mono text-primary/60 mb-4">
-          <span>{`// whoami`}</span>
-          <span className="cursor-blink" />
-        </div>
-        <div className="flex items-start gap-6 flex-wrap">
-          {/* Avatar */}
-          <div className="shrink-0">
+        <div className="about-playful-intro">
+          <div className="about-dark-avatar">
             <Image
               src="https://vzxtwpfxuyqyjitoqgap.supabase.co/storage/v1/object/public/user-avatar/avatars/myslef.png"
               alt="avatar"
               width={128}
               height={128}
-              className="w-24 h-24 sm:w-32 sm:h-32 rounded-lg border border-primary/30 object-cover"
+              className="w-full h-full object-cover"
               priority
-              sizes="(max-width: 639px) 96px, 128px"
+              sizes="96px"
             />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-foreground mb-1">
-              {profile.name}
-              <span className="text-primary text-glow ml-2 text-lg font-mono">
-                {`@${profile.alias}`}
-              </span>
-            </h1>
-            <p className="text-sm text-foreground/50 font-mono mb-2">
-              {`// 全栈 + AI 开发`}
-            </p>
-            <p className="text-sm text-foreground/40 max-w-lg leading-relaxed">
-              数据科学与大数据技术 · 2025届<br />
-              有互联网科技企业实习经历，目前在一家大型零售业集团做全栈开发。<br />
-              正在从 Java 向 AI 迈进，目标：让代码不只是代码。
-            </p>
+            <div className="about-terminal-only">{`// hello.world`}</div>
+            <h1 className="about-playful-title">Halcyon</h1>
+            <p className="about-playful-subtitle">代码、散步，以及一些还没发生的好事。</p>
           </div>
         </div>
-      </section>
 
-      {/* Contact */}
-      <section className="mb-16">
-        <div className="flex items-center gap-3 mb-6">
-          <h2 className="text-xs font-mono text-primary tracking-wider">
-            {`[ contact ]`}
-          </h2>
-          <span className="flex-1 h-[1px] bg-border" />
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <ContactItem
-            label="GITHUB"
-            value="github.com/XiaoCheng991"
-            href={profile.github}
-          />
-          <ContactItem
-            label="EMAIL"
-            value="kyon991@proton.me"
-            href={`mailto:${profile.email}`}
-          />
-          <ContactItem
-            label="LOCATION"
-            value={profile.location}
-            href="#"
-          />
-        </div>
-        <div className="flex gap-3 mt-4">
-          <a href={profile.csdn} target="_blank" rel="noopener noreferrer" className="text-xs font-mono text-foreground/40 hover:text-primary transition-colors">
-            [ CSDN ]
-          </a>
-          <a href={profile.gitee} target="_blank" rel="noopener noreferrer" className="text-xs font-mono text-foreground/40 hover:text-primary transition-colors">
-            [ GITEE ]
-          </a>
-        </div>
-      </section>
-
-      {/* Experience */}
-      <section className="mb-16">
-        <div className="flex items-center gap-3 mb-6">
-          <h2 className="text-xs font-mono text-primary tracking-wider">
-            {`[ experience ]`}
-          </h2>
-          <span className="flex-1 h-[1px] bg-border" />
-        </div>
-        <div className="space-y-6">
-          {experiences.map((exp, i) => (
-            <div key={i} className="pl-6 border-l-2 border-primary/20 relative">
-              <div className="absolute -left-[7px] top-1.5 w-3 h-3 bg-primary/30 rounded-full" />
-              <div className="flex items-center justify-between flex-wrap gap-2 mb-1">
-                <h3 className="text-sm font-semibold text-foreground">{exp.company}</h3>
-                <span className="text-xs font-mono text-foreground/30">{exp.period}</span>
+        <div className="about-top-grid">
+          <div className="about-top-stack">
+            <article className="about-insight-card">
+              <div className="about-insight-card-title">
+                <span>当前状态</span>
+                <span className="about-terminal-only">{`[ live.status ]`}</span>
               </div>
-              <div className="text-xs font-mono text-primary/60 mb-2">{exp.role}</div>
-              <ul className="text-sm text-foreground/50 space-y-1">
-                {exp.points.map((point, j) => (
-                  <li key={j} className="flex items-start gap-2">
-                    <span className="text-primary/40 mt-0.5 shrink-0">→</span>
-                    <span>{point}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </section>
+              <div className="about-insight-card-value">
+                <span aria-hidden="true">{status?.icon ?? "◌"}</span>
+                <span>{status?.label ?? "读取中…"}</span>
+              </div>
+              <div className="about-insight-card-meta">南京时间 {status?.time ?? "--:--"}</div>
+            </article>
 
-      {/* Skills */}
-      <section className="mb-16">
-        <div className="flex items-center gap-3 mb-6">
-          <h2 className="text-xs font-mono text-primary tracking-wider">
-            {`[ skills ]`}
-          </h2>
-          <span className="flex-1 h-[1px] bg-border" />
+            <article className="about-insight-card">
+              <div className="about-insight-card-title">
+                <span>南京天气</span>
+                <span className="about-terminal-only">{`[ weather.now ]`}</span>
+              </div>
+              <div className="about-insight-card-value">
+                <span aria-hidden="true">{weather?.icon ?? "🌤️"}</span>
+                <span>{weather ? `${Math.round(weather.temperature)}°C` : "读取中…"}</span>
+              </div>
+              <div className="about-insight-card-meta">{weather?.label ?? "实时天气"}</div>
+            </article>
+          </div>
+
+          <article className="about-insight-card about-social-card">
+            <div className="about-insight-card-title">
+              <span>找到我</span>
+              <span className="about-terminal-only">{`[ social.links ]`}</span>
+            </div>
+            <div className="about-social-list">
+              {socialLinks.map(({ label, href, icon: Icon }) => (
+                <a key={label} href={href} target={href.startsWith("http") ? "_blank" : undefined} rel="noreferrer">
+                  <Icon size={16} />
+                  <span>{label}</span>
+                  <IconArrowUpRight className="about-social-arrow" size={15} />
+                </a>
+              ))}
+            </div>
+          </article>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {skills.map((s) => (
-            <div
-              key={s.label}
-              className="border border-border bg-card/30 p-4 hover:border-primary/30 transition-colors"
-            >
-              <div className="text-xs font-mono text-primary/50 mb-3">{s.label}</div>
-              <div className="flex flex-wrap gap-2">
-                {s.items.map((item) => (
+
+        <section className="about-intro-copy">
+          <span className="about-terminal-only">{`// intro.md`}</span>
+          <p>
+          Halcyon，Do myself!
+          </p>
+        </section>
+
+        <section className="about-module about-hobby-module">
+          <div className="about-module-heading">
+            <div>
+              <span className="about-terminal-only">{`// hobby.ts`}</span>
+              <h2>🎸 爱好</h2>
+            </div>
+            <div className="about-module-tools">
+              <span className="about-module-count">01</span>
+              {hobbyWorks.length > 0 && (
+                <UploadButton
+                  target="hobby"
+                  label="继续上传"
+                  accept="audio/*,video/*"
+                  disabled={uploadingTarget === "hobby"}
+                  onUpload={handleUpload}
+                />
+              )}
+            </div>
+          </div>
+          <div className="about-hobby-grid">
+            {hobbies.map((hobby) => (
+              <div key={hobby.title} className="about-hobby-feature">
+                <span className="about-hobby-icon" aria-hidden="true">🎸</span>
+                <div>
+                  <h3>{hobby.title}</h3>
+                  <p>{hobby.description}</p>
+                </div>
+              </div>
+            ))}
+            <div className="about-upload-slot">
+              {hobbyWorks.length > 0 ? (
+                hobbyWorks.map((work) => (
+                  <a key={work.title} href={work.href ?? "#"} className="about-media-card">
+                    <span className="about-media-cover">{work.kind === "audio" ? "♫" : "▶"}</span>
+                    <span>{work.title}</span>
+                  </a>
+                ))
+              ) : (
+                <div className="about-empty-state about-empty-upload">
+                  <span className="about-empty-icon" aria-hidden="true">♫</span>
+                  <strong>上传吉他作品</strong>
+                  <span>暂无作品，敬请期待</span>
+                  <UploadButton
+                    target="hobby"
+                    label="上传作品"
+                    accept="audio/*,video/*"
+                    disabled={uploadingTarget === "hobby"}
+                    onUpload={handleUpload}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section className="about-module about-game-module">
+          <div className="about-module-heading">
+            <div>
+              <span className="about-terminal-only">{`// game.library`}</span>
+              <h2>🎮 游戏库</h2>
+            </div>
+            <div className="about-module-tools">
+              <span className="about-module-count">02</span>
+              {games.length > 0 && (
+                <UploadButton
+                  target="game"
+                  label="继续添加"
+                  accept="image/*"
+                  disabled={uploadingTarget === "game"}
+                  onUpload={handleUpload}
+                />
+              )}
+            </div>
+          </div>
+          <div className="about-game-shelf">
+            {games.length > 0 ? (
+              games.map((game) => (
+                <article key={game.name} className="about-media-card">
                   <span
-                    key={item}
-                    className="text-xs font-mono px-2 py-1 bg-muted text-foreground/50 border border-border"
+                    className="about-media-cover"
+                    style={game.coverUrl ? { backgroundImage: `url(${game.coverUrl})` } : undefined}
                   >
-                    {item}
+                    {!game.coverUrl && "🎮"}
                   </span>
-                ))}
+                  <span>{game.name}</span>
+                </article>
+              ))
+            ) : (
+              <div className="about-empty-state about-empty-games">
+                <span className="about-empty-icon" aria-hidden="true">🎮</span>
+                <strong>添加游戏</strong>
+                <span>空游戏架</span>
+                <UploadButton
+                  target="game"
+                  label="上传封面"
+                  accept="image/*"
+                  disabled={uploadingTarget === "game"}
+                  onUpload={handleUpload}
+                />
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            )}
+          </div>
+        </section>
 
-      {/* Education */}
-      <section className="mb-16">
-        <div className="flex items-center gap-3 mb-6">
-          <h2 className="text-xs font-mono text-primary tracking-wider">
-            {`[ education ]`}
-          </h2>
-          <span className="flex-1 h-[1px] bg-border" />
-        </div>
-        <div className="border border-border bg-card/30 p-4 flex items-center justify-between flex-wrap gap-3">
-          <div>
-            <div className="text-sm font-semibold text-foreground">某工业大学</div>
-            <div className="text-xs font-mono text-foreground/40 mt-1">
-              数据科学与大数据技术 · 本科 · 2021.09 ~ 2025.06
+        <section className="about-module about-book-module">
+          <div className="about-module-heading">
+            <div>
+              <span className="about-terminal-only">{`// book.shelf`}</span>
+              <h2>📚 书架</h2>
+            </div>
+            <div className="about-module-tools">
+              <span className="about-module-count">03</span>
+              {books.length > 0 && (
+                <UploadButton
+                  target="book"
+                  label="继续添加"
+                  accept="image/*"
+                  disabled={uploadingTarget === "book"}
+                  onUpload={handleUpload}
+                />
+              )}
             </div>
           </div>
-        </div>
-      </section>
+          <div className="about-bookshelf">
+            <div className="about-book-row">
+              {books.length > 0 ? (
+                books.map((book) => (
+                  <div key={book.title} className="about-book-spine">
+                    <span
+                      className="about-book-cover"
+                      style={book.coverUrl ? { backgroundImage: `url(${book.coverUrl})` } : undefined}
+                    >
+                      {!book.coverUrl && "📖"}
+                    </span>
+                    <span className="about-book-title">{book.title}</span>
+                  </div>
+                ))
+              ) : null}
+            </div>
+            <div className="about-bookshelf-bottom" />
+          </div>
+          {books.length === 0 && (
+            <div className="about-empty-bookshelf">
+              <span className="about-empty-icon" aria-hidden="true">📚</span>
+              <strong>书架还在等第一本书</strong>
+              <span>把喜欢的故事摆上来</span>
+              <UploadButton
+                target="book"
+                label="上传书籍封面"
+                accept="image/*"
+                disabled={uploadingTarget === "book"}
+                onUpload={handleUpload}
+              />
+            </div>
+          )}
+        </section>
 
-      {/* Quote */}
-      <section className="mb-8">
-        <blockquote className="border-l-2 border-primary/30 pl-4 py-3 text-sm text-foreground/40 italic font-mono">
-          {"代码不只是代码。"}
-        </blockquote>
-      </section>
+        <section className="about-module about-video-module">
+          <div className="about-module-heading">
+            <div>
+              <span className="about-terminal-only">{`// video.clip`}</span>
+              <h2>🎬 随手拍</h2>
+            </div>
+            <div className="about-module-tools">
+              <span className="about-module-count">04</span>
+              {videos.length > 0 && (
+                <UploadButton
+                  target="video"
+                  label="继续上传"
+                  accept="image/*,video/*"
+                  disabled={uploadingTarget === "video"}
+                  onUpload={handleUpload}
+                />
+              )}
+            </div>
+          </div>
+          <div className="about-video-grid">
+            {videos.length > 0 ? (
+              videos.map((video) => (
+                <a key={video.title} href={video.href ?? "#"} className="about-media-card about-video-card">
+                  <span
+                    className="about-media-cover"
+                    style={video.coverUrl ? { backgroundImage: `url(${video.coverUrl})` } : undefined}
+                  >
+                    {!video.coverUrl && "▶"}
+                  </span>
+                  <span>{video.title}</span>
+                </a>
+              ))
+            ) : (
+                <div className="about-empty-state about-empty-videos">
+                  <span className="about-empty-icon" aria-hidden="true">🎬</span>
+                <strong>上传视频</strong>
+                <span>空视频架</span>
+                <UploadButton
+                  target="video"
+                  label="上传视频"
+                  accept="image/*,video/*"
+                  disabled={uploadingTarget === "video"}
+                  onUpload={handleUpload}
+                />
+              </div>
+            )}
+          </div>
+        </section>
+
+        <section className="about-module about-favorite-module">
+          <div className="about-module-heading">
+            <div>
+              <span className="about-terminal-only">{`// favorites.db`}</span>
+              <h2>⭐ 收藏夹</h2>
+            </div>
+            <div className="about-module-tools">
+              <span className="about-module-count">05</span>
+              {favoriteCollections[favoriteTab].length > 0 && (
+                <UploadButton
+                  target="favorite"
+                  label="继续上传"
+                  accept="text/*,image/*,video/*"
+                  disabled={uploadingTarget === "favorite"}
+                  onUpload={handleUpload}
+                />
+              )}
+            </div>
+          </div>
+          <div className="about-favorite-tabs" role="tablist" aria-label="收藏分类">
+            {favoriteTabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                aria-selected={favoriteTab === tab.id}
+                className={favoriteTab === tab.id ? "is-active" : ""}
+                onClick={() => setFavoriteTab(tab.id)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+          <div className="about-favorite-content">
+            {favoriteCollections[favoriteTab].length > 0 ? (
+              favoriteCollections[favoriteTab].map((entry) => (
+                <a key={entry.title} href={entry.href ?? "#"} className="about-favorite-entry">
+                  <strong>{entry.title}</strong>
+                  {entry.meta && <span>{entry.meta}</span>}
+                </a>
+              ))
+            ) : (
+              <div className="about-empty-state about-empty-favorites">
+                <span className="about-empty-icon" aria-hidden="true">☆</span>
+                <strong>暂无收藏</strong>
+                <span>值得留下的内容，会出现在这里</span>
+                <UploadButton
+                  target="favorite"
+                  label="上传收藏"
+                  accept="text/*,image/*,video/*"
+                  disabled={uploadingTarget === "favorite"}
+                  onUpload={handleUpload}
+                />
+              </div>
+            )}
+          </div>
+        </section>
+        {uploadMessage && <p className="about-upload-message" role="status">{uploadMessage}</p>}
       </div>
     </div>
-  );
-}
-
-function ContactItem({ label, value, href }: { label: string; value: string; href: string }) {
-  if (href === "#") {
-    return (
-      <div className="border border-border bg-card/30 p-3 flex items-center gap-3">
-        <span className="text-xs font-mono text-primary/40 w-20 shrink-0">{label}</span>
-        <span className="text-xs font-mono text-foreground/50">{value}</span>
-      </div>
-    );
-  }
-  return (
-    <a
-      href={href}
-      target={href.startsWith("http") ? "_blank" : undefined}
-      rel="noopener noreferrer"
-      className="border border-border bg-card/30 p-3 flex items-center gap-3 hover:border-primary/30 hover:text-primary transition-colors group"
-    >
-      <span className="text-xs font-mono text-foreground/30 w-20 shrink-0 group-hover:text-primary/50 transition-colors">{label}</span>
-      <span className="text-xs font-mono text-foreground/50 truncate">{value}</span>
-    </a>
   );
 }
