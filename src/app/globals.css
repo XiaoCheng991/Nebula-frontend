@@ -2013,3 +2013,577 @@ html.light .about-upload-button {
   background: hsl(0 0% 100% / 0.28);
   box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.55);
 }
+
+/* ============================================================
+   LIGHT-THEME: About page — top-card color tuning + 5-section
+   visual refactor (gramophone / cassette wall / reading corner /
+   polaroid wall / bookmark wall). All rules scoped to html.light —
+   dark theme is intentionally left untouched.
+   ============================================================ */
+
+/* --- Workstream 1: top cards accent saturation (light only) --- */
+html.light .about-top-stack > .about-insight-card:nth-child(1) { --card-accent: rgb(85 217 228 / 0.42); }
+html.light .about-top-stack > .about-insight-card:nth-child(2) { --card-accent: rgb(140 110 188 / 0.38); }
+html.light .about-social-card { --card-accent: rgb(85 217 228 / 0.34); }
+
+/* shared liquid-glass body: fractal grain + organic wash + warm white */
+html.light .about-glass {
+  background:
+    url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMTAnIGhlaWdodD0nMTEwJz48ZmlsdGVyIGlkPSduJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC43OCcgbnVtT2N0YXZlcz0nNCcgc3RpdGNoVGlsZXM9J3N0aXRjaCcvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPScxMDAlJyBoZWlnaHQ9JzEwMCUnIGZpbHRlcj0ndXJsKCNuKScgZmlsbD0ncmdiYSgwLDAsMCwwLjE2KScvPjwvc3ZnPg==") 0 0 / 60px repeat,
+    radial-gradient(ellipse at 95% 14%, hsl(0 0% 100% / 0.22), transparent 60%),
+    radial-gradient(ellipse at 7% 86%, hsl(0 0% 100% / 0.14), transparent 54%),
+    conic-gradient(from 200deg at 50% 50%, hsl(0 0% 100% / 0.10), transparent 60%),
+    hsl(0 0% 100% / 0.09);
+  border: 1px solid hsl(var(--border) / 0.45);
+  border-radius: 22px;
+  box-shadow:
+    0 12px 44px hsl(var(--foreground) / 0.06),
+    0 0 0 1px hsl(var(--foreground) / 0.07),
+    inset 0 1px 0 hsl(0 0% 100% / 0.55),
+    inset 0 0 6px hsl(0 0% 100% / 0.36);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+html.light .about-glass:hover {
+  box-shadow:
+    0 16px 52px hsl(var(--foreground) / 0.08),
+    0 0 0 1px hsl(var(--foreground) / 0.07),
+    inset 0 1px 0 hsl(0 0% 100% / 0.55),
+    inset 0 0 6px hsl(0 0% 100% / 0.36),
+    inset 0 0 14px hsl(0 0% 100% / 0.18);
+}
+
+/* === 1. hobby -> gramophone === */
+html.light .about-gramophone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.3rem;
+  padding: 1.5rem 1rem 0.5rem;
+}
+html.light .about-gramophone-base {
+  position: relative;
+  width: 8.6rem;
+  height: 8.6rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50% 50% 44% 44%;
+  background: hsl(0 0% 0% / 0.10);
+  box-shadow:
+    inset 0 0 0 6px hsl(0 0% 0% / 0.08),
+    inset 0 0 0 20px hsl(0 0% 100% / 0.06),
+    0 0 0 2px hsl(var(--border) / 0.35);
+  overflow: hidden;
+}
+html.light .about-gramophone-platter {
+  width: 6rem;
+  height: 6rem;
+  border-radius: 50%;
+  background:
+    repeating-radial-gradient(circle, hsl(0 0% 0% / 0.52) 0%, hsl(0 0% 0% / 0.52) 3%, transparent 3.3%, transparent 8%),
+    repeating-radial-gradient(circle, hsl(0 0% 0% / 0.42) 0%, hsl(0 0% 0% / 0.42) 1.8%, transparent 2.2%, transparent 5.5%),
+    hsl(0 0% 4% / 0.88);
+  box-shadow:
+    0 0 0 4px hsl(0 0% 0% / 0.48),
+    0 0 0 9px hsl(0 0% 100% / 0.10);
+  animation: about-vinyl-spin 8s linear infinite;
+}
+@keyframes about-vinyl-spin { to { transform: rotate(360deg); } }
+html.light .about-gramophone-label {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: hsl(0 0% 100% / 0.94);
+  box-shadow:
+    0 0 0 3px hsl(0 0% 0% / 0.52),
+    0 0 0 7px hsl(0 0% 100% / 0.12),
+    inset 0 0 0 2px hsl(0 0% 0% / 0.28);
+}
+html.light .about-gramophone-tonearm {
+  position: absolute;
+  top: 26%;
+  right: 10%;
+  width: 2.6rem;
+  height: 0.22rem;
+  background: hsl(0 0% 0% / 0.62);
+  border-radius: 3px;
+  transform-origin: right center;
+  transform: rotate(-26deg);
+  box-shadow: 0 1px 2px hsl(0 0% 0% / 0.38);
+}
+html.light .about-gramophone-tonearm::before {
+  content: "";
+  position: absolute;
+  left: -0.7rem;
+  top: -0.28rem;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: hsl(0 0% 0% / 0.6);
+  box-shadow: inset 0 0 2px hsl(0 0% 0% / 0.5);
+}
+html.light .about-cassette-rack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  align-items: center;
+}
+html.light .about-cassette-slot {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 6rem;
+  height: 1.3rem;
+  padding: 0 0.35rem;
+  border: 1px dashed hsl(var(--border) / 0.36);
+  border-radius: 0.3rem;
+  background: hsl(0 0% 100% / 0.18);
+  font-size: 0.65rem;
+  color: hsl(var(--foreground) / 0.65);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+html.light .about-cassette-thumb { font-size: 0.6rem; opacity: 0.8; }
+html.light .about-cassette-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+html.light .about-gramophone-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: hsl(var(--foreground) / 0.45);
+  font-size: 0.82rem;
+}
+
+/* === 2. games -> cassette wall === */
+html.light .about-cassette-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(5.4rem, 1fr));
+  gap: 0.9rem;
+  width: 100%;
+  max-width: 22rem;
+}
+html.light .about-cassette-wall {
+  position: relative;
+  padding: 1.25rem;
+}
+html.light .about-cassette-wall::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+  background:
+    linear-gradient(hsl(0 0% 0% / 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(0 0% 0% / 0.04) 1px, transparent 1px);
+  background-size: 0.7rem 0.7rem;
+  pointer-events: none;
+}
+html.light .about-cassette-grid { position: relative; z-index: 1; }
+html.light .about-cassette-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 0.4rem;
+  overflow: hidden;
+  background: hsl(0 0% 0% / 0.06);
+  border: 1px solid hsl(var(--border) / 0.32);
+  box-shadow: 0 6px 16px hsl(0 0% 0% / 0.10);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+html.light .about-cassette-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 11px 22px hsl(0 0% 0% / 0.14);
+}
+html.light .about-cassette-cover {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 1 / 1.18;
+  background: hsl(var(--border) / 0.18);
+  background-size: cover;
+  background-position: center;
+  font-size: 1.1rem;
+  color: hsl(var(--foreground) / 0.55);
+}
+html.light .about-cassette-label {
+  padding: 0.35rem 0.4rem;
+  font-size: 0.62rem;
+  color: hsl(0 0% 100% / 0.9);
+  background: hsl(28 36% 20% / 0.8);
+  border-top: 1px solid hsl(var(--border) / 0.28);
+}
+html.light .about-cassette-console {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1.4rem 1rem 1.2rem;
+  position: relative;
+  z-index: 1;
+}
+html.light .about-cassette-console::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+  background:
+    radial-gradient(ellipse at 50% 0%, hsl(120 80% 55% / 0.10), transparent 55%),
+    linear-gradient(hsl(0 0% 0% / 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(0 0% 0% / 0.03) 1px, transparent 1px);
+  background-size: 0.9rem 0.9rem;
+  pointer-events: none;
+}
+html.light .about-cassette-screen {
+  position: relative;
+  width: 7.2rem;
+  height: 4.3rem;
+  border: 2px solid hsl(var(--border) / 0.48);
+  border-radius: 0.48rem;
+  background: hsl(0 0% 0% / 0.88);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  box-shadow: inset 0 0 10px hsl(0 0% 0% / 0.6);
+}
+html.light .about-cassette-screen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%, hsl(120 80% 55% / 0.48), transparent 60%);
+  opacity: 0.72;
+}
+html.light .about-cassette-screen-text {
+  color: hsl(120 80% 62%);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.07em;
+  text-shadow: 0 0 5px hsl(120 80% 62% / 0.55);
+}
+html.light .about-cassette-dpad {
+  position: absolute;
+  bottom: 0.45rem;
+  right: 0.55rem;
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 0.16rem;
+  background: hsl(var(--foreground) / 0.10);
+  box-shadow:
+    0 0 0 1px hsl(var(--foreground) / 0.36),
+    0.19rem 0 0 hsl(var(--foreground) / 0.36),
+    -0.19rem 0 0 hsl(var(--foreground) / 0.36),
+    0 0.19rem 0 hsl(var(--foreground) / 0.36),
+    0 -0.19rem 0 hsl(var(--foreground) / 0.36);
+}
+
+/* === 3. bookshelf -> reading corner scene === */
+html.light .about-shelf-scene {
+  position: relative;
+  margin: 0.6rem auto 1.4rem;
+  padding: 1.6rem 1rem 2.6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.1rem;
+  perspective: 1000px;
+}
+html.light .about-shelf-back {
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+  background: radial-gradient(ellipse at 50% 22%, hsl(50 40% 90% / 0.34), transparent 62%);
+  pointer-events: none;
+}
+html.light .about-shelf-glow {
+  position: absolute;
+  left: 9%;
+  top: 12%;
+  width: 7.2rem;
+  height: 7.2rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 0%, hsl(50 50% 72% / 0.42), transparent 64%);
+  filter: blur(5px);
+  pointer-events: none;
+}
+html.light .about-shelf-frame {
+  position: relative;
+  width: 100%;
+  max-width: 25rem;
+  height: 9.2rem;
+  padding: 0.6rem 0.45rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-end;
+  justify-content: center;
+  gap: 0.32rem;
+  background:
+    linear-gradient(90deg, hsl(28 42% 26% / 0.9) 8%, transparent 8%, transparent 92%, hsl(28 42% 26% / 0.9) 92%),
+    hsl(0 0% 0% / 0.03);
+  border-radius: 0.4rem;
+  box-shadow: inset 0 0 0 1px hsl(var(--border) / 0.28);
+}
+html.light .about-shelf-frame::before,
+html.light .about-shelf-frame::after {
+  content: "";
+  position: absolute;
+  left: 0.3rem;
+  right: 0.3rem;
+  height: 0.5rem;
+  border-radius: 0.26rem;
+  background: linear-gradient(90deg, hsl(28 45% 36% / 0.94), hsl(28 55% 50% / 0.9), hsl(28 42% 26% / 0.78));
+  box-shadow: 0 2px 0 hsl(28 45% 18% / 0.52);
+}
+html.light .about-shelf-frame::before { top: 0.3rem; }
+html.light .about-shelf-frame::after { bottom: 0.3rem; }
+html.light .about-shelf-divider {
+  position: absolute;
+  left: 0.3rem;
+  right: 0.3rem;
+  bottom: 42%;
+  height: 0.36rem;
+  border-radius: 0.22rem;
+  background: linear-gradient(90deg, hsl(28 45% 28% / 0.9), hsl(28 55% 44% / 0.85), hsl(28 42% 23% / 0.74));
+  box-shadow: 0 1px 0 hsl(28 45% 16% / 0.5);
+}
+html.light .about-books {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-end;
+  justify-content: center;
+  gap: 0.18rem;
+  width: 100%;
+  padding: 0 0.2rem;
+}
+html.light .about-book {
+  position: relative;
+  border: 1px solid hsl(28 35% 18% / 0.7);
+  border-radius: 0.22rem 0.5rem 0.5rem 0.22rem;
+  background: linear-gradient(135deg, hsl(28 40% 38% / 0.9), hsl(28 50% 52% / 0.86), hsl(28 40% 28% / 0.92));
+  box-shadow: 2px 0 0 hsl(28 45% 16% / 0.34), 0 2px 4px hsl(28 45% 18% / 0.18);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  overflow: hidden;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+html.light .about-book:nth-child(3n+1) { width: 2.3rem; height: 7.4rem; }
+html.light .about-book:nth-child(3n+2) { width: 2.7rem; height: 8.3rem; }
+html.light .about-book:nth-child(3n)   { width: 2.9rem; height: 6.8rem; }
+html.light .about-book:hover { transform: translateY(-2px); box-shadow: 2px 0 0 hsl(28 45% 14%/0.44), 0 6px 12px hsl(28 45% 18%/0.24); }
+html.light .about-book-cover {
+  width: 100%;
+  height: 58%;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: hsl(0 0% 100% / 0.7);
+}
+html.light .about-book-title {
+  width: 100%;
+  padding: 0.22rem 0.1rem;
+  font-size: 0.4rem;
+  line-height: 1.15;
+  text-align: center;
+  color: hsl(0 0% 100% / 0.88);
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+html.light .about-empty-shelf {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  color: hsl(var(--foreground) / 0.45);
+  font-size: 0.82rem;
+  z-index: 2;
+}
+html.light .about-shelf-lamp {
+  position: absolute;
+  left: 9%;
+  top: 11%;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.16rem;
+  pointer-events: none;
+}
+html.light .about-shelf-lamp::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: hsl(0 0% 100% / 0.92);
+  box-shadow: 0 0 0 3px hsl(28 40% 22% / 0.85), 0 0 9px hsl(0 0% 100% / 0.55), 0 0 18px hsl(50 50% 70% / 0.42);
+}
+html.light .about-shelf-lamp::after {
+  content: "";
+  width: 0.8rem;
+  height: 0.42rem;
+  border-radius: 0 0 50% 50%;
+  background: hsl(28 40% 18% / 0.9);
+}
+html.light .about-shelf-lamp-arm {
+  width: 0.16rem;
+  height: 0.8rem;
+  background: hsl(28 40% 18% / 0.88);
+  border-radius: 2px;
+}
+
+/* === 4. videos -> polaroid wall === */
+html.light .about-polaroid-wall {
+  position: relative;
+  padding: 1.1rem;
+}
+html.light .about-polaroid-wall::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+  background:
+    linear-gradient(hsl(0 0% 0% / 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(0 0% 0% / 0.03) 1px, transparent 1px);
+  background-size: 0.8rem 0.8rem;
+  pointer-events: none;
+}
+html.light .about-polaroid-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  gap: 1.4rem;
+  width: 100%;
+  max-width: 24rem;
+  margin: 0 auto;
+}
+html.light .about-polaroid {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  background: hsl(0 0% 100% / 0.94);
+  border: 3px solid hsl(0 0% 100% / 0.96);
+  border-radius: 0.5rem;
+  padding: 0.55rem 0.55rem 0.7rem;
+  box-shadow: 0 8px 20px hsl(0 0% 0% / 0.10);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+html.light .about-polaroid:hover { transform: translateY(-2px) rotate(0deg); box-shadow: 0 13px 28px hsl(0 0% 0% / 0.14); }
+html.light .about-polaroid-r0 { transform: rotate(-1.5deg); }
+html.light .about-polaroid-r1 { transform: rotate(0.6deg); }
+html.light .about-polaroid-r2 { transform: rotate(-0.7deg); }
+html.light .about-polaroid-cover {
+  width: 100%;
+  height: 5.8rem;
+  border-radius: 0.3rem;
+  background: hsl(var(--border) / 0.18);
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: hsl(var(--foreground) / 0.42);
+  overflow: hidden;
+}
+html.light .about-polaroid-caption {
+  font-size: 0.6rem;
+  color: hsl(var(--foreground) / 0.62);
+  text-align: center;
+  font-style: italic;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+html.light .about-polaroid-empty {
+  align-items: center;
+  text-align: center;
+  border-style: dashed;
+  border-color: hsl(0 0% 0% / 0.18);
+  padding: 1.2rem 1rem 2.1rem;
+  max-width: 10rem;
+  margin: 0 auto;
+}
+html.light .about-polaroid-placeholder { font-size: 1.5rem; opacity: 0.42; }
+
+/* === 5. favorites -> bookmark wall === */
+html.light .about-bookmark-tabs {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+  padding: 0.32rem;
+  background: hsl(0 0% 100% / 0.10);
+  border: 1px solid hsl(var(--border) / 0.42);
+  border-radius: 999px;
+  backdrop-filter: blur(10px) saturate(180%);
+}
+html.light .about-bookmark-tabs button {
+  flex: 1;
+  padding: 0.4rem 0.7rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: hsl(var(--foreground) / 0.6);
+  font-size: 0.74rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+html.light .about-bookmark-tabs button:hover { color: hsl(var(--foreground) / 0.9); }
+html.light .about-bookmark-tabs button.is-active {
+  background: hsl(0 0% 100% / 0.26);
+  color: hsl(var(--primary));
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.55);
+}
+html.light .about-bookmark-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.55rem;
+}
+html.light .about-bookmark {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 0.6rem;
+  color: hsl(var(--foreground) / 0.75);
+  font-size: 0.8rem;
+  overflow: hidden;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+html.light .about-bookmark:hover { transform: translateX(4px); box-shadow: 0 6px 16px hsl(0 0% 0% / 0.08); }
+html.light .about-bookmark-swatch {
+  flex: 0 0 0.28rem;
+  height: 1.6rem;
+  border-radius: 0.14rem;
+}
+html.light .about-bookmark-title { color: hsl(var(--foreground)); font-weight: 600; font-size: 0.82rem; }
+html.light .about-bookmark-meta { color: hsl(var(--foreground) / 0.42); font-size: 0.7rem; }
+html.light .about-bookmark-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+  color: hsl(var(--foreground) / 0.45);
+}
+html.light .about-bookmark-slots { display: flex; gap: 0.35rem; }
+html.light .about-bookmark-slot {
+  flex: 0 0 auto;
+  width: 0.22rem;
+  height: 1.6rem;
+  border-radius: 0.11rem;
+  border: 1px dashed hsl(var(--border) / 0.34);
+  background: hsl(0 0% 0% / 0.04);
+}
+
+/* module-level responsive: stack top grid on narrow viewports */
+@media (max-width: 639px) {
+  html.light .about-cassette-rack { flex-direction: column; }
+}

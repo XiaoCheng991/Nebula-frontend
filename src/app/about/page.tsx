@@ -236,6 +236,20 @@ function getNanjingStatus(): Status {
 function getWeather(code: number) {
   return weatherByCode[code] ?? { icon: "🌐", label: "天气未知" };
 }
+const range = (n: number): number[] => Array.from({ length: n }, (_, i) => i);
+const polaroidClass = (index: number): string =>
+  index % 3 === 0 ? "about-polaroid about-polaroid-r0"
+  : index % 3 === 1 ? "about-polaroid about-polaroid-r1"
+  : "about-polaroid about-polaroid-r2";
+const bookmarkColor = (tab: FavoriteTab): string => {
+  switch (tab) {
+    case "quotes": return "hsl(180 82% 60%)";
+    case "podcasts": return "hsl(262 46% 66%)";
+    case "videos": return "hsl(28 82% 58%)";
+    default: return "hsl(150 42% 50%)";
+  }
+};
+
 
 export default function AboutPage() {
   const [status, setStatus] = useState<Status | null>(null);
@@ -407,7 +421,7 @@ export default function AboutPage() {
               <h2>🎸 爱好</h2>
             </div>
             <div className="about-module-tools">
-              <span className="about-module-count">01</span>
+              <span className="about-module-count">{hobbyWorks.length}</span>
               {hobbyWorks.length > 0 && (
                 <UploadButton
                   target="hobby"
@@ -419,38 +433,38 @@ export default function AboutPage() {
               )}
             </div>
           </div>
-          <div className="about-hobby-grid">
-            {hobbies.map((hobby) => (
-              <div key={hobby.title} className="about-hobby-feature">
-                <span className="about-hobby-icon" aria-hidden="true">🎸</span>
-                <div>
-                  <h3>{hobby.title}</h3>
-                  <p>{hobby.description}</p>
-                </div>
+          <div className="about-gramophone">
+            <div className="about-gramophone-base">
+              <div className="about-gramophone-platter">
+                <div className="about-gramophone-label" />
               </div>
-            ))}
-            <div className="about-upload-slot">
+              <div className="about-gramophone-tonearm" />
+            </div>
+            <div className="about-cassette-rack">
               {hobbyWorks.length > 0 ? (
                 hobbyWorks.map((work) => (
-                  <a key={work.title} href={work.href ?? "#"} className="about-media-card">
-                    <span className="about-media-cover">{work.kind === "audio" ? "♫" : "▶"}</span>
-                    <span>{work.title}</span>
+                  <a key={work.title} href={work.href ?? "#"} className="about-cassette-slot">
+                    <span className="about-cassette-thumb" aria-hidden="true">
+                      {work.kind === "audio" ? "♫" : "▶"}
+                    </span>
+                    <span className="about-cassette-title">{work.title}</span>
                   </a>
                 ))
               ) : (
-                <div className="about-empty-state about-empty-upload">
-                  <span className="about-empty-icon" aria-hidden="true">♫</span>
-                  <strong>上传吉他作品</strong>
-                  <span>暂无作品，敬请期待</span>
-                  <UploadButton
-                    target="hobby"
-                    label="上传作品"
-                    accept="audio/*,video/*"
-                    disabled={uploadingTarget === "hobby"}
-                    onUpload={handleUpload}
-                  />
-                </div>
+                range(4).map((i) => (
+                  <div key={`empty-${i}`} className="about-cassette-slot about-cassette-empty" />
+                ))
               )}
+            </div>
+            <div className="about-gramophone-empty">
+              <span>还没有唱片，录一段吧</span>
+              <UploadButton
+                target="hobby"
+                label="上传作品"
+                accept="audio/*,video/*"
+                disabled={uploadingTarget === "hobby"}
+                onUpload={handleUpload}
+              />
             </div>
           </div>
         </section>
@@ -462,7 +476,7 @@ export default function AboutPage() {
               <h2>🎮 游戏库</h2>
             </div>
             <div className="about-module-tools">
-              <span className="about-module-count">02</span>
+              <span className="about-module-count">{games.length}</span>
               {games.length > 0 && (
                 <UploadButton
                   target="game"
@@ -474,24 +488,27 @@ export default function AboutPage() {
               )}
             </div>
           </div>
-          <div className="about-game-shelf">
+          <div className="about-cassette-wall about-glass">
             {games.length > 0 ? (
-              games.map((game) => (
-                <article key={game.name} className="about-media-card">
-                  <span
-                    className="about-media-cover"
-                    style={game.coverUrl ? { backgroundImage: `url(${game.coverUrl})` } : undefined}
-                  >
-                    {!game.coverUrl && "🎮"}
-                  </span>
-                  <span>{game.name}</span>
-                </article>
-              ))
+              <div className="about-cassette-grid">
+                {games.map((game) => (
+                  <a key={game.name} href="#" className="about-cassette-card">
+                    <span
+                      className="about-cassette-cover"
+                      style={game.coverUrl ? { backgroundImage: `url(${game.coverUrl})` } : undefined}
+                    >
+                      {!game.coverUrl && "🎮"}
+                    </span>
+                    <span className="about-cassette-label">{game.name}</span>
+                  </a>
+                ))}
+              </div>
             ) : (
-              <div className="about-empty-state about-empty-games">
-                <span className="about-empty-icon" aria-hidden="true">🎮</span>
-                <strong>添加游戏</strong>
-                <span>空游戏架</span>
+              <div className="about-cassette-console about-glass">
+                <span className="about-cassette-screen">
+                  <span className="about-cassette-screen-text">INSERT GAME</span>
+                  <span className="about-cassette-dpad" />
+                </span>
                 <UploadButton
                   target="game"
                   label="上传封面"
@@ -511,7 +528,7 @@ export default function AboutPage() {
               <h2>📚 书架</h2>
             </div>
             <div className="about-module-tools">
-              <span className="about-module-count">03</span>
+              <span className="about-module-count">{books.length}</span>
               {books.length > 0 && (
                 <UploadButton
                   target="book"
@@ -523,38 +540,45 @@ export default function AboutPage() {
               )}
             </div>
           </div>
-          <div className="about-bookshelf">
-            <div className="about-book-row">
-              {books.length > 0 ? (
-                books.map((book) => (
-                  <div key={book.title} className="about-book-spine">
-                    <span
-                      className="about-book-cover"
-                      style={book.coverUrl ? { backgroundImage: `url(${book.coverUrl})` } : undefined}
-                    >
-                      {!book.coverUrl && "📖"}
-                    </span>
-                    <span className="about-book-title">{book.title}</span>
-                  </div>
-                ))
-              ) : null}
+          <div className="about-shelf-scene">
+            <div className="about-shelf-glow" />
+            <div className="about-shelf-back" />
+            <div className="about-shelf-frame">
+              <div className="about-shelf-divider" />
+              <div className="about-books">
+                {books.length > 0
+                  ? books.map((book) => (
+                      <div key={book.title} className="about-book">
+                        <span
+                          className="about-book-cover"
+                          style={book.coverUrl ? { backgroundImage: `url(${book.coverUrl})` } : undefined}
+                        >
+                          {!book.coverUrl && "📖"}
+                        </span>
+                        <span className="about-book-title">{book.title}</span>
+                      </div>
+                    ))
+                  : range(6).map((i) => (
+                      <div key={`empty-${i}`} className="about-book about-book-empty" />
+                    ))}
+              </div>
             </div>
-            <div className="about-bookshelf-bottom" />
+            <div className="about-shelf-lamp">
+              <span className="about-shelf-lamp-arm" />
+            </div>
+            {books.length === 0 && (
+              <div className="about-empty-shelf">
+                <span>书还在路上</span>
+                <UploadButton
+                  target="book"
+                  label="上传书籍封面"
+                  accept="image/*"
+                  disabled={uploadingTarget === "book"}
+                  onUpload={handleUpload}
+                />
+              </div>
+            )}
           </div>
-          {books.length === 0 && (
-            <div className="about-empty-bookshelf">
-              <span className="about-empty-icon" aria-hidden="true">📚</span>
-              <strong>书架还在等第一本书</strong>
-              <span>把喜欢的故事摆上来</span>
-              <UploadButton
-                target="book"
-                label="上传书籍封面"
-                accept="image/*"
-                disabled={uploadingTarget === "book"}
-                onUpload={handleUpload}
-              />
-            </div>
-          )}
         </section>
 
         <section className="about-module about-video-module">
@@ -564,7 +588,7 @@ export default function AboutPage() {
               <h2>🎬 随手拍</h2>
             </div>
             <div className="about-module-tools">
-              <span className="about-module-count">04</span>
+              <span className="about-module-count">{videos.length}</span>
               {videos.length > 0 && (
                 <UploadButton
                   target="video"
@@ -576,24 +600,27 @@ export default function AboutPage() {
               )}
             </div>
           </div>
-          <div className="about-video-grid">
+          <div className="about-polaroid-wall about-glass">
             {videos.length > 0 ? (
-              videos.map((video) => (
-                <a key={video.title} href={video.href ?? "#"} className="about-media-card about-video-card">
-                  <span
-                    className="about-media-cover"
-                    style={video.coverUrl ? { backgroundImage: `url(${video.coverUrl})` } : undefined}
-                  >
-                    {!video.coverUrl && "▶"}
-                  </span>
-                  <span>{video.title}</span>
-                </a>
-              ))
+              <div className="about-polaroid-grid">
+                {videos.map((video, i) => (
+                  <a key={video.title} href={video.href ?? "#"} className={polaroidClass(i)}>
+                    <span
+                      className="about-polaroid-cover"
+                      style={video.coverUrl ? { backgroundImage: `url(${video.coverUrl})` } : undefined}
+                    >
+                      {!video.coverUrl && "▶"}
+                    </span>
+                    <span className="about-polaroid-caption">{video.title}</span>
+                  </a>
+                ))}
+              </div>
             ) : (
-                <div className="about-empty-state about-empty-videos">
-                  <span className="about-empty-icon" aria-hidden="true">🎬</span>
-                <strong>上传视频</strong>
-                <span>空视频架</span>
+              <div className="about-polaroid about-polaroid-empty">
+                <span className="about-polaroid-placeholder" aria-hidden="true">
+                  ▶
+                </span>
+                <span className="about-polaroid-caption">第一张照片</span>
                 <UploadButton
                   target="video"
                   label="上传视频"
@@ -613,7 +640,7 @@ export default function AboutPage() {
               <h2>⭐ 收藏夹</h2>
             </div>
             <div className="about-module-tools">
-              <span className="about-module-count">05</span>
+              <span className="about-module-count">{favoriteCollections[favoriteTab].length}</span>
               {favoriteCollections[favoriteTab].length > 0 && (
                 <UploadButton
                   target="favorite"
@@ -625,7 +652,7 @@ export default function AboutPage() {
               )}
             </div>
           </div>
-          <div className="about-favorite-tabs" role="tablist" aria-label="收藏分类">
+          <div className="about-bookmark-tabs" role="tablist" aria-label="收藏分类">
             {favoriteTabs.map((tab) => (
               <button
                 key={tab.id}
@@ -639,29 +666,29 @@ export default function AboutPage() {
               </button>
             ))}
           </div>
-          <div className="about-favorite-content">
-            {favoriteCollections[favoriteTab].length > 0 ? (
-              favoriteCollections[favoriteTab].map((entry) => (
-                <a key={entry.title} href={entry.href ?? "#"} className="about-favorite-entry">
-                  <strong>{entry.title}</strong>
-                  {entry.meta && <span>{entry.meta}</span>}
+          {favoriteCollections[favoriteTab].length > 0 ? (
+            <div className="about-bookmark-grid">
+              {favoriteCollections[favoriteTab].map((entry) => (
+                <a key={entry.title} href={entry.href ?? "#"} className="about-bookmark">
+                  <span
+                    className="about-bookmark-swatch"
+                    style={{ backgroundColor: bookmarkColor(favoriteTab) }}
+                  />
+                  <strong className="about-bookmark-title">{entry.title}</strong>
+                  {entry.meta && <span className="about-bookmark-meta">{entry.meta}</span>}
                 </a>
-              ))
-            ) : (
-              <div className="about-empty-state about-empty-favorites">
-                <span className="about-empty-icon" aria-hidden="true">☆</span>
-                <strong>暂无收藏</strong>
-                <span>值得留下的内容，会出现在这里</span>
-                <UploadButton
-                  target="favorite"
-                  label="上传收藏"
-                  accept="text/*,image/*,video/*"
-                  disabled={uploadingTarget === "favorite"}
-                  onUpload={handleUpload}
-                />
+              ))}
+            </div>
+          ) : (
+            <div className="about-bookmark-empty">
+              <div className="about-bookmark-slots">
+                {range(6).map((i) => (
+                  <div key={`slot-${i}`} className="about-bookmark-slot" />
+                ))}
               </div>
-            )}
-          </div>
+              <span>等待被收藏</span>
+            </div>
+          )}
         </section>
         {uploadMessage && <p className="about-upload-message" role="status">{uploadMessage}</p>}
       </div>
