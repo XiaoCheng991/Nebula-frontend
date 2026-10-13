@@ -11,6 +11,7 @@ readTime: 15
 ## 实现思路
 
 ### 六步旅程
+
 1. **想清楚**：`ProductDetail` 接口（extends Product，多 gallery/specs）、`GET /products/:id` 约定、详情页结构、路由规划
 2. **静态骨架**：建 router 配置、列表页挂路由 + 「查看详情」跳转、详情页写死假数据渲染
 3. **拆分组件**：拆出 ProductGallery（纯展示）、SpecSelector（受控）、AddToCart（非受控）
@@ -19,6 +20,7 @@ readTime: 15
 6. **验证与笔记**：跳转/轮播/规格/加购测试；对比笔记
 
 ### 详情页数据流
+
 ```
 路由参数 id
   → watch(() => route.params.id) / useEffect([id])

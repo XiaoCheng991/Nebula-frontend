@@ -11,6 +11,7 @@ readTime: 10
 ## 实现思路
 
 ### 六步旅程
+
 1. **想清楚**：页面结构（CartTable / QuantityStepper / CartSummary / 空态）、`/cart` 路由、交互清单、持久化策略（变化时写、初始化时读）
 2. **静态骨架**：注册 /cart 路由 + 写死 2 条渲染（**前置修正**：CartItem 加唯一 id）
 3. **拆分组件**：CartTable（条目表格）、QuantityStepper（受控步进器）、CartSummary（纯展示合计栏）
@@ -19,6 +20,7 @@ readTime: 10
 6. **验证与笔记**：增删改、刷新持久化、防御验证测试
 
 ### 数据流
+
 ```
 cart store（唯一数据源，localStorage 持久化）
   → 页面读取渲染（items）

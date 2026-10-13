@@ -11,6 +11,7 @@ readTime: 12
 ## 实现思路
 
 ### 六步旅程
+
 1. **想清楚**：login/register API 约定、token 存储策略（localStorage，键 `'token'`，与模块 0 拦截器注释一致）、受保护路由清单（/cart）
 2. **静态骨架**：/login、/register 路由 + 表单页渲染
 3. **拆分组件**：LoginForm / RegisterForm（UI + **声明式校验**内聚，emit submit；业务归父级/store）
@@ -19,6 +20,7 @@ readTime: 12
 6. **验证与笔记**：登录/登出/未登录重定向全流程测试
 
 ### 认证数据流
+
 ```
 LoginForm（收集 + 声明式校验）
   → emit submit(values)
