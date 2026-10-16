@@ -235,7 +235,24 @@
     box-shadow: 0 16px 44px hsl(var(--background) / 0.45);
   }
 
-  .toc-list { padding: 1rem 1.1rem 1.1rem; }
+  /* 标题多时目录内部滚动：不被视窗裁切，滚轮也不带动正文 */
+  .toc-list {
+    padding: 1rem 1.1rem 1.1rem;
+    max-height: calc(100vh - 8rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--foreground) / 0.25) transparent;
+  }
+  .toc-list::-webkit-scrollbar { width: 5px; }
+  .toc-list::-webkit-scrollbar-track { background: transparent; }
+  .toc-list::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: hsl(var(--foreground) / 0.22);
+  }
+  .toc-list::-webkit-scrollbar-thumb:hover { background: hsl(var(--foreground) / 0.35); }
+  /* 浮动面板自身已滚动，内层目录不再叠加滚动 */
+  .toc-float-panel .toc-list { max-height: none; overflow: visible; }
   .toc-title {
     display: flex;
     align-items: center;
@@ -270,6 +287,34 @@
     color: hsl(var(--primary));
     background: linear-gradient(90deg, hsl(var(--primary) / 0.08), transparent);
   }
+
+  /* 顶级标题折叠：行 = 箭头按钮 + 链接 */
+  .toc-li { display: flex; align-items: center; gap: 0.1rem; }
+  .toc-li > a { flex: 1; min-width: 0; }
+  .toc-caret,
+  .toc-caret-spacer {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 16px;
+    height: 16px;
+    padding: 0;
+  }
+  .toc-caret {
+    border: 0;
+    background: none;
+    cursor: pointer;
+    color: hsl(var(--foreground) / 0.4);
+    border-radius: 6px;
+    transition: color 0.2s ease, background 0.2s ease;
+  }
+  .toc-caret:hover {
+    color: hsl(var(--primary));
+    background: hsl(var(--foreground) / 0.07);
+  }
+  .toc-caret svg { transition: transform 0.22s ease; }
+  .toc-caret[aria-expanded="true"] svg { transform: rotate(90deg); }
 
   .img-lightbox {
     position: fixed;
@@ -1072,7 +1117,7 @@ html.light .light-page-layout {
   margin-inline: auto;
   padding: 2rem 1.25rem;
   display: grid !important;
-  grid-template-columns: 180px minmax(0, 1fr) 260px;
+  grid-template-columns: 180px minmax(0, 1fr) 300px;
   gap: 48px;
   align-items: flex-start;
   justify-content: center;
@@ -1112,7 +1157,7 @@ html.light .light-page-layout > .sidebar-right {
 html.light .light-detail-toc {
   position: sticky;
   top: 1rem;
-  width: 180px;
+  width: 240px;
   height: fit-content;
   padding: 1rem;
   border-radius: 1.5rem;

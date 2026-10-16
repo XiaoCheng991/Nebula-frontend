@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect } from "react";
 import Image from "next/image";
 import { IconVolume } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
