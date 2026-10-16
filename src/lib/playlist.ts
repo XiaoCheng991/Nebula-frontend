@@ -17,6 +17,8 @@ export interface Track {
   title: string;
   artist: string;
   src: string;
+  // 可选封面；未提供时播放器用渐变 + 音符占位。
+  cover?: string;
 }
 
 export const PLAYLIST: Track[] = [

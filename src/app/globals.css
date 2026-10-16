@@ -1091,6 +1091,10 @@ html.light .home-main {
 html.light .light-about-main {
   max-width: 42rem;
 }
+/* /music 播放器面板需更宽：左列唱片+控制、右列播放列表才不拥挤 */
+html.light .light-page-layout.light-page-main--wide > .light-page-main {
+  max-width: 72rem;
+}
 html.light .light-page-layout > .sidebar-light,
 html.light .home-container > .sidebar-light {
   position: sticky;
@@ -2586,4 +2590,780 @@ html.light .about-bookmark-slot {
 /* module-level responsive: stack top grid on narrow viewports */
 @media (max-width: 639px) {
   html.light .about-cassette-rack { flex-direction: column; }
+}
+
+
+/* ==================================================================== */
+/* 浅色主题 /music：黑胶沉浸面板（暖棕暗调）                              */
+/* 布局：Sidebar + home-main；home-main 内 播放器(2.2fr) | 列表(1fr) 同层 */
+/* 列表浮层：18px 圆角 + 深棕玻璃 + z-index 2 + margin-left:-14px 覆盖    */
+/* 配色：暖棕 hsl(26 28% 20%)→hsl(0 0% 8%)；亮色仅琥珀 hsl(38 90% 70%)    */
+/* 文字：标题 92% / 正文 78% / 辅助 55%（近白系）                          */
+/* 动效：唱针/旋转/均衡器由 .is-playing 驱动，暂停即停无跳变              */
+/* ==================================================================== */
+
+/* 新增 DOM 元素在深色主题下不渲染（零改动） */
+.music-cover-disc,
+.music-cover-center,
+.music-tonearm,
+.music-cover-halo { display: none; }
+
+/* ---- 展台容器：暖棕渐变，无噪点 ---- */
+html.light .music-page {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-radius: 22px;
+  overflow: hidden;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background:
+    radial-gradient(ellipse at 50% 116%, hsl(30 28% 20% / 0.85), transparent 62%),
+    linear-gradient(168deg, hsl(28 22% 14%), hsl(26 18% 10%) 46%, hsl(0 0% 8%));
+  box-shadow:
+    0 30px 70px hsl(20 30% 8% / 0.3),
+    inset 0 1px 0 hsl(0 0% 100% / 0.07);
+  color: hsl(0 0% 92%);
+}
+
+html.light .music-deco {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 999px;
+}
+html.light .music-deco-a {
+  top: -3.5rem;
+  right: -4rem;
+  width: 17rem;
+  height: 17rem;
+  background: radial-gradient(circle, hsl(28 34% 26% / 0.4), transparent 68%);
+  filter: blur(60px);
+}
+html.light .music-deco-b {
+  bottom: 12%;
+  left: -5rem;
+  width: 15rem;
+  height: 15rem;
+  background: radial-gradient(circle, hsl(24 26% 22% / 0.35), transparent 68%);
+  filter: blur(60px);
+}
+html.light .music-deco-c {
+  display: block;
+  top: 24%;
+  left: 44%;
+  width: 42vw;
+  height: 42vw;
+  background: radial-gradient(
+    circle,
+    hsl(28 30% 24% / 0.3),
+    hsl(22 24% 16% / 0.18) 55%,
+    transparent 72%
+  );
+  filter: blur(52px);
+  opacity: 0.8;
+}
+/* ---- hero：对齐全站 hero-badge 语言 ---- */
+html.light .music-hero {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+}
+html.light .music-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  font-size: 12px;
+  background: hsl(0 0% 0% / 0.3);
+  border: 1px solid hsl(0 0% 100% / 0.1);
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.07);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: hsl(0 0% 92% / 0.62);
+}
+html.light .music-eyebrow-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, hsl(38 90% 70%), hsl(26 80% 56%));
+  box-shadow: 0 0 10px hsl(38 90% 65% / 0.5);
+}
+html.light .music-title {
+  margin: 0;
+  font-size: clamp(1.6rem, 4.6vw, 2rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: hsl(0 0% 92%);
+  text-shadow: 0 2px 18px hsl(0 0% 0% / 0.4);
+}
+html.light .music-subtitle {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.7;
+  max-width: 36em;
+  color: hsl(0 0% 78% / 0.55);
+}
+html.light .music-hero-rule {
+  display: block;
+  width: 100%;
+  height: 1px;
+  margin-top: 0.5rem;
+  background: linear-gradient(
+    90deg,
+    hsl(38 80% 70% / 0.3),
+    hsl(26 50% 45% / 0.18) 35%,
+    transparent 80%
+  );
+}
+
+/* ---- 一体化面板：同容器两栏（播放器 2.2fr | 列表 1fr） ---- */
+html.light .music-panel {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr);
+  column-gap: 1.25rem;
+  align-items: start;
+  padding: 1.5rem;
+  border-radius: 22px;
+  border: 1px solid hsl(0 0% 100% / 0.07);
+  background:
+    radial-gradient(ellipse at 78% 6%, hsl(30 32% 26% / 0.32), transparent 60%),
+    linear-gradient(
+      155deg,
+      hsl(26 28% 20% / 0.92),
+      hsl(22 20% 13% / 0.94) 55%,
+      hsl(0 0% 8% / 0.95)
+    );
+  backdrop-filter: blur(16px) saturate(120%);
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
+  box-shadow:
+    0 24px 54px hsl(20 30% 8% / 0.4),
+    inset 0 1px 0 hsl(0 0% 100% / 0.08),
+    inset 0 0 22px hsl(30 60% 60% / 0.04);
+  color: hsl(0 0% 92%);
+  transition: border-color 0.5s ease, box-shadow 0.5s ease;
+}
+/* 播放时整体氛围微亮（克制） */
+html.light .music-panel.is-playing {
+  border-color: hsl(38 70% 62% / 0.14);
+  box-shadow:
+    0 24px 54px hsl(20 30% 8% / 0.4),
+    0 0 44px hsl(34 80% 55% / 0.06),
+    inset 0 1px 0 hsl(0 0% 100% / 0.1),
+    inset 0 0 22px hsl(30 60% 60% / 0.05);
+}
+
+/* ---- 左列：播放器，内部全部水平居中 ---- */
+html.light .music-now {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+  padding-right: 1.5rem;
+  min-width: 0;
+}
+html.light .music-cover {
+  position: relative;
+  width: clamp(158px, 20vw, 180px);
+  aspect-ratio: 1;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+html.light .music-cover::before,
+html.light .music-cover::after { display: none; }
+
+html.light .music-cover-disc {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  background:
+    repeating-radial-gradient(circle at 50% 50%, hsl(0 0% 100% / 0.05) 0 1px, transparent 1px 5px),
+    radial-gradient(circle at 34% 26%, hsl(30 30% 34% / 0.85), transparent 55%),
+    radial-gradient(circle at 50% 50%, hsl(26 26% 16%), hsl(0 0% 7%) 76%);
+  box-shadow:
+    0 20px 44px hsl(0 0% 0% / 0.5),
+    inset 0 2px 6px hsl(0 0% 100% / 0.07),
+    inset 0 -12px 26px hsl(0 0% 0% / 0.55);
+  animation: music-spin 12s linear infinite;
+  animation-play-state: paused;
+}
+html.light .music-panel.is-playing .music-cover-disc {
+  animation-play-state: running;
+}
+
+html.light .music-cover-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 42%;
+  height: 42%;
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  overflow: hidden;
+  color: hsl(0 0% 92%);
+  background: linear-gradient(140deg, hsl(28 30% 28%), hsl(22 20% 12%));
+  box-shadow:
+    0 0 0 6px hsl(0 0% 0% / 0.4),
+    inset 0 1px 0 hsl(0 0% 100% / 0.14);
+}
+html.light .music-cover-center::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  background: hsl(0 0% 7%);
+  box-shadow: inset 0 1px 2px hsl(0 0% 0% / 0.9), 0 0 0 2px hsl(0 0% 100% / 0.07);
+}
+
+/* 唱针：转轴 = 臂顶中心（transform-origin:50% 0），尺寸全 % 随盘缩放   */
+/* 几何校准（240px 盘）：轴心 (1.25S,0.16S)，臂长 0.4488S，轴到盘心     */
+/* 0.8238S。暂停 rotate(20deg)+上抬 10px：针尖距盘心 1.20R（盘外）悬停； */
+/* 播放 rotate(66deg)：臂旋入盘面，针尖距盘心 0.75R 真实搭在盘面纹路上。  */
+html.light .music-tonearm {
+  display: block;
+  position: absolute;
+  top: 16%;
+  left: 123.2%;
+  z-index: 3;
+  width: 3.6%;
+  height: 44.88%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, hsl(24 8% 26%), hsl(30 14% 84%) 45%, hsl(20 8% 22%));
+  transform-origin: 50% 0;
+  transform: translateY(-10px) rotate(20deg);
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: drop-shadow(0 8px 14px hsl(0 0% 0% / 0.5));
+  will-change: transform;
+}
+html.light .music-now.is-playing .music-tonearm { transform: translateY(0) rotate(66deg); }
+html.light .music-tonearm::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -10px;
+  width: 26px;
+  height: 26px;
+  transform: translateX(-50%);
+  border-radius: 8px;
+  background: linear-gradient(140deg, hsl(30 14% 82%), hsl(20 10% 44%));
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.5), 0 3px 8px hsl(0 0% 0% / 0.45);
+}
+html.light .music-tonearm::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  width: 9px;
+  height: 9px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: radial-gradient(circle at 35% 30%, hsl(0 0% 100%), hsl(34 90% 66%));
+  box-shadow: 0 0 10px hsl(34 90% 65% / 0.5);
+}
+
+/* 盘缘暖光呼吸（克制，与 is-playing 同步暂停） */
+html.light .music-cover-halo {
+  display: block;
+  position: absolute;
+  inset: -18px;
+  border-radius: 999px;
+  background: radial-gradient(circle, hsl(34 80% 62% / 0.2), transparent 70%);
+  filter: blur(24px);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+html.light .music-now.is-playing .music-cover-halo {
+  animation-play-state: running;
+  animation: music-halo 3.6s ease-in-out infinite;
+}
+
+/* ---- 信息区：深底浅字，全部居中 ---- */
+html.light .music-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  min-width: 0;
+  text-align: center;
+}
+html.light .music-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.28rem 0.8rem;
+  border-radius: 999px;
+  background: hsl(0 0% 0% / 0.3);
+  border: 1px solid hsl(0 0% 100% / 0.09);
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.07);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-size: 11px;
+  color: hsl(0 0% 78% / 0.6);
+}
+html.light .music-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: hsl(0 0% 70% / 0.5);
+}
+html.light .music-status.is-playing {
+  color: hsl(38 85% 78%);
+  border-color: hsl(38 70% 62% / 0.3);
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.09), 0 0 14px hsl(34 80% 58% / 0.2);
+}
+html.light .music-status.is-playing .music-status-dot {
+  width: 8px;
+  height: 8px;
+  background: hsl(38 90% 68%);
+  box-shadow: 0 0 10px hsl(38 90% 65% / 0.8);
+  animation: breathe 2.4s ease-in-out infinite;
+}
+html.light .music-track-title {
+  margin: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: clamp(1.25rem, 4vw, 1.6rem);
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
+  color: hsl(0 0% 92%);
+  text-shadow: 0 2px 16px hsl(0 0% 0% / 0.45);
+}
+html.light .music-track-artist {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: center;
+  color: hsl(0 0% 78% / 0.45);
+}
+
+/* ---- 进度 / 均衡器：max-width 70% 居中 ---- */
+html.light .music-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 70%;
+  margin-top: 0.25rem;
+}
+html.light .music-eq {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 12px;
+  margin-bottom: 0.25rem;
+}
+html.light .music-eq i {
+  width: 3px;
+  height: 12px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, hsl(38 90% 74%), hsl(28 70% 56%));
+  box-shadow: 0 0 6px hsl(34 85% 62% / 0.28);
+  transform: scaleY(0.25);
+  transform-origin: bottom;
+  animation: music-eq-bounce 0.9s ease-in-out infinite;
+  animation-play-state: paused;
+}
+html.light .music-panel.is-playing .music-eq i {
+  animation-play-state: running;
+}
+html.light .music-panel.is-playing .music-eq i:nth-child(1) { animation-delay: 0s; }
+html.light .music-panel.is-playing .music-eq i:nth-child(2) { animation-delay: 0.14s; }
+html.light .music-panel.is-playing .music-eq i:nth-child(3) { animation-delay: 0.28s; }
+html.light .music-panel.is-playing .music-eq i:nth-child(4) { animation-delay: 0.08s; }
+html.light .music-panel.is-playing .music-eq i:nth-child(5) { animation-delay: 0.22s; }
+
+html.light .music-times {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: hsl(0 0% 78% / 0.45);
+}
+
+/* 玻璃进度条 / 音量条 */
+html.light .music-bar {
+  position: relative;
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  cursor: pointer;
+  touch-action: none;
+}
+html.light .music-bar--thin { height: 3px; }
+html.light .music-bar-track {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: hsl(0 0% 100% / 0.1);
+  overflow: hidden;
+}
+html.light .music-bar-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, hsl(38 90% 70%), hsl(28 75% 55%));
+  box-shadow: 0 0 10px hsl(34 85% 60% / 0.3);
+}
+html.light .music-bar-thumb {
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: hsl(40 90% 85%);
+  box-shadow: 0 0 8px hsl(34 85% 62% / 0.5);
+}
+
+/* ---- 控制区：居中；唯一亮点是播放键 ---- */
+html.light .music-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.1rem;
+  margin-top: 0.25rem;
+}
+/* 音量独立居中行：不参与控制行的居中计算，
+   保证播放键圆心与唱片圆心落在同一条垂直线上 */
+html.light .music-volume-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.1rem;
+}
+html.light .music-ctl {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid hsl(0 0% 100% / 0.09);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+html.light .music-ctl-side {
+  width: 52px;
+  height: 52px;
+  color: hsl(0 0% 78% / 0.6);
+  background: hsl(0 0% 0% / 0.32);
+}
+html.light .music-ctl-side:hover {
+  transform: translateY(-2px);
+  background: hsl(0 0% 100% / 0.08);
+  box-shadow: 0 10px 22px hsl(0 0% 0% / 0.45), inset 0 1px 0 hsl(0 0% 100% / 0.12);
+}
+html.light .music-ctl-play {
+  width: 72px;
+  height: 72px;
+  color: hsl(40 60% 96%);
+  border-color: hsl(0 0% 100% / 0.12);
+  background: linear-gradient(150deg, hsl(30 30% 30%), hsl(22 22% 16%));
+  box-shadow:
+    0 16px 34px hsl(0 0% 0% / 0.5),
+    0 0 22px hsl(34 85% 58% / 0.22),
+    inset 0 1px 0 hsl(0 0% 100% / 0.16),
+    inset 0 -8px 16px hsl(0 0% 0% / 0.35);
+}
+html.light .music-ctl-play:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(150deg, hsl(30 32% 36%), hsl(22 24% 18%));
+  box-shadow:
+    0 20px 42px hsl(0 0% 0% / 0.55),
+    0 0 30px hsl(34 85% 58% / 0.3),
+    inset 0 1px 0 hsl(0 0% 100% / 0.2),
+    inset 0 -8px 16px hsl(0 0% 0% / 0.35);
+}
+html.light .music-ctl-play svg { filter: drop-shadow(0 1px 3px hsl(34 85% 55% / 0.35)); }
+
+/* ---- 音量行：居中，max-width 70% ---- */
+/* 音量：图标按钮并入控制行行尾，展开面板朝右（该区域为空白带） */
+html.light .music-volume {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: 0;
+}
+/* 常显横向音量条：喇叭 + 短条 + 数值，一条居中的小控件行 */
+html.light .music-bar--vol {
+  width: clamp(96px, 22vw, 132px);
+  height: 4px;
+}
+html.light .music-bar--vol .music-bar-thumb {
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+}
+html.light .music-volume-icon {
+  display: inline-flex;
+  flex: none;
+  color: inherit;
+}
+html.light .music-volume-value {
+  flex: none;
+  text-align: center;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: hsl(0 0% 78% / 0.6);
+}
+html.light .music-error { color: hsl(8 70% 68% / 0.9); }
+
+/* ---- 右列：播放列表（浮层卡，与播放器同层级） ---- */
+html.light .music-playlist {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  padding: 1.25rem;
+  border: none;
+  background: none;
+  color: hsl(0 0% 92%);
+}
+/* 两列之间极淡分隔线（深色玻璃沟槽，位于列间距内） */
+html.light .music-playlist::before {
+  content: "";
+  position: absolute;
+  left: -0.75rem;
+  top: 8%;
+  height: 84%;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    hsl(0 0% 100% / 0.09) 18%,
+    hsl(0 0% 100% / 0.09) 82%,
+    transparent
+  );
+  pointer-events: none;
+}
+html.light .music-list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+html.light .music-list-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: hsl(0 0% 92% / 0.8);
+}
+html.light .music-list-count {
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background: hsl(0 0% 0% / 0.3);
+  border: 1px solid hsl(0 0% 100% / 0.08);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: hsl(0 0% 78% / 0.5);
+}
+html.light .music-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  list-style: none;
+  margin: 0;
+  /* 左右留 4-6px：行 hover/active 的 1px 外发光边线才不会被
+     overflow-y:auto 产生的裁剪区切掉（用户反馈“左边线被遮挡”） */
+  /* 顶部 4px：避免当前/悬停行的发光上缘贴死列表容器顶沿，形成“上框线”观感 */
+  padding: 4px 6px 0 4px;
+  max-height: 380px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: hsl(24 20% 55% / 0.28) transparent;
+}
+html.light .music-rows::-webkit-scrollbar { width: 6px; }
+html.light .music-rows::-webkit-scrollbar-track { background: transparent; }
+html.light .music-rows::-webkit-scrollbar-thumb {
+  background: hsl(24 20% 55% / 0.22);
+  border-radius: 999px;
+}
+html.light .music-rows:hover::-webkit-scrollbar-thumb { background: hsl(24 20% 55% / 0.35); }
+
+html.light .music-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.6rem 0.75rem;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+html.light .music-row:hover {
+  transform: translateY(-2px);
+  background: hsl(0 0% 100% / 0.05);
+  box-shadow: 0 8px 20px hsl(0 0% 0% / 0.35), inset 0 1px 0 hsl(0 0% 100% / 0.07);
+}
+html.light .music-row.is-active {
+  color: hsl(38 80% 80%);
+  background: hsl(0 0% 100% / 0.06);
+  box-shadow:
+    inset 0 1px 0 hsl(0 0% 100% / 0.1),
+    0 0 0 1px hsl(38 70% 62% / 0.25),
+    0 0 18px hsl(34 80% 58% / 0.12);
+}
+/* 序号 → 列表行内联玻璃 pill（不再绝对定位叠在缩略图上） */
+html.light .music-row-no {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: hsl(22 22% 12% / 0.92);
+  border: 1px solid hsl(0 0% 100% / 0.12);
+  box-shadow: none;
+  opacity: 1;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  color: hsl(0 0% 78% / 0.5);
+  transition: color 0.25s ease, background 0.25s ease, border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+html.light .music-row.is-active .music-row-no {
+  color: hsl(40 60% 96%);
+  background: linear-gradient(140deg, hsl(32 50% 42%), hsl(24 40% 26%));
+  border-color: hsl(38 70% 62% / 0.4);
+  box-shadow: 0 0 12px hsl(34 85% 58% / 0.3);
+}
+html.light .music-row-thumb {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: linear-gradient(140deg, hsl(26 28% 28%), hsl(20 20% 12%));
+  color: hsl(0 0% 78% / 0.7);
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.1), 0 4px 10px hsl(0 0% 0% / 0.35);
+}
+html.light .music-row.is-active .music-row-thumb {
+  box-shadow:
+    inset 0 1px 0 hsl(0 0% 100% / 0.14),
+    0 0 0 1px hsl(38 70% 62% / 0.3),
+    0 6px 16px hsl(0 0% 0% / 0.4);
+}
+html.light .music-row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+html.light .music-row-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+html.light .music-row-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  color: hsl(0 0% 92% / 0.85);
+}
+html.light .music-row-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+html.light .music-row-artist {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  color: hsl(0 0% 78% / 0.38);
+}
+html.light .music-row.is-active .music-row-artist { color: hsl(38 60% 78% / 0.75); }
+html.light .music-row-time {
+  flex: none;
+  margin-left: auto;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: hsl(0 0% 78% / 0.35);
+}
+html.light .music-row.is-active .music-row-time { color: hsl(38 80% 80% / 0.8); }
+/* 当前行"播放中"三小点（与左列均衡器同 keyframes 同节奏） */
+html.light .music-row-eq {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 10px;
+  flex: none;
+}
+html.light .music-row-eq i {
+  width: 2px;
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, hsl(38 90% 74%), hsl(28 70% 56%));
+  transform-origin: bottom;
+  animation: music-eq-bounce 0.8s ease-in-out infinite;
+}
+html.light .music-row-eq i:nth-child(2) { animation-delay: 0.15s; }
+html.light .music-row-eq i:nth-child(3) { animation-delay: 0.3s; }
+
+/* ---- 断点：≤900px 面板堆叠（播放器在上、列表在下，浮层取消） ---- */
+@media (max-width: 900px) {
+  html.light .music-panel { grid-template-columns: minmax(0, 1fr); }
+  html.light .music-now { padding-right: 0; }
+  html.light .music-playlist {
+    margin-left: 0;
+    margin-top: 0.75rem;
+  }
+  /* 堆叠时：取消竖沟槽；上下分区仅靠间距区分，不再画任何 1px 线
+     （首行 hover 上浮时不会再把上方线条遮住） */
+  html.light .music-playlist::before { display: none; }
+  html.light .music-playlist::after { content: none; }
+}
+
+/* 动效定义：旋转 / 呼吸 / 均衡器 */
+@keyframes music-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes music-halo {
+  0%, 100% { opacity: 0.25; transform: scale(0.97); }
+  50% { opacity: 0.7; transform: scale(1.04); }
+}
+@keyframes music-eq-bounce {
+  0%, 100% { transform: scaleY(0.25); }
+  50% { transform: scaleY(1); }
 }

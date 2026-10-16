@@ -1,155 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import { formatTime, useMusicPlayer } from "@/lib/music";
 import { PLAYLIST } from "@/lib/playlist";
-
-// ===============================================================
-// SVG ICONS
-// Custom paths: hand-tuned for the 16x16 viewBox, monochrome so
-// they take the current text colour and stay crisp on the nav bar.
-// ===============================================================
-
-function IconNote({ size = 13 }: { size?: number }) {
-  // Eighth note glyph with a flag - more legible than the unicode
-  // character at 13px size, and consistent across systems.
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.6}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d="M11 2 L11 10" />
-      <path d="M11 2 L5.5 4 L5.5 12" />
-      <circle cx="4.25" cy="12" r="1.75" fill="currentColor" stroke="none" />
-      <circle cx="9.75" cy="10" r="1.75" fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
-
-function IconPlay({ size = 11 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 16 16"
-      fill="currentColor"
-      aria-hidden
-    >
-      <path d="M4 2.5 L4 13.5 L13 8 Z" />
-    </svg>
-  );
-}
-
-function IconPause({ size = 11 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 16 16"
-      fill="currentColor"
-      aria-hidden
-    >
-      <rect x="3.5" y="2.5" width="3" height="11" />
-      <rect x="9.5" y="2.5" width="3" height="11" />
-    </svg>
-  );
-}
-
-function IconPrev({ size = 12 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 16 16"
-      fill="currentColor"
-      aria-hidden
-    >
-      <rect x="2.5" y="2.5" width="2" height="11" />
-      <path d="M13.5 2.5 L13.5 13.5 L5 8 Z" />
-    </svg>
-  );
-}
-
-function IconNext({ size = 12 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 16 16"
-      fill="currentColor"
-      aria-hidden
-    >
-      <rect x="11.5" y="2.5" width="2" height="11" />
-      <path d="M2.5 2.5 L2.5 13.5 L11 8 Z" />
-    </svg>
-  );
-}
-
-// ===============================================================
-// DRAG HOOK
-// Lets a user grab a value bar and drag instead of having to
-// blindly click-and-release. ref points at the bar DOM node so we
-// can compute x ratios at any pointer move.
-// ===============================================================
-
-function useDragHandler(
-  ref: React.RefObject<HTMLElement>,
-  onMove: (pct: number) => void
-) {
-  return useCallback(
-    (e: React.PointerEvent<HTMLElement>) => {
-      // Initiate a click-to-set immediately on press, so single taps
-      // still work without dragging.
-      const apply = (clientX: number) => {
-        const el = ref.current;
-        if (!el) return;
-        const r = el.getBoundingClientRect();
-        const pct = Math.max(
-          0,
-          Math.min(1, (clientX - r.left) / r.width)
-        );
-        onMove(pct);
-      };
-
-      apply(e.clientX);
-
-      // While the pointer is held down, follow it. Capture the
-      // pointer so we keep getting moves even if the cursor slips
-      // off the bar.
-      const target = e.currentTarget;
-      target.setPointerCapture(e.pointerId);
-      e.preventDefault();
-
-      const onUp = () => {
-        target.releasePointerCapture(e.pointerId);
-        window.removeEventListener("pointermove", onMoveWin);
-        window.removeEventListener("pointerup", onUp);
-        window.removeEventListener("pointercancel", onUp);
-      };
-      const onMoveWin = (ev: PointerEvent) => apply(ev.clientX);
-
-      window.addEventListener("pointermove", onMoveWin);
-      window.addEventListener("pointerup", onUp);
-      window.addEventListener("pointercancel", onUp);
-    },
-    [ref, onMove]
-  );
-}
-
+import { IconNote, IconPlay, IconPause, IconPrev, IconNext } from "./music/icons";
 
 /**
- * Inline nav-bar music trigger + dropdown popover.
+ * Inline nav-bar music trigger + dropdown popover (dark-theme shell).
  *
  * Trigger lives inside the header nav, on the right tail after the
  * three text links. It is a tiny pill (28x28) showing either `♫` or
- * `♪` depending on play state - nothing else, so it never crowds
- * the nav links.
+ * `♪` depending on play state - nothing else, so it never crowds the
+ * nav links.
  *
  * Click the trigger to open a popover that hangs below the nav.
  * The popover carries the actual player: track title, prev / play /
@@ -160,218 +22,33 @@ function useDragHandler(
  * a refresh resumes mid-track.
  *
  * Errors stay silent. Auto-advance to next track on `ended`.
+ *
+ * Playback itself lives in the shared engine (`@/lib/music`); the
+ * light-theme sidebar player subscribes to the same store, so both
+ * shells drive one single audio element.
  */
 
-const STORAGE_KEY = "kyon:music:state";
-
-interface PlayerState {
-  idx: number;
-  volume: number;
-  playing: boolean;
-  time: number;
-}
-
-const DEFAULT_STATE: PlayerState = {
-  idx: 0,
-  volume: 0.5,
-  playing: false,
-  time: 0,
-};
-
-function loadState(): PlayerState {
-  if (typeof window === "undefined") return DEFAULT_STATE;
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return DEFAULT_STATE;
-    const p = JSON.parse(raw);
-    return {
-      idx: typeof p.idx === "number" ? p.idx : 0,
-      volume: typeof p.volume === "number" ? p.volume : 0.5,
-      playing: !!p.playing,
-      time: typeof p.time === "number" ? p.time : 0,
-    };
-  } catch {
-    return DEFAULT_STATE;
-  }
-}
-
-function saveState(s: PlayerState) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
-  } catch {
-    // silent
-  }
-}
-
-function formatTime(t: number): string {
-  if (!t || isNaN(t)) return "0:00";
-  const m = Math.floor(t / 60);
-  const s = Math.floor(t % 60);
-  return `${m}:${s.toString().padStart(2, "0")}`;
-}
-
 export default function MusicPlayer() {
-  const [state, setState] = useState<PlayerState>(loadState);
   const [open, setOpen] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [error, setError] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const rafRef = useRef<number | null>(null);
-  const progressBarRef = useRef<HTMLDivElement | null>(null);
-  const volumeBarRef = useRef<HTMLDivElement | null>(null);
-
-  const track = PLAYLIST[state.idx] || PLAYLIST[0];
+  const {
+    state,
+    error,
+    track,
+    currentTime,
+    duration,
+    progressPct,
+    volPct,
+    progressRef: progressBarRef,
+    volumeRef: volumeBarRef,
+    onProgressDown,
+    onVolumeDown,
+    togglePlay,
+    prevTrack,
+    nextTrack,
+  } = useMusicPlayer();
 
   // 若播放列表为空，整个按钮隐藏。
   if (PLAYLIST.length === 0) return null;
-
-  // Audio element bootstrap.
-  useEffect(() => {
-    const audio = new Audio();
-    audio.volume = state.volume;
-    audioRef.current = audio;
-
-    const onMeta = () => {
-      if (!isNaN(audio.duration)) setDuration(audio.duration);
-    };
-    const onEnd = () => {
-      setState((p) => ({ ...p, idx: (p.idx + 1) % PLAYLIST.length, time: 0 }));
-      setCurrentTime(0);
-    };
-    const onErr = () => setError(true);
-    audio.addEventListener("loadedmetadata", onMeta);
-    audio.addEventListener("ended", onEnd);
-    audio.addEventListener("error", onErr);
-
-    return () => {
-      audio.removeEventListener("loadedmetadata", onMeta);
-      audio.removeEventListener("ended", onEnd);
-      audio.removeEventListener("error", onErr);
-      audio.pause();
-      audio.src = "";
-      audioRef.current = null;
-    };
-    // state.volume is the only field used at bootstrap time.
-  }, []);
-
-  // idx -> src.
-  useEffect(() => {
-    if (!audioRef.current) return;
-    const t = PLAYLIST[state.idx];
-    if (!t) return;
-    setError(false);
-    audioRef.current.src = t.src;
-    if (audioRef.current.readyState > 0 && !isNaN(audioRef.current.duration)) {
-      setDuration(audioRef.current.duration);
-    }
-    audioRef.current.currentTime = state.time;
-    if (state.playing) {
-      audioRef.current.play().catch(() => {});
-    }
-  }, [state.idx]);
-
-  // volume -> element.
-  useEffect(() => {
-    if (audioRef.current) audioRef.current.volume = state.volume;
-  }, [state.volume]);
-
-  // playing -> play/pause.
-  useEffect(() => {
-    if (!audioRef.current) return;
-    if (state.playing) {
-      audioRef.current.play().catch(() => {});
-    } else {
-      audioRef.current.pause();
-    }
-  }, [state.playing, state.idx]);
-
-  // RAF tick for the readout.
-  // Depends on state.idx so the RAF is cancelled when a new track loads,
-  // preventing it from overwriting currentTime with stale time values.
-  useEffect(() => {
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    if (!state.playing) return;
-    const tick = () => {
-      const a = audioRef.current;
-      if (a) setCurrentTime(a.currentTime);
-      rafRef.current = requestAnimationFrame(tick);
-    };
-    rafRef.current = requestAnimationFrame(tick);
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
-  }, [state.playing, state.idx]);
-
-  // Persistence.
-  useEffect(() => {
-    saveState({ ...state, time: currentTime });
-  }, [state.idx, state.volume, state.playing, currentTime]);
-
-  // Click-outside / Escape.
-  useEffect(() => {
-    if (!open) return;
-    const onDoc = (e: MouseEvent) => {
-      const root = document.getElementById("music-player-root");
-      if (!root) return;
-      if (!root.contains(e.target as Node)) setOpen(false);
-    };
-    const onEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("mousedown", onDoc);
-    document.addEventListener("keydown", onEsc);
-    return () => {
-      document.removeEventListener("mousedown", onDoc);
-      document.removeEventListener("keydown", onEsc);
-    };
-  }, [open]);
-
-  const togglePlay = useCallback(() => {
-    setState((p) => ({ ...p, playing: !p.playing }));
-  }, []);
-
-  const prevTrack = useCallback(() => {
-    setState((p) => ({
-      ...p,
-      idx: p.idx <= 0 ? PLAYLIST.length - 1 : p.idx - 1,
-      time: 0,
-    }));
-    setCurrentTime(0);
-  }, []);
-
-  const nextTrack = useCallback(() => {
-    setState((p) => ({
-      ...p,
-      idx: (p.idx + 1) % PLAYLIST.length,
-      time: 0,
-    }));
-    setCurrentTime(0);
-  }, []);
-
-  const seekTo = useCallback(
-    (pct: number) => {
-      if (!audioRef.current || !duration) return;
-      const t = pct * duration;
-      audioRef.current.currentTime = t;
-      setCurrentTime(t);
-      setState((p) => ({ ...p, time: t }));
-    },
-    [duration]
-  );
-
-  const setVolume = useCallback((v: number) => {
-    setState((p) => ({ ...p, volume: Math.max(0, Math.min(1, v)) }));
-  }, []);
-
-  // Drag handlers for the progress / volume bars. Single click sets
-  // a value; press-and-drag updates as the cursor moves.
-  const onProgressDown = useDragHandler(progressBarRef, seekTo);
-  const onVolumeDown = useDragHandler(volumeBarRef, setVolume);
-
-  const progressPct = duration ? (currentTime / duration) * 100 : 0;
-  const volPct = state.volume * 100;
-
 
   return (
     <div

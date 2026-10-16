@@ -12,6 +12,7 @@ import {
 } from "@tabler/icons-react";
 import SidebarSearchItem from "@/components/SidebarSearchItem";
 import ThemeToggleRow from "@/components/ThemeToggleRow";
+import { IconNote } from "@/components/music/icons";
 
 export default function Sidebar() {
   return (
@@ -82,6 +83,10 @@ export default function Sidebar() {
         <Link href="/about" className="menu-item">
           <IconFileText size={20} />
           Plans
+        </Link>
+        <Link href="/music" className="menu-item">
+          <IconNote size={20} />
+          Music
         </Link>
         <SidebarSearchItem />
         <ThemeToggleRow />
