@@ -2658,9 +2658,10 @@ html.light .music-page {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 1.5rem;
+  gap: 0.9rem;
+  padding: 1.1rem;
   border-radius: 22px;
+  /* 不做内部滚动：内容高度已压缩到一屏内，底部自然留白；溢出交给整页滚动 */
   overflow: hidden;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -2717,7 +2718,7 @@ html.light .music-hero {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.4rem;
+  gap: 0.25rem;
 }
 html.light .music-eyebrow {
   display: inline-flex;
@@ -2742,7 +2743,7 @@ html.light .music-eyebrow-dot {
 }
 html.light .music-title {
   margin: 0;
-  font-size: clamp(1.6rem, 4.6vw, 2rem);
+  font-size: clamp(1.4rem, 3.8vw, 1.7rem);
   font-weight: 600;
   line-height: 1.15;
   letter-spacing: -0.01em;
@@ -2760,7 +2761,7 @@ html.light .music-hero-rule {
   display: block;
   width: 100%;
   height: 1px;
-  margin-top: 0.5rem;
+  margin-top: 0.35rem;
   background: linear-gradient(
     90deg,
     hsl(38 80% 70% / 0.3),
@@ -2775,9 +2776,9 @@ html.light .music-panel {
   z-index: 1;
   display: grid;
   grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr);
-  column-gap: 1.25rem;
+  column-gap: 1rem;
   align-items: start;
-  padding: 1.5rem;
+  padding: 1.05rem;
   border-radius: 22px;
   border: 1px solid hsl(0 0% 100% / 0.07);
   background:
@@ -2818,7 +2819,7 @@ html.light .music-now {
 }
 html.light .music-cover {
   position: relative;
-  width: clamp(158px, 20vw, 180px);
+  width: clamp(140px, 17vw, 160px);
   aspect-ratio: 1;
   background: transparent;
   box-shadow: none;
@@ -3241,7 +3242,7 @@ html.light .music-rows {
      overflow-y:auto 产生的裁剪区切掉（用户反馈“左边线被遮挡”） */
   /* 顶部 4px：避免当前/悬停行的发光上缘贴死列表容器顶沿，形成“上框线”观感 */
   padding: 4px 6px 0 4px;
-  max-height: 380px;
+  max-height: 320px;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
@@ -4137,6 +4138,14 @@ html.light .habit-editor a:focus-visible {
    plans-layout 只为 /plans 加，博客列表页同为 home-container+light-page-layout 但不受影响。 */
 html.light .plans-layout {
   grid-template-columns: 180px minmax(0, 1fr) 280px;
+}
+/* 浅色专属页（/plans、/music）切到深色瞬间的防闪：
+   由 LightOnlyRedirect 在检测到非 light 时临时加上该 class 隐藏容器，
+   避免 html.light 移除后、路由跳转完成前闪现裸 HTML。
+   SSR 首屏不会带该 class，不影响浅色用户的正常首屏渲染。 */
+html.switching-light-only .plans-layout,
+html.switching-light-only .light-two-column {
+  visibility: hidden;
 }
 html.light .plans-layout > .sidebar-right {
   /* 浅色下 nav-header 已隐藏，无 fixed header 遮挡；top 与布局
