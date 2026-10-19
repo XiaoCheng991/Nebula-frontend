@@ -1483,6 +1483,14 @@ html.light .about-insight-card:hover {
     flex-basis: 100%;
   }
 }
+/* 浅色 About 顶部双列（状态/天气/社交）在手机端改单列，与 insight-cards 同步。
+   仅在 html.light 作用域，深色 About 布局不变。 */
+@media (max-width: 768px) {
+  html.light .about-top-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.75rem;
+  }
+}
 
 /* About content modules */
 
@@ -4241,4 +4249,183 @@ html.light .habit-aside-body .habit-tips-group li::before {
   color: hsl(28 75% 45% / 0.7);
   font-variant-numeric: tabular-nums;
   font-weight: 600;
+}
+
+/* ============================================================
+   浅色移动端响应式（仅 html.light 作用域，深色移动端保持现状）
+   桌面端（≥1025px）以上规则均不生效：抽屉/顶部条默认隐藏。
+   ============================================================ */
+
+/* ---- 移动端专用元素：桌面端隐藏 ----
+   .sidebar-mobile-drawer 是包裹原菜单区的容器，桌面端须在流内正常显示，故不在此列；
+   它的折叠只写在下方 ≤768px 媒体查询内。 */
+.sidebar-mobile-bar,
+.sidebar-mobile-mask {
+  display: none;
+}
+
+/* ---- ≤1024px（平板/小屏）：右栏退出栅格，移到主内容下方 ---- */
+@media (max-width: 1024px) {
+  html.light .plans-layout {
+    grid-template-columns: 180px minmax(0, 1fr);
+  }
+  html.light .plans-layout > .sidebar-right {
+    position: static;
+    width: 100%;
+    max-width: 42rem;
+    margin-top: 2rem;
+    /* 右栏改为流内块级：取消 sticky 高度限制，随内容展开 */
+    top: auto;
+  }
+  html.light .plans-layout > .sidebar-right .habit-aside {
+    max-height: none;
+  }
+  /* /music 在大屏已是 wide 两列，此断点下右栏不存在，仅确保不溢出 */
+  html.light .light-page-main--wide .light-page-main {
+    max-width: 100%;
+  }
+  /* 音乐面板 ≤900px 已堆叠（3391 行既有规则），此处仅兜底防溢出 */
+  html.light .music-panel {
+    min-width: 0;
+  }
+}
+
+/* ---- ≤768px（手机）：侧边栏折叠为顶部条 + 抽屉 ---- */
+@media (max-width: 768px) {
+  /* 侧边栏退出栅格流：改 fixed 顶部条，主内容占满整行 */
+  html.light .light-page-layout,
+  html.light .plans-layout {
+    display: block !important;
+    padding: 0 1rem 1.5rem;
+  }
+  html.light .light-page-layout > .sidebar-light,
+  html.light .home-container > .sidebar-light {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 70;
+    width: 100%;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  /* 主内容让出顶部条高度 */
+  html.light .home-main,
+  html.light .light-page-main {
+    margin-top: 3.5rem;
+  }
+  html.light .plans-layout > .sidebar-right {
+    position: static;
+    width: 100%;
+    max-width: none;
+    margin-top: 2rem;
+  }
+  html.light .plans-layout > .sidebar-right .habit-aside {
+    max-height: none;
+  }
+
+  /* 顶部收纳条：fixed 贴顶，玻璃质感 */
+  html.light .sidebar-light .sidebar-mobile-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    height: 3.5rem;
+    padding: 0 0.75rem;
+    border-radius: 0 0 18px 18px;
+    background: hsl(0 0% 100%);
+    border-bottom: 1px solid hsl(var(--border) / 0.4);
+    box-shadow: 0 6px 20px hsl(var(--foreground) / 0.05);
+  }
+  html.light .sidebar-mobile-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-width: 0;
+    text-decoration: none;
+    color: hsl(var(--foreground));
+  }
+  html.light .sidebar-mobile-avatar {
+    flex: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    overflow: hidden;
+    box-shadow: inset 0 0 0 1px hsl(var(--border) / 0.4);
+  }
+  html.light .sidebar-mobile-name {
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  html.light .sidebar-mobile-toggle {
+    display: grid;
+    place-items: center;
+    flex: none;
+    /* 触控目标 ≥40px */
+    width: 44px;
+    height: 44px;
+    border: 1px solid hsl(var(--border) / 0.45);
+    border-radius: 14px;
+    background: hsl(0 0% 100% / 0.5);
+    color: hsl(var(--foreground) / 0.75);
+    cursor: pointer;
+    box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.55);
+  }
+  html.light .sidebar-mobile-toggle:active {
+    transform: scale(0.96);
+  }
+  /* 半透明遮罩：点击关闭抽屉 */
+  html.light .sidebar-light .sidebar-mobile-mask {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    background: hsl(var(--foreground) / 0.28);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+
+  /* 抽屉展开时，把主题切换/搜索等触控目标提到 ≥40px */
+  html.light .sidebar-mobile-drawer .menu-item {
+    min-height: 44px;
+  }
+
+  /* 折叠态：竖排菜单区整体收起，只留顶部条 */
+  html.light .sidebar-light .sidebar-mobile-drawer {
+    display: none;
+  }
+  /* 展开态：fixed 全高玻璃抽屉，从左侧滑入 */
+  html.light .sidebar-light .sidebar-mobile-drawer.is-open {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 90;
+    width: min(80vw, 20rem);
+    padding: 1rem 0.75rem 2rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-radius: 0 22px 22px 0;
+    background: hsl(0 0% 100%);
+    border-right: 1px solid hsl(var(--border) / 0.4);
+    box-shadow: 0 12px 40px hsl(var(--foreground) / 0.1);
+    animation: sidebar-drawer-in 0.24s ease-out;
+  }
+  /* 抽屉内头像/站点名居中布局保持；收起 32px 大头像改小，适配抽屉宽 */
+  html.light .sidebar-mobile-drawer .w-32 {
+    width: 5rem;
+    height: 5rem;
+  }
+  @keyframes sidebar-drawer-in {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+  }
 }
