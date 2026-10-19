@@ -546,7 +546,7 @@ html.light .read-mode article.prose {
   background:
     /* fine fractal grain: micro-abrades every glass surface. This is the single
        most important detail — it kills the cheap, plastic-shiny gradient look. */
-    url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMTAnIGhlaWdodD0nMTEwJz48ZmlsdGVyIGlkPSduJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC43OCcgbnVtT2N0YXZlcz0nNCcgc3RpdGNoVGlsZXM9J3N0aXRjaCcvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPScxMDAlJyBoZWlnaHQ9JzEwMCUnIGZpbHRlcj0ndXJsKCNuKScgZmlsbD0ncmdiYSgwLDAsMCwwLjE2KScvPjwvc3ZnPg==") 0 0 / 60px repeat,
+        url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMTAnIGhlaWdodD0nMTEwJz48ZmlsdGVyIGlkPSduJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC43OCcgbnVtT2N0YXZlcz0nNCcgc3RpdGNoVGlsZXM9J3N0aXRjaCcvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPScxMDAlJyBoZWlnaHQ9JzEwMCUnIGZpbHRlcj0ndXJsKCNuKScgZmlsbD0ncmdiYSgwLDAsMCwwLjE2KScvPjwvc3ZnPg==") 0 0 / 60px repeat,
     radial-gradient(ellipse var(--card-spot, at 90% 16%), var(--card-accent, transparent), transparent 60%),
     radial-gradient(ellipse at 18% 82%, var(--card-accent, transparent), transparent 56%),
     conic-gradient(from 200deg at 50% 50%, var(--card-accent, transparent), transparent 55%),
@@ -1117,7 +1117,7 @@ html.light .light-page-layout {
   margin-inline: auto;
   padding: 2rem 1.25rem;
   display: grid !important;
-  grid-template-columns: 180px minmax(0, 1fr) 300px;
+  grid-template-columns: 180px minmax(0, 1fr) 340px;
   gap: 48px;
   align-items: flex-start;
   justify-content: center;
@@ -1157,7 +1157,7 @@ html.light .light-page-layout > .sidebar-right {
 html.light .light-detail-toc {
   position: sticky;
   top: 1rem;
-  width: 240px;
+  width: 320px;
   height: fit-content;
   padding: 1rem;
   border-radius: 1.5rem;
@@ -1450,7 +1450,7 @@ html.light .about-social-list a {
 }
 html.light .about-insight-card {
   background:
-    url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMTAnIGhlaWdodD0nMTEwJz48ZmlsdGVyIGlkPSduJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC43OCcgbnVtT2N0YXZlcz0nNCcgc3RpdGNoVGlsZXM9J3N0aXRjaCcvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPScxMDAlJyBoZWlnaHQ9JzEwMCUnIGZpbHRlcj0ndXJsKCNuKScgZmlsbD0ncmdiYSgwLDAsMCwwLjE2KScvPjwvc3ZnPg==") 0 0 / 60px repeat,
+        url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMTAnIGhlaWdodD0nMTEwJz48ZmlsdGVyIGlkPSduJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC43OCcgbnVtT2N0YXZlcz0nNCcgc3RpdGNoVGlsZXM9J3N0aXRjaCcvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPScxMDAlJyBoZWlnaHQ9JzEwMCUnIGZpbHRlcj0ndXJsKCNuKScgZmlsbD0ncmdiYSgwLDAsMCwwLjE2KScvPjwvc3ZnPg==") 0 0 / 60px repeat,
     radial-gradient(ellipse var(--card-spot, at 90% 16%), var(--card-accent, transparent), transparent 60%),
     radial-gradient(ellipse at 18% 82%, var(--card-accent, transparent), transparent 56%),
     conic-gradient(from 200deg at 50% 50%, var(--card-accent, transparent), transparent 55%),
@@ -2078,7 +2078,7 @@ html.light .about-social-card { --card-accent: rgb(85 217 228 / 0.34); }
 /* shared liquid-glass body: fractal grain + organic wash + warm white */
 html.light .about-glass {
   background:
-    url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMTAnIGhlaWdodD0nMTEwJz48ZmlsdGVyIGlkPSduJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC43OCcgbnVtT2N0YXZlcz0nNCcgc3RpdGNoVGlsZXM9J3N0aXRjaCcvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPScxMDAlJyBoZWlnaHQ9JzEwMCUnIGZpbHRlcj0ndXJsKCNuKScgZmlsbD0ncmdiYSgwLDAsMCwwLjE2KScvPjwvc3ZnPg==") 0 0 / 60px repeat,
+        url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMTAnIGhlaWdodD0nMTEwJz48ZmlsdGVyIGlkPSduJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC43OCcgbnVtT2N0YXZlcz0nNCcgc3RpdGNoVGlsZXM9J3N0aXRjaCcvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPScxMDAlJyBoZWlnaHQ9JzEwMCUnIGZpbHRlcj0ndXJsKCNuKScgZmlsbD0ncmdiYSgwLDAsMCwwLjE2KScvPjwvc3ZnPg==") 0 0 / 60px repeat,
     radial-gradient(ellipse at 95% 14%, hsl(0 0% 100% / 0.22), transparent 60%),
     radial-gradient(ellipse at 7% 86%, hsl(0 0% 100% / 0.14), transparent 54%),
     conic-gradient(from 200deg at 50% 50%, hsl(0 0% 100% / 0.10), transparent 60%),
@@ -3411,4 +3411,825 @@ html.light .music-row-eq i:nth-child(3) { animation-delay: 0.3s; }
 @keyframes music-eq-bounce {
   0%, 100% { transform: scaleY(0.25); }
   50% { transform: scaleY(1); }
+}
+
+/* === /plans 每日打卡面板（仅浅色，深色零改动） === */
+/* 视觉基准：液态玻璃卡（22px 圆角 / 半透明白底 / 噪点 / 青紫光斑 / 柔和 hover） */
+html.light .habit-tracker {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+html.light .habit-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  border-radius: 22px;
+  background:
+    var(--gn) 0 0 / 60px repeat,
+    radial-gradient(ellipse at 88% 14%, hsl(32 80% 55% / 0.14), transparent 58%),
+    radial-gradient(ellipse at 14% 86%, hsl(20 70% 60% / 0.1), transparent 56%),
+    hsl(0 0% 100% / 0.5);
+  border: 1px solid hsl(var(--border) / 0.45);
+  box-shadow:
+    0 8px 24px hsl(var(--foreground) / 0.04),
+    inset 0 1px 0 hsl(0 0% 100% / 0.55),
+    inset 0 0 14px hsl(0 0% 100% / 0.18);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+html.light .habit-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  font-size: 12px;
+  color: hsl(32 45% 32%);
+  background: hsl(0 0% 100% / 0.45);
+  border: 1px solid hsl(var(--border) / 0.45);
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.55);
+}
+html.light .habit-title {
+  margin: 0.5rem 0 0;
+  font-size: clamp(1.6rem, 4.6vw, 2.1rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: hsl(var(--foreground));
+}
+html.light .habit-sub {
+  margin: 0.35rem 0 0;
+  font-size: 13px;
+  line-height: 1.75;
+  max-width: 30em;
+  color: hsl(var(--foreground) / 0.55);
+}
+
+/* 进度环：conic 渐变随完成度扫过 */
+html.light .habit-ring {
+  /* 由 HabitTracker 通过 style 注入百分比字符串（如 "56%"，含默认值 0% 供静态解析） */
+  --pct: 0%;
+  position: relative;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  flex: none;
+  background: conic-gradient(
+    hsl(32 82% 54%) var(--pct, 0%),
+    hsl(20 75% 58%) var(--pct, 0%),
+    hsl(var(--foreground) / 0.08) 0
+  );
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.5);
+}
+html.light .habit-ring-inner {
+  position: absolute;
+  inset: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  border-radius: 50%;
+  background: hsl(0 0% 100% / 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+html.light .habit-ring-num {
+  font-size: 15px;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  font-variant-numeric: tabular-nums;
+}
+html.light .habit-ring-label {
+  font-size: 11px;
+  color: hsl(var(--foreground) / 0.5);
+  font-variant-numeric: tabular-nums;
+}
+html.light .habit-summary {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+html.light .habit-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin: 0;
+  font-size: 12px;
+}
+html.light .habit-stats > div {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+html.light .habit-stats dt {
+  color: hsl(var(--foreground) / 0.45);
+}
+html.light .habit-stats dd {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0;
+  color: hsl(var(--foreground) / 0.8);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 分组卡：与博客卡片同一液态玻璃配方 */
+html.light .habit-groups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+html.light .habit-group {
+  padding: 1.25rem;
+  border-radius: 22px;
+  background:
+    var(--gn) 0 0 / 60px repeat,
+    radial-gradient(ellipse at 92% 10%, hsl(32 80% 55% / 0.12), transparent 58%),
+    radial-gradient(ellipse at 10% 90%, hsl(20 70% 60% / 0.09), transparent 54%),
+    hsl(0 0% 100% / 0.45);
+  border: 1px solid hsl(var(--border) / 0.45);
+  box-shadow:
+    0 8px 24px hsl(var(--foreground) / 0.04),
+    inset 0 1px 0 hsl(0 0% 100% / 0.5),
+    inset 0 0 14px hsl(0 0% 100% / 0.16);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+html.light .habit-group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+html.light .habit-group-head h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+html.light .habit-group-count {
+  font-size: 12px;
+  color: hsl(var(--foreground) / 0.5);
+  font-variant-numeric: tabular-nums;
+}
+html.light .habit-group-hint {
+  margin: 0.2rem 0 0;
+  font-size: 11px;
+  color: hsl(var(--foreground) / 0.45);
+}
+html.light .habit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+html.light .habit-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  color: hsl(var(--foreground) / 0.72);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+html.light .habit-item:hover {
+  transform: translateY(-2px);
+  background: hsl(0 0% 100% / 0.55);
+  box-shadow: 0 6px 16px hsl(var(--foreground) / 0.05), inset 0 1px 0 hsl(0 0% 100% / 0.5);
+}
+html.light .habit-box {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  border-radius: 8px;
+  background: hsl(0 0% 100% / 0.5);
+  border: 1px solid hsl(var(--border) / 0.5);
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.5);
+  color: transparent;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+html.light .habit-item-title {
+  font-size: 13px;
+  line-height: 1.6;
+}
+html.light .habit-item.is-done {
+  background: hsl(32 70% 55% / 0.08);
+  box-shadow: inset 0 0 0 1px hsl(32 70% 50% / 0.16);
+}
+html.light .habit-item.is-done:hover {
+  background: hsl(32 70% 55% / 0.13);
+  box-shadow: 0 6px 16px hsl(var(--foreground) / 0.05), inset 0 0 0 1px hsl(32 70% 50% / 0.22);
+}
+html.light .habit-item.is-done .habit-box {
+  background: hsl(32 78% 56% / 0.2);
+  border-color: hsl(32 70% 48% / 0.5);
+  color: hsl(28 60% 30%);
+  box-shadow: none;
+}
+html.light .habit-item.is-done .habit-item-title {
+  color: hsl(var(--foreground) / 0.5);
+  text-decoration: line-through;
+  text-decoration-color: hsl(var(--foreground) / 0.25);
+}
+html.light .habit-foot {
+  font-size: 12px;
+  line-height: 1.7;
+  color: hsl(var(--foreground) / 0.45);
+}
+
+/* === /plans 页面内编辑器 + 悬浮提醒（仅浅色） === */
+html.light .habit-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  align-self: flex-start;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid hsl(var(--border) / 0.45);
+  border-radius: 999px;
+  background: hsl(0 0% 100% / 0.5);
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font: inherit;
+  font-size: 12px;
+  color: hsl(var(--foreground) / 0.62);
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+html.light .habit-edit-btn:hover {
+  transform: translateY(-2px);
+  border-color: hsl(32 70% 50% / 0.45);
+  color: hsl(28 50% 30%);
+  box-shadow: 0 6px 16px hsl(var(--foreground) / 0.05), inset 0 1px 0 hsl(0 0% 100% / 0.6);
+}
+html.light .habit-empty {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 13px;
+  color: hsl(var(--foreground) / 0.45);
+}
+
+html.light .habit-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+html.light .habit-editor-head h2 {
+  margin: 0;
+  font-size: clamp(1.6rem, 4.6vw, 2.1rem);
+  font-weight: 600;
+  line-height: 1.15;
+  color: hsl(var(--foreground));
+}
+html.light .habit-editor-head p {
+  margin: 0.35rem 0 0;
+  font-size: 12px;
+  color: hsl(var(--foreground) / 0.5);
+}
+html.light .habit-editor-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+html.light .habit-editor-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1rem;
+  border-radius: 22px;
+  background:
+    var(--gn) 0 0 / 60px repeat,
+    radial-gradient(ellipse at 92% 10%, hsl(32 80% 55% / 0.12), transparent 58%),
+    radial-gradient(ellipse at 10% 92%, hsl(20 70% 60% / 0.09), transparent 54%),
+    hsl(0 0% 100% / 0.5);
+  border: 1px solid hsl(var(--border) / 0.45);
+  box-shadow:
+    0 8px 24px hsl(var(--foreground) / 0.04),
+    inset 0 1px 0 hsl(0 0% 100% / 0.5),
+    inset 0 0 14px hsl(0 0% 100% / 0.16);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+html.light .habit-editor-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+html.light .habit-input,
+html.light .habit-select {
+  flex: 1 1 8rem;
+  min-width: 0;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid hsl(var(--border) / 0.5);
+  border-radius: 12px;
+  background: hsl(0 0% 100% / 0.55);
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.5);
+  font: inherit;
+  font-size: 13px;
+  color: hsl(var(--foreground) / 0.85);
+}
+html.light .habit-input:focus,
+html.light .habit-select:focus {
+  outline: none;
+  border-color: hsl(32 70% 50% / 0.55);
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.5), 0 0 0 3px hsl(32 80% 55% / 0.1);
+}
+html.light .habit-select { flex: 0 0 auto; }
+html.light .habit-editor-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+html.light .habit-editor-items li {
+  display: flex;
+  gap: 0.4rem;
+}
+html.light .habit-editor-days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+html.light .habit-day-tab {
+  padding: 0.25rem 0.6rem;
+  border: 1px solid hsl(var(--border) / 0.45);
+  border-radius: 999px;
+  background: hsl(0 0% 100% / 0.45);
+  font: inherit;
+  font-size: 12px;
+  color: hsl(var(--foreground) / 0.55);
+  cursor: pointer;
+}
+html.light .habit-day-tab.is-active {
+  color: hsl(28 50% 28%);
+  border-color: hsl(32 70% 50% / 0.55);
+  background: hsl(32 78% 56% / 0.14);
+  box-shadow: none;
+}
+html.light .habit-icon-btn {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border: 1px solid hsl(var(--border) / 0.45);
+  border-radius: 10px;
+  background: hsl(0 0% 100% / 0.45);
+  color: hsl(28 45% 34%);
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+html.light .habit-icon-btn:hover {
+  transform: translateY(-2px);
+  color: hsl(28 55% 26%);
+  border-color: hsl(32 70% 50% / 0.4);
+  box-shadow: 0 6px 16px hsl(var(--foreground) / 0.05);
+}
+html.light .habit-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  align-self: flex-start;
+  padding: 0.35rem 0.7rem;
+  border: 1px dashed hsl(var(--border) / 0.7);
+  border-radius: 999px;
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  color: hsl(var(--foreground) / 0.55);
+  cursor: pointer;
+}
+html.light .habit-add-block { align-self: flex-start; }
+html.light .habit-editor-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+html.light .habit-btn {
+  padding: 0.45rem 1.1rem;
+  border: 1px solid hsl(var(--border) / 0.45);
+  border-radius: 999px;
+  background: hsl(0 0% 100% / 0.5);
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.55);
+  font: inherit;
+  font-size: 13px;
+  color: hsl(28 40% 28%);
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+html.light .habit-btn:hover {
+  transform: translateY(-2px);
+  border-color: hsl(32 70% 50% / 0.4);
+  box-shadow: 0 6px 16px hsl(var(--foreground) / 0.05), inset 0 1px 0 hsl(0 0% 100% / 0.6);
+}
+html.light .habit-btn-ghost {
+  background: transparent;
+  border-style: dashed;
+  box-shadow: none;
+  color: hsl(var(--foreground) / 0.5);
+}
+html.light .habit-btn-ghost:hover {
+  border-color: hsl(32 70% 50% / 0.5);
+  color: hsl(28 50% 30%);
+  box-shadow: none;
+}
+/* 主按钮：琥珀实底 + 深字（对比达标），阴影极淡 */
+html.light .habit-btn-primary {
+  background: hsl(32 82% 54%);
+  border-color: hsl(28 70% 44% / 0.5);
+  color: hsl(28 65% 14%);
+  box-shadow: 0 6px 16px hsl(32 60% 40% / 0.14), inset 0 1px 0 hsl(0 0% 100% / 0.28);
+}
+html.light .habit-btn-primary:hover {
+  transform: translateY(-2px);
+  border-color: hsl(28 70% 44% / 0.6);
+  box-shadow: 0 8px 20px hsl(32 60% 40% / 0.18), inset 0 1px 0 hsl(0 0% 100% / 0.32);
+}
+
+/* ---- 悬浮提醒：右下角 FAB + 弹出玻璃面板 ---- */
+html.light .habit-tips {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+html.light .habit-tips-fab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid hsl(var(--border) / 0.45);
+  border-radius: 999px;
+  background: hsl(0 0% 100% / 0.62);
+  box-shadow: 0 10px 30px hsl(var(--foreground) / 0.1), inset 0 1px 0 hsl(0 0% 100% / 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font: inherit;
+  font-size: 13px;
+  color: hsl(var(--foreground) / 0.7);
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+html.light .habit-tips-fab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 38px hsl(var(--foreground) / 0.14), inset 0 1px 0 hsl(0 0% 100% / 0.65);
+}
+html.light .habit-tips-badge {
+  min-width: 18px;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, hsl(185 80% 45%), hsl(270 60% 58%));
+  color: hsl(0 0% 100%);
+  font-size: 11px;
+  line-height: 18px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+html.light .habit-tips-panel {
+  width: min(20rem, calc(100vw - 2.5rem));
+  max-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  border-radius: 22px;
+  background:
+    var(--gn) 0 0 / 60px repeat,
+    radial-gradient(ellipse at 92% 10%, hsl(32 80% 55% / 0.12), transparent 58%),
+    radial-gradient(ellipse at 10% 92%, hsl(20 70% 60% / 0.09), transparent 56%),
+    hsl(0 0% 100% / 0.72);
+  border: 1px solid hsl(var(--border) / 0.45);
+  box-shadow:
+    0 12px 32px hsl(var(--foreground) / 0.08),
+    inset 0 1px 0 hsl(0 0% 100% / 0.6),
+    inset 0 0 14px hsl(0 0% 100% / 0.18);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  overflow: hidden;
+}
+html.light .habit-tips-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0.9rem;
+  border-bottom: 1px solid hsl(var(--border) / 0.35);
+  font-size: 13px;
+  color: hsl(var(--foreground) / 0.7);
+}
+html.light .habit-tips-panel-head button {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: hsl(var(--foreground) / 0.5);
+  cursor: pointer;
+}
+html.light .habit-tips-panel-head button:hover { color: hsl(var(--foreground)); }
+html.light .habit-tips-body {
+  padding: 0.75rem 0.9rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+html.light .habit-tips-group + .habit-tips-group { margin-top: 0.85rem; }
+html.light .habit-tips-group h3 {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin: 0 0 0.35rem;
+  font-size: 13px;
+  font-weight: 600;
+  color: hsl(var(--foreground) / 0.8);
+}
+html.light .habit-tips-group h3 span {
+  font-size: 11px;
+  font-weight: 400;
+  color: hsl(var(--foreground) / 0.4);
+}
+html.light .habit-tips-group ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 12px;
+  line-height: 1.7;
+  color: hsl(var(--foreground) / 0.6);
+}
+
+/* === /plans 坚持日历（仅浅色，深色零改动） === */
+/* GitHub 式 contribution 图：列=周（周日对齐），行=周一至周日 */
+html.light .heat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1.25rem;
+  border-radius: 22px;
+  background:
+    var(--gn) 0 0 / 60px repeat,
+    radial-gradient(ellipse at 92% 12%, hsl(32 80% 55% / 0.12), transparent 58%),
+    radial-gradient(ellipse at 10% 90%, hsl(20 70% 60% / 0.09), transparent 56%),
+    conic-gradient(from 200deg at 50% 50%, hsl(32 70% 55% / 0.06), transparent 55%),
+    hsl(0 0% 100% / 0.5);
+  border: 1px solid hsl(var(--border) / 0.45);
+  box-shadow:
+    0 8px 24px hsl(var(--foreground) / 0.04),
+    inset 0 1px 0 hsl(0 0% 100% / 0.5),
+    inset 0 0 14px hsl(0 0% 100% / 0.16);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+html.light .heat-head h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+html.light .heat-head p {
+  margin: 0.2rem 0 0;
+  font-size: 11px;
+  line-height: 1.6;
+  color: hsl(var(--foreground) / 0.45);
+}
+html.light .heat-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--foreground) / 0.25) transparent;
+}
+html.light .heat-scroll::-webkit-scrollbar { height: 6px; }
+html.light .heat-scroll::-webkit-scrollbar-track { background: transparent; }
+html.light .heat-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: hsl(var(--foreground) / 0.2);
+}
+html.light .heat-body {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  min-width: max-content;
+}
+/* 月份行 + 周序列共用 13px 列距（10px 格 + 3px 间隙） */
+html.light .heat-months {
+  grid-column: 2;
+  display: flex;
+  height: 14px;
+  margin-bottom: 2px;
+  font-size: 10px;
+  line-height: 14px;
+  color: hsl(var(--foreground) / 0.4);
+}
+html.light .heat-month {
+  /* 由 HabitHeatmap 通过 style 注入像素宽度（如 "13px"/"26px"，含默认值供静态解析） */
+  --span: 13px;
+  flex: none;
+  overflow: hidden;
+  white-space: nowrap;
+  width: var(--span, 13px);
+}
+html.light .heat-weekdays {
+  grid-column: 1;
+  grid-row: 3;
+  display: grid;
+  grid-template-rows: repeat(7, 10px);
+  gap: 3px;
+  margin-right: 6px;
+  font-size: 9px;
+  line-height: 10px;
+  color: hsl(var(--foreground) / 0.4);
+}
+html.light .heat-grid {
+  grid-column: 2;
+  grid-row: 3;
+  display: grid;
+  grid-template-rows: repeat(7, 10px);
+  grid-auto-flow: column;
+  grid-auto-columns: 10px;
+  gap: 3px;
+}
+html.light .heat-cell {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: hsl(0 0% 96%);
+  box-shadow: inset 0 0 0 1px hsl(var(--foreground) / 0.08);
+}
+/* 完成度色阶：单色琥珀五级（实色，不透出底层颗粒）；与勾选态同一色系 */
+html.light .heat-cell.lv-1 { background: hsl(32 80% 92%); }
+html.light .heat-cell.lv-2 { background: hsl(32 80% 80%); }
+html.light .heat-cell.lv-3 { background: hsl(32 78% 64%); }
+html.light .heat-cell.lv-4 { background: hsl(30 80% 50%); }
+html.light .heat-cell.lv-4 { box-shadow: none; }
+/* 今日：淡主色描边，便于定位 */
+html.light .heat-cell.is-future { opacity: 0.35; }
+html.light .heat-cell.is-today {
+  box-shadow: 0 0 0 1.5px hsl(var(--primary) / 0.55);
+}
+html.light .heat-cell.is-today.lv-4 {
+  box-shadow: 0 0 0 1.5px hsl(var(--primary) / 0.7);
+}
+html.light .heat-cell:hover {
+  outline: 1px solid hsl(var(--foreground) / 0.35);
+  outline-offset: 1px;
+}
+html.light .heat-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 11px;
+  color: hsl(var(--foreground) / 0.5);
+}
+html.light .heat-summary b {
+  font-weight: 600;
+  color: hsl(var(--foreground) / 0.8);
+  font-variant-numeric: tabular-nums;
+}
+html.light .heat-legend {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 10px;
+  color: hsl(var(--foreground) / 0.4);
+}
+html.light .heat-legend .heat-cell { pointer-events: none; }
+@media (max-width: 1023px) {
+  html.light .habit-groups { grid-template-columns: minmax(0, 1fr); }
+}
+
+
+/* /plans 打卡页按钮：点后有 is-done / is-active 状态本身可辨识，
+   不需要全局青色 focus 套圈（其他页面、其他组件不受影响）。 */
+html.light .habit-tracker button:focus-visible,
+html.light .habit-tracker a:focus-visible,
+html.light .habit-tips button:focus-visible,
+html.light .habit-editor button:focus-visible,
+html.light .habit-editor a:focus-visible {
+  outline: none;
+}
+
+/* /plans 专属布局（仅浅色）：第三列加宽到 280px 消除右侧留白。
+   plans-layout 只为 /plans 加，博客列表页同为 home-container+light-page-layout 但不受影响。 */
+html.light .plans-layout {
+  grid-template-columns: 180px minmax(0, 1fr) 280px;
+}
+html.light .plans-layout > .sidebar-right {
+  /* 浅色下 nav-header 已隐藏，无 fixed header 遮挡；top 与布局
+     padding-top（2rem）一致：滚动粘住后距视口顶部保留呼吸间距，
+     不会贴死浏览器最上沿 */
+  top: 2rem;
+  width: 280px;
+}
+
+/* /plans 右侧常驻每日提醒栏（仅浅色）：普通块级卡片，随 sidebar-right sticky 跟随 */
+html.light .habit-aside {
+  display: flex;
+  flex-direction: column;
+  /* 顶部 sticky 留 2rem + 底部留 2rem，避免粘住后卡片底部超出视口 */
+  max-height: calc(100vh - 4rem);
+  border-radius: 22px;
+  background:
+    var(--gn) 0 0 / 60px repeat,
+    radial-gradient(ellipse at 92% 10%, hsl(32 80% 55% / 0.12), transparent 58%),
+    radial-gradient(ellipse at 10% 92%, hsl(20 70% 60% / 0.09), transparent 56%),
+    hsl(0 0% 100% / 0.5);
+  border: 1px solid hsl(var(--border) / 0.45);
+  box-shadow:
+    0 8px 24px hsl(var(--foreground) / 0.04),
+    inset 0 1px 0 hsl(0 0% 100% / 0.5),
+    inset 0 0 14px hsl(0 0% 100% / 0.16);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  overflow: hidden;
+}
+html.light .habit-aside-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.7rem 0.85rem;
+  border-bottom: 1px solid hsl(var(--border) / 0.35);
+  font-size: 13px;
+  color: hsl(var(--foreground) / 0.7);
+}
+html.light .habit-aside-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: hsl(var(--foreground) / 0.8);
+}
+html.light .habit-aside-count {
+  min-width: 26px;
+  height: 20px;
+  /* 数字字形视觉重心偏上：顶部 1px 内边距把字形下移微调，配合 flex 双轴居中 */
+  padding: 2px 0.45rem 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: linear-gradient(135deg, hsl(34 92% 64%), hsl(20 82% 52%));
+  color: hsl(26 70% 13%);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  box-shadow:
+    0 2px 8px hsl(28 70% 45% / 0.22),
+    inset 0 1px 0 hsl(0 0% 100% / 0.45);
+}
+html.light .habit-aside-body {
+  padding: 0.75rem 0.85rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  /* 整个面板的提醒条目全局连续编号（1..12 与徽标总数呼应） */
+  counter-reset: habit-tips;
+}
+/* 右栏沿用 habit-tips-group 排版，仅收紧字号 */
+html.light .habit-aside-body .habit-tips-group h3 { font-size: 12px; }
+html.light .habit-aside-body .habit-tips-group ul {
+  font-size: 12px;
+  line-height: 1.7;
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+}
+html.light .habit-aside-body .habit-tips-group li {
+  position: relative;
+  padding-left: 1.35rem;
+  margin: 0.1rem 0;
+  counter-increment: habit-tips;
+}
+html.light .habit-aside-body .habit-tips-group li::before {
+  content: counter(habit-tips) ".";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: hsl(28 75% 45% / 0.7);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
 }

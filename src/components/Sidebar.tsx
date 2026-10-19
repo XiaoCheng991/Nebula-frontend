@@ -80,7 +80,7 @@ export default function Sidebar() {
           <IconFolder size={20} />
           Projects
         </Link>
-        <Link href="/about" className="menu-item">
+        <Link href="/plans" className="menu-item">
           <IconFileText size={20} />
           Plans
         </Link>

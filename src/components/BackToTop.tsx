@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 function getScrollPct(): number {
   const doc = document.documentElement;
@@ -19,8 +20,13 @@ const RING_R = 20;
 const C = 2 * Math.PI * RING_R;
 
 export default function BackToTop() {
+  // /plans 打卡页自带右下角悬浮面板，进度球与它重叠，故该路由不渲染此按钮。
+  const pathname = usePathname();
   const [pct, setPct] = useState(0);
 
+  // 注意：所有 hooks 必须在条件 return 之前调用，
+  // 否则从其他路由导航到 /plans 时会因 hooks 数量减少报
+  // "Rendered fewer hooks than expected"。
   useEffect(() => {
     let rafId: number | null = null;
     let pending = false;
@@ -42,6 +48,8 @@ export default function BackToTop() {
       if (rafId) window.cancelAnimationFrame(rafId);
     };
   }, []);
+
+  if (pathname?.startsWith("/plans")) return null;
 
   const offset = C - (pct / 100) * C;
   const scrollTop = () => window.scrollTo({
