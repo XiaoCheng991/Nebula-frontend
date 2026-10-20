@@ -230,25 +230,58 @@ export function normalizeConfig(blocks: unknown): HabitBlock[] {
   return out.length ? out : DEFAULT_BLOCKS.map(normalizeBlock);
 }
 
+/* 配置远端存放：复用 habit_records 的单行哨兵（habit_key = "__config__"），
+ * 全量 JSON 存 title 列，done_on 用固定日期占位。records 的所有查询都 neq 掉该行，
+ * 两者互不干扰；这样无需新建表、无需额外 RLS 策略。
+ * 时间戳 at 用于「以新者覆盖」：换设备/换浏览器时不会再回退成默认清单。 */
+const CONFIG_ROW_KEY = "__config__";
+const CONFIG_ROW_DATE = "1970-01-01";
+
+interface StoredConfig {
+  at: number;
+  blocks: HabitBlock[];
+}
+
+/** 本地配置最后修改时间（ms）；用于与远端 at 比较决定谁覆盖谁。0 = 未知（旧格式数据）。 */
+let configUpdatedAt = 0;
+/** 本地是否存过配置。false = 换浏览器首次访问（此时远端为准）。 */
+let configFromLocal = false;
+
 function loadConfig(): HabitBlock[] {
   if (typeof window === "undefined") return DEFAULT_BLOCKS.map(normalizeBlock);
   try {
     const raw = localStorage.getItem(HABIT_CONFIG_KEY);
-    if (!raw) return DEFAULT_BLOCKS.map(normalizeBlock);
-    return normalizeConfig(JSON.parse(raw));
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      const blocks = Array.isArray(parsed) ? parsed : parsed?.blocks;
+      if (Array.isArray(blocks)) {
+        configFromLocal = true;
+        configUpdatedAt = Array.isArray(parsed) ? 0 : Number(parsed?.at) || 0;
+        return normalizeConfig(blocks);
+      }
+    }
   } catch {
-    return DEFAULT_BLOCKS.map(normalizeBlock);
+    // silent
+  }
+  configUpdatedAt = 0;
+  return DEFAULT_BLOCKS.map(normalizeBlock);
+}
+
+/** 只写本地（离线兜底）。 */
+function writeConfigLocal() {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(HABIT_CONFIG_KEY, JSON.stringify({ at: configUpdatedAt, blocks: config }));
+  } catch {
+    // silent
   }
 }
 
 function persistConfig() {
-  if (typeof window === "undefined") return;
-  try {
-    // 迁移 Supabase 时，把此处改为远端写；本地仍保留做离线兜底。
-    localStorage.setItem(HABIT_CONFIG_KEY, JSON.stringify(config));
-  } catch {
-    // silent
-  }
+  writeConfigLocal();
+  scheduleConfigSync();
+  // 配置变了（条目文本/模块可能变）：重刷远端记录行内容
+  scheduleRemoteSync();
 }
 
 export function getConfig(): HabitBlock[] {
@@ -258,6 +291,7 @@ export function getConfig(): HabitBlock[] {
 /** 保存页面内编辑结果：立即生效并通知所有订阅者。 */
 export function saveConfig(blocks: HabitBlock[]) {
   config = normalizeConfig(blocks);
+  configUpdatedAt = Date.now();
   persistConfig();
   rebuild();
   emit();
@@ -265,6 +299,7 @@ export function saveConfig(blocks: HabitBlock[]) {
 
 export function resetConfig() {
   config = DEFAULT_BLOCKS.map(normalizeBlock);
+  configUpdatedAt = Date.now();
   persistConfig();
   rebuild();
   emit();
@@ -321,6 +356,49 @@ function persistLocal() {
 let remoteInFlight = false;
 let remoteTimer: ReturnType<typeof setTimeout> | null = null;
 
+/** 某一天的可打卡条目 id → { title 条目文本, group 当日分组名 }（写远端时补内容）。 */
+function habitMetaByDate(date: string): Map<string, { title: string; group: string }> {
+  const map = new Map<string, { title: string; group: string }>();
+  for (const g of groupsForDate(date)) {
+    for (const h of g.habits) {
+      map.set(h.id, { title: h.title, group: g.title });
+    }
+  }
+  return map;
+}
+
+/**
+ * 把某一天的勾选覆盖写入远端（先删后插，幂等）。
+ * 每行同时写入条目文本 title 与所属模块 group_id，使库中记录自解释；
+ * 已从清单删除的条目不再落库。
+ */
+async function writeDateRemote(date: string, ids: string[]) {
+  if (!supabase) return;
+  const { error: delError } = await supabase
+    .from(HABITS_TABLE)
+    .delete()
+    .eq("user_key", HABITS_USER_KEY)
+    .eq("done_on", date);
+  if (delError) console.warn("[habits] 删除远端记录失败:", delError.message);
+  if (ids.length === 0) return;
+  const meta = habitMetaByDate(date);
+  const rows = ids
+    .filter((id) => meta.has(id))
+    .map((id) => {
+      const m = meta.get(id)!;
+      return {
+        user_key: HABITS_USER_KEY,
+        habit_key: id,
+        group_id: m.group,
+        title: m.title,
+        done_on: date,
+      };
+    });
+  if (rows.length === 0) return;
+  const { error: insError } = await supabase.from(HABITS_TABLE).insert(rows);
+  if (insError) console.warn("[habits] 写入远端记录失败:", insError.message);
+}
+
 async function syncRemote() {
   if (!supabase || remoteInFlight) return;
   remoteInFlight = true;
@@ -328,28 +406,19 @@ async function syncRemote() {
     const { data, error } = await supabase
       .from(HABITS_TABLE)
       .select("done_on, habit_key")
-      .eq("user_key", HABITS_USER_KEY);
-    if (error) return;
+      .eq("user_key", HABITS_USER_KEY)
+      .neq("habit_key", CONFIG_ROW_KEY);
+    if (error) {
+      console.warn("[habits] 读取远端记录失败:", error.message);
+      return;
+    }
     const remoteDates = new Set<string>();
     for (const r of data ?? []) remoteDates.add(r.done_on as string);
 
     const localDates = new Set(Object.keys(records));
     // 1) 本地有记录的日期：删掉远端该日期全部行，再插入本地该日期的勾（幂等）
     for (const [date, ids] of Object.entries(records)) {
-      await supabase
-        .from(HABITS_TABLE)
-        .delete()
-        .eq("user_key", HABITS_USER_KEY)
-        .eq("done_on", date);
-      if (ids.length > 0) {
-        await supabase.from(HABITS_TABLE).insert(
-          ids.map((habitKey) => ({
-            user_key: HABITS_USER_KEY,
-            habit_key: habitKey,
-            done_on: date,
-          }))
-        );
-      }
+      await writeDateRemote(date, ids);
     }
     // 2) 远端有、本地没有的日期（其他设备/旧数据）：删除避免脏数据残留
     const staleDates = [...remoteDates].filter((d) => !localDates.has(d));
@@ -360,8 +429,9 @@ async function syncRemote() {
         .eq("user_key", HABITS_USER_KEY)
         .in("done_on", staleDates);
     }
-  } catch {
-    // 静默：网络/权限失败不影响本地
+  } catch (e) {
+    // 网络/权限失败不影响本地功能，但需留痕便于排查
+    console.warn("[habits] 同步打卡记录失败:", e);
   } finally {
     remoteInFlight = false;
   }
@@ -380,13 +450,16 @@ async function mergeRemote() {
     const { data, error } = await supabase
       .from(HABITS_TABLE)
       .select("done_on, habit_key")
-      .eq("user_key", HABITS_USER_KEY);
+      .eq("user_key", HABITS_USER_KEY)
+      .neq("habit_key", CONFIG_ROW_KEY);
     if (error) return;
     const remote: Records = {};
+    const remoteDates = new Set<string>();
     for (const r of data ?? []) {
       const date = r.done_on as string;
       const key = r.habit_key as string;
       (remote[date] ??= []).push(key);
+      remoteDates.add(date);
     }
     let changed = false;
     const merged: Records = { ...records };
@@ -404,8 +477,105 @@ async function mergeRemote() {
       rebuild();
       emit();
     }
-  } catch {
-    // 静默
+    // 本地已有但远端缺失的日期：补推上库（老数据首次入库走这条）
+    const missing = Object.keys(records).filter((d) => !remoteDates.has(d));
+    for (const date of missing) {
+      await writeDateRemote(date, records[date] ?? []);
+    }
+  } catch (e) {
+    console.warn("[habits] 合并远端记录失败:", e);
+  }
+}
+
+/* === 配置远端同步（复用 habit_records 哨兵行，免建新表） === */
+
+let configInFlight = false;
+let configTimer: ReturnType<typeof setTimeout> | null = null;
+
+async function syncConfigRemote() {
+  if (!supabase || configInFlight) return;
+  configInFlight = true;
+  try {
+    // 单行覆盖：先删后插（habit_records 无唯一约束，upsert 不可用）
+    await supabase
+      .from(HABITS_TABLE)
+      .delete()
+      .eq("user_key", HABITS_USER_KEY)
+      .eq("habit_key", CONFIG_ROW_KEY);
+    await supabase.from(HABITS_TABLE).insert({
+      user_key: HABITS_USER_KEY,
+      habit_key: CONFIG_ROW_KEY,
+      done_on: CONFIG_ROW_DATE,
+      title: JSON.stringify({ at: configUpdatedAt || Date.now(), blocks: config }),
+    });
+  } catch (e) {
+    console.warn("[habits] 同步打卡配置失败:", e);
+  } finally {
+    configInFlight = false;
+  }
+}
+
+function scheduleConfigSync() {
+  if (!supabase) return;
+  if (configTimer) clearTimeout(configTimer);
+  configTimer = setTimeout(() => void syncConfigRemote(), 400);
+}
+
+/** 初始化拉远端配置：仅当远端比本地新才覆盖，否则把本地推上去。 */
+async function mergeConfigRemote() {
+  if (!supabase) return;
+  try {
+    const { data, error } = await supabase
+      .from(HABITS_TABLE)
+      .select("title")
+      .eq("user_key", HABITS_USER_KEY)
+      .eq("habit_key", CONFIG_ROW_KEY)
+      .order("created_at", { ascending: false })
+      .limit(1);
+    if (error) {
+      console.warn("[habits] 读取远端配置失败:", error.message);
+      return;
+    }
+    const stored = data?.length ? (JSON.parse(data[0].title) as StoredConfig) : null;
+    const remoteBlocks = Array.isArray(stored?.blocks) ? stored!.blocks : null;
+    const remoteAt = Number(stored?.at) || 0;
+
+    // 1) 远端还没有配置：把本地（含默认清单）推上去
+    if (!remoteBlocks) {
+      if (!configUpdatedAt) configUpdatedAt = Date.now();
+      writeConfigLocal();
+      scheduleConfigSync();
+      return;
+    }
+    // 2) 本地没有任何配置（换浏览器首次访问）：以远端为准
+    if (!configFromLocal) {
+      config = normalizeConfig(remoteBlocks);
+      configUpdatedAt = remoteAt;
+      writeConfigLocal();
+      rebuild();
+      emit();
+      return;
+    }
+    // 3) 本地是旧格式（无时间戳，可能是用户已编辑但从未同步）：以本地为准
+    if (!configUpdatedAt) {
+      configUpdatedAt = Date.now();
+      writeConfigLocal();
+      scheduleConfigSync();
+      return;
+    }
+    // 4) 比时间戳：新的赢
+    if (remoteAt > configUpdatedAt) {
+      config = normalizeConfig(remoteBlocks);
+      configUpdatedAt = remoteAt;
+      writeConfigLocal();
+      rebuild();
+      emit();
+      return;
+    }
+    // 本地更新：推上去
+    scheduleConfigSync();
+  } catch (e) {
+    console.warn("[habits] 合并远端配置失败:", e);
   }
 }
 
@@ -453,6 +623,7 @@ const listeners = new Set<() => void>();
 // 客户端初始化：拉远端记录与本地并集合并（anon key 未配置时自动跳过）
 if (typeof window !== "undefined") {
   void mergeRemote();
+  void mergeConfigRemote();
 }
 
 function emit() {
