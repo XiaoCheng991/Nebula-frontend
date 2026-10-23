@@ -21,6 +21,7 @@
     "markdown-it": "^14.2.0",
     "markdown-it-table": "^4.1.1",
     "next": "^14.2.35",
+    "piixpal": "^0.4.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "server-only": "^0.0.1",

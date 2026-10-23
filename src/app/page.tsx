@@ -5,6 +5,7 @@ import BlogClient from "@/components/blog-client";
 import { getAllTags } from "@/lib/tags";
 import SearchTrigger from "@/components/SearchTrigger";
 import Sidebar from "@/components/Sidebar";
+import PiixPets from "@/components/PiixPets";
 
 function countWords(content: string): number {
   return content.replace(/\s/g, "").length;
@@ -102,6 +103,9 @@ export default async function BlogPage({
             <p className="text-foreground/50 font-mono text-sm max-w-xl">
               {`喜忧参半，皆是日常`}
             </p>
+          </div>
+          <div className="pb-1">
+            <PiixPets />
           </div>
           {/* Light theme: status badge only */}
           <div className="sl">
